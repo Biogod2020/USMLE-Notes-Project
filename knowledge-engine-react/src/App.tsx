@@ -1,6 +1,7 @@
 // src/App.tsx
+import { Toaster } from 'sonner';
 import { useEffect, useMemo, useState } from 'react';
-import type { KnowledgeBase, Topic, ToastNotification } from './types'; // 确保 Topic 和 KnowledgeBase 都从 './types' 导入
+import type { Topic, ToastNotification } from './types'; // 确保 Topic 和 KnowledgeBase 都从 './types' 导入
 import { NavPanel } from './components/NavPanel';
 import { TopicView } from './components/TopicView';
 import { ConnectionsPanel } from './components/ConnectionsPanel';
@@ -320,6 +321,7 @@ export default function App() {
       />
       <Popover data={popoverData} />
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
+      <Toaster richColors /> 
     </>
   );
 }

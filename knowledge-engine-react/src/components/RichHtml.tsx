@@ -1,5 +1,5 @@
 // src/components/RichHtml.tsx
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import type { MouseEvent } from 'react';
 import DOMPurify from 'dompurify';
 

@@ -1,6 +1,7 @@
 // src/hooks/useKnowledgeBase.ts
 import { useState, useCallback, useEffect, useRef } from 'react';
-import type { KnowledgeBase, Topic, FileSelection } from '../types';
+import { toast } from 'sonner';
+import type { KnowledgeBase, FileSelection } from '../types';
 import { normalizeTopic } from '../utils/normalization';
 
 const LS_FILES_KEY = 'KE_selectedFiles';
@@ -93,7 +94,12 @@ export function useKnowledgeBase() {
 
   const selectDirectory = useCallback(async () => {
     try {
-      const handle = await window.showDirectoryPicker();
+      if (!('showDirectoryPicker' in window)) {
+        
+        toast.error('当前浏览器不支持目录选择（File System Access API，文件系统访问应用程序编程接口）。');
+        return ;
+      }
+      const handle = await (window as Required<Window>).showDirectoryPicker!();
       dirHandleRef.current = handle;
       setDirectoryName(handle.name);
 

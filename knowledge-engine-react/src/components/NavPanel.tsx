@@ -1,5 +1,5 @@
 // src/components/NavPanel.tsx
-import React, { useMemo, memo } from 'react';
+import { useMemo, memo } from 'react';
 import type { KnowledgeBase, Topic, FileSelection } from '../types';
 import type { SearchResult } from '../App';
 import { getIcon, ThemeIcon, PanelCollapseIcon } from './Icons';

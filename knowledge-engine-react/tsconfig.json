@@ -6,8 +6,10 @@
   ],
   "compilerOptions": {
     "isolatedModules": true,
-    "verbatimModuleSyntax": true
+    "verbatimModuleSyntax": true,
+    
     // 或者（老项目）
     // "importsNotUsedAsValues": "remove"
   }
+  
 }

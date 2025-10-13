@@ -1,5 +1,5 @@
 // src/components/ConnectionsPanel.tsx
-import React, { useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import type { KnowledgeBase, Topic } from '../types';
 import { getFamilyForType, SEMANTIC_FAMILIES } from '../utils/semanticUtils';
 

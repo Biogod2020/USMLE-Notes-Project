@@ -54,8 +54,11 @@ const adjustColor = (cssVar: string, opacity: number = 1, darken: boolean = fals
 function GraphView({ knowledgeBase, centerNodeId, onNodeClick }: Omit<Props, 'isOpen' | 'onClose'>) {
   // CRITICAL FIX: Initialize useNodesState and useEdgesState with an empty array [].
   // This allows TypeScript to correctly infer the state type as Node[] and Edge[], not never[].
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const initialNodes: Node[] = [];
+  const initialEdges: Edge[] = [];
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
   const { fitView } = useReactFlow();
 
   const runLayout = useCallback(async (currentNodes: Node[], currentEdges: Edge[]) => {
@@ -156,7 +159,7 @@ function GraphView({ knowledgeBase, centerNodeId, onNodeClick }: Omit<Props, 'is
       edges={edges}
       onNodesChange={onNodesChange}
       onEdgesChange={onEdgesChange}
-      onNodeClick={(_, node) => onNodeClick(node.id)}
+      onNodeClick={(_, node: Node) => onNodeClick(node.id)}
       onNodeDoubleClick={handleNodeDoubleClick}
       nodeTypes={nodeTypes}
       edgeTypes={edgeTypes}

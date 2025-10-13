@@ -1,5 +1,4 @@
-===== ./.DS_Store =====
-
+```
 ===== ./.gitignore =====
 # Logs
 logs
@@ -16700,20 +16699,24 @@ export default defineConfig([
    Bud1            %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @      �                                        @      �                                          @      �                                          @                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   E   %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       DSDB                             `          �                                           @      �                                          @      �                                          @                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 ===== ./src/App.tsx =====
 // src/App.tsx
-import { useEffect, useMemo, useState } from 'react';
-import type { KnowledgeBase, Topic, ToastNotification } from './types'; // 确保 Topic 和 KnowledgeBase 都从 './types' 导入
+import { useEffect, useMemo, useState, type ChangeEvent } from 'react';
+import type { KnowledgeBase, Topic, Connection } from './types';
 import { NavPanel } from './components/NavPanel';
 import { TopicView } from './components/TopicView';
 import { ConnectionsPanel } from './components/ConnectionsPanel';
 import { GraphModal } from './components/GraphModal';
 import { Popover } from './components/Popover';
-import { ToastContainer } from './components/Toast';
 import { useResizablePanels } from './hooks/useResizablePanels';
-import { useKnowledgeBase } from './hooks/useKnowledgeBase';
 import Fuse, { type FuseResult } from 'fuse.js';
 
-export type SearchResult = FuseResult<SearchItem>;
-
+export type SearchResult = FuseResult<{
+  id: string;
+  title: string;
+  acronym: string;
+  primaryType: string;
+  tags: string[];
+  fullContent: string;
+}>;
 type SearchItem = {
   id: string;
   title: string;
@@ -16722,7 +16725,6 @@ type SearchItem = {
   tags: string[];
   fullContent: string;
 };
-
 interface PopoverData {
   content: { emoji: string; title: string; definition: string };
   x: number;
@@ -16742,7 +16744,6 @@ function stripHtml(html: string) {
   const doc = new DOMParser().parseFromString(html ?? '', 'text/html');
   return doc?.body?.textContent ?? '';
 }
-
 function generateAcronym(title: string) {
   const words = (title ?? '').split(/\s+/).filter(Boolean);
   const caps = words
@@ -16752,6 +16753,46 @@ function generateAcronym(title: string) {
   return (caps || words.map((w) => w[0]).join('')).toUpperCase();
 }
 
+/** ---------- Normalization helpers (robust import) ---------- **/
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === 'object' && !Array.isArray(v);
+}
+function cleanStringsInObject(obj: any): any {
+    if (typeof obj === 'string') {
+        return obj.normalize('NFC').replace(/‚Äî/g, '—').replace(/‚Ä¶/g, '…');
+    }
+    if (Array.isArray(obj)) {
+        return obj.map(cleanStringsInObject);
+    }
+    if (isRecord(obj)) {
+        return Object.fromEntries(
+            Object.entries(obj).map(([key, value]) => [key, cleanStringsInObject(value)])
+        );
+    }
+    return obj;
+}
+function normalizeTopic(idKey: string, raw: any): Topic {
+  const cleanedRaw = cleanStringsInObject(raw);
+  const id = (cleanedRaw?.id ?? idKey)?.toString?.() ?? idKey;
+  const title = (typeof cleanedRaw?.title === 'string' && cleanedRaw.title.trim()) || id;
+  const primaryType = (typeof cleanedRaw?.primaryType === 'string' && cleanedRaw.primaryType) || 'concept';
+  const classificationPath = Array.isArray(cleanedRaw?.classificationPath) ? cleanedRaw.classificationPath.filter((x: any) => typeof x === 'string' && x.trim()) : [];
+  const tags = Array.isArray(cleanedRaw?.tags) ? cleanedRaw.tags.filter((x: any) => typeof x === 'string' && x.trim()) : [];
+  const content = isRecord(cleanedRaw?.content) ? cleanedRaw.content : {};
+  const connections = Array.isArray(cleanedRaw?.connections) ? cleanedRaw.connections : [];
+
+  return {
+    ...(isRecord(cleanedRaw) ? cleanedRaw : {}),
+    id,
+    title,
+    primaryType,
+    classificationPath,
+    tags,
+    content,
+    connections,
+  } as Topic;
+}
+
 const panelConfig = {
   nav: { initial: 320, min: 280 },
   connections: { initial: 350, min: 300 },
@@ -16759,63 +16800,21 @@ const panelConfig = {
 const collapsedWidth = '50px';
 
 export default function App() {
+  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase>({});
   const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
+  const [isLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
   const [isGraphModalOpen, setIsGraphModalOpen] = useState(false);
   const [popoverData, setPopoverData] = useState<PopoverData | null>(null);
+
   const [searchTerm, setSearchTerm] = useState('');
+  
   const [isNavOpen, setIsNavOpen] = useState(false);
   const [isConnectionsOpen, setIsConnectionsOpen] = useState(false);
+
   const [navFilterPath, setNavFilterPath] = useState<string[] | null>(null);
-  const [toasts, setToasts] = useState<ToastNotification[]>([]);
-
-  const {
-    knowledgeBase,
-    fileSelections,
-    directoryName,
-    isLoading,
-    error,
-    selectDirectory,
-    toggleFileSelection,
-  } = useKnowledgeBase();
-
-  const addToast = (message: string, type: ToastNotification['type'] = 'info') => {
-    const id = Date.now();
-    setToasts(prev => [...prev, { id, message, type }]);
-  };
-
-  const removeToast = (id: number) => {
-    setToasts(prev => prev.filter(t => t.id !== id));
-  };
   
-  const handleSelectDirectory = async () => {
-    const result = await selectDirectory();
-    if (result) {
-        // Initial load, don't show toast unless there's an error from the hook
-    }
-  };
-
-  const handleToggleFile = async (fileName: string) => {
-    const result = await toggleFileSelection(fileName);
-    if(result) {
-        if(result.added.length > 0) {
-            addToast(`Added topics from: ${result.added.join(', ')}`, 'success');
-        }
-        if (result.removed.length > 0) {
-            addToast(`Removed topics from: ${result.removed.join(', ')}`, 'info');
-        }
-    }
-  };
-
-  // Auto-select first topic on initial load
-  useEffect(() => {
-    if (!activeTopicId && Object.keys(knowledgeBase).length > 0) {
-      const firstTopicId = Object.values(knowledgeBase)
-        .filter((t) => !!t && typeof t.id === 'string' && !t.id.startsWith('zzz_'))
-        .sort((a, b) => a.title.localeCompare(b.title))[0]?.id ?? null;
-      setActiveTopicId(firstTopicId);
-    }
-  }, [knowledgeBase, activeTopicId]);
-
   const { sizes, startDragging, isCollapsed, toggleCollapse } = useResizablePanels(panelConfig);
 
   const fuse = useMemo(() => {
@@ -16897,9 +16896,7 @@ export default function App() {
   };
 
   const handleTopicSelect = (id: string) => {
-    if (activeTopicId !== id) {
-      setActiveTopicId(id);
-    }
+    setActiveTopicId(id);
     setNavFilterPath(null);
     setIsNavOpen(false);
     setIsConnectionsOpen(false);
@@ -16925,7 +16922,77 @@ export default function App() {
     }
   };
 
+  const handleImportJSON = async (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (!files || files.length === 0) return;
+
+    const prevKBEmpty = Object.keys(knowledgeBase).length === 0;
+    const updates: KnowledgeBase = { ...knowledgeBase };
+    let newTopicsCount = 0, updatedTopicsCount = 0, fixedMissingIdCount = 0, skippedZzzCount = 0;
+
+    for (const file of Array.from(files)) {
+      try {
+        const text = await file.text();
+        const jsonData = JSON.parse(text);
+
+        const entries: Array<[string, any]> = Array.isArray(jsonData)
+          ? jsonData.map((t, idx) => [String((t && typeof t.id === 'string' && t.id) || `__idx_${idx}`), t])
+          : Object.entries(jsonData as Record<string, unknown>);
+
+        for (const [idKey, rawTopic] of entries) {
+          if (!rawTopic || typeof idKey !== 'string' || idKey.startsWith('zzz_')) {
+            if (idKey.startsWith('zzz_')) skippedZzzCount++;
+            continue;
+          }
+
+          const normalized = normalizeTopic(idKey, rawTopic);
+          if (!rawTopic.id) fixedMissingIdCount++;
+          if (normalized.id.startsWith('zzz_')) {
+            skippedZzzCount++;
+            continue;
+          }
+
+          if (!updates[normalized.id]) newTopicsCount++;
+          else updatedTopicsCount++;
+          updates[normalized.id] = normalized;
+        }
+      } catch (e) {
+        console.error('Failed to import or parse file:', file.name, e);
+        alert(`Error importing file "${file.name}". Please check if it is a valid JSON.`);
+      }
+    }
+    
+    const finalUpdates: KnowledgeBase = {};
+    const validIds = new Set(Object.keys(updates).filter(id => !id.startsWith('zzz_')));
+    for (const id of validIds) {
+        const topic = updates[id];
+        if (topic.connections) {
+            topic.connections = topic.connections.filter(c => validIds.has(c.to));
+        }
+        finalUpdates[id] = topic;
+    }
+
+    if (newTopicsCount > 0 || updatedTopicsCount > 0) {
+      const firstTopicId = Object.values(finalUpdates)
+        .filter((t) => !!t && typeof t.id === 'string' && !t.id.startsWith('zzz_'))
+        .sort((a, b) => a.title.localeCompare(b.title))[0]?.id ?? null;
+      setKnowledgeBase(finalUpdates);
+      if (prevKBEmpty || !activeTopicId) setActiveTopicId(firstTopicId);
+    }
+
+    const parts = ['Import successful!', `- ${newTopicsCount} new topics added.`, `- ${updatedTopicsCount} topics updated.`];
+    if (fixedMissingIdCount > 0) parts.push(`- ${fixedMissingIdCount} topics were missing "id" and were auto-fixed.`);
+    if (skippedZzzCount > 0) parts.push(`- ${skippedZzzCount} topics skipped due to "zzz_" prefix.`);
+    alert(parts.join('\n'));
+
+    if (event.target) event.target.value = '';
+  };
+
+  if (isLoading) return <div style={{ padding: '2rem', textAlign: 'center' }}>Loading…</div>;
+  if (error) return <div style={{ padding: '2rem', color: 'red', textAlign: 'center' }}>Error: {error}</div>;
+
   const activeTopic = activeTopicId ? knowledgeBase[activeTopicId] ?? null : null;
+  
   const closeAllDrawers = () => {
     setIsNavOpen(false);
     setIsConnectionsOpen(false);
@@ -16954,16 +17021,11 @@ export default function App() {
             onSearchChange={handleSearchChange}
             searchResults={searchResults}
             onToggleTheme={toggleTheme}
+            onImportJSON={handleImportJSON}
             isCollapsed={isCollapsed.nav}
             onToggleCollapse={() => toggleCollapse('nav')}
             navFilterPath={navFilterPath}
             onClearNavFilter={() => setNavFilterPath(null)}
-            // New props for file management
-            directoryName={directoryName}
-            fileSelections={fileSelections}
-            onSelectDirectory={handleSelectDirectory}
-            onToggleFileSelection={handleToggleFile}
-            isLoading={isLoading}
           />
         </aside>
 
@@ -16979,7 +17041,6 @@ export default function App() {
               <button className="mobile-header-btn" onClick={() => setIsConnectionsOpen(true)}>↔</button>
           </div>
           <div className="main-panel-content">
-            {error && <div className="error-banner">{error}</div>}
             <TopicView
               topic={activeTopic}
               onTopicSelect={handleTopicSelect}
@@ -17020,7 +17081,6 @@ export default function App() {
         onNodeClick={handleGraphNodeClick}
       />
       <Popover data={popoverData} />
-      <ToastContainer toasts={toasts} onDismiss={removeToast} />
     </>
   );
 }
@@ -17486,10 +17546,12 @@ export const getIcon = (type: string) => TYPE_ICONS[type] || <ConceptIcon />;
 
 ===== ./src/components/NavPanel.tsx =====
 // src/components/NavPanel.tsx
-import React, { useMemo, memo } from 'react';
-import type { KnowledgeBase, Topic, FileSelection } from '../types';
+import React, { useMemo, useRef, type ChangeEvent, memo } from 'react';
+import type { KnowledgeBase, Topic } from '../types';
 import type { SearchResult } from '../App';
-import { getIcon, ThemeIcon, PanelCollapseIcon } from './Icons';
+
+const TYPE_EMOJI: Record<string, string> = { disease: '🦠', structure: '🏛️', process: '⚙️', substance: '🧪', finding: '❗', concept: '💡', };
+function emojiFor(type: string) { return TYPE_EMOJI[type] ?? '📄'; }
 
 interface NavNodeData { children: Record<string, NavNodeData>; items: Topic[]; }
 
@@ -17501,15 +17563,11 @@ interface Props {
   onSearchChange: (s: string) => void;
   searchResults: SearchResult[] | null;
   onToggleTheme: () => void;
+  onImportJSON: (event: ChangeEvent<HTMLInputElement>) => void;
   isCollapsed: boolean;
   onToggleCollapse: () => void;
   navFilterPath: string[] | null;
   onClearNavFilter: () => void;
-  directoryName: string | null;
-  fileSelections: FileSelection[];
-  onSelectDirectory: () => void;
-  onToggleFileSelection: (fileName: string) => void;
-  isLoading: boolean;
 }
 
 const Highlight = memo(({ text, highlight }: { text: string; highlight: string }) => {
@@ -17528,6 +17586,7 @@ const Highlight = memo(({ text, highlight }: { text: string; highlight: string }
 function buildTree(kb: KnowledgeBase): { root: NavNodeData, unclassified: Topic[] } {
   const root: NavNodeData = { children: {}, items: [] };
   const unclassified: Topic[] = [];
+
   Object.values(kb)
     .filter(t => t && typeof t.id === 'string' && !t.id.startsWith('zzz_'))
     .sort((a, b) => a.title.localeCompare(b.title))
@@ -17546,15 +17605,15 @@ function buildTree(kb: KnowledgeBase): { root: NavNodeData, unclassified: Topic[
   return { root, unclassified };
 }
 
-const NavNode = memo(({ node, activeTopicId, onTopicSelect, openKeys }: {
+function NavNode({ node, activeTopicId, onTopicSelect, openKeys }: {
   node: NavNodeData;
   activeTopicId: string | null;
   onTopicSelect: (id: string) => void;
   openKeys: Set<string>;
-}) => {
+}) {
   return (
     <ul>
-      {Object.entries(node.children).sort((a,b) => a[0].localeCompare(b[0])).map(([seg, child]) => (
+      {Object.entries(node.children).map(([seg, child]) => (
         <li key={seg}>
           <details open={openKeys.has(seg)}>
             <summary>{seg}</summary>
@@ -17566,12 +17625,12 @@ const NavNode = memo(({ node, activeTopicId, onTopicSelect, openKeys }: {
         <li key={item.id}>
           <a
             href="#"
-            className={`${item.id === activeTopicId ? 'active' : ''}`}
+            className={`type-${item.primaryType} ${item.id === activeTopicId ? 'active' : ''}`}
             onClick={(e) => { e.preventDefault(); onTopicSelect(item.id); }}
             aria-current={item.id === activeTopicId ? 'page' : undefined}
           >
             <span className="topic-title">
-              <span className={`emoji type-${item.primaryType}`}>{getIcon(item.primaryType)}</span>
+              <span className="emoji">{emojiFor(item.primaryType)}</span>
               <span>{item.title}</span>
             </span>
           </a>
@@ -17579,28 +17638,46 @@ const NavNode = memo(({ node, activeTopicId, onTopicSelect, openKeys }: {
       ))}
     </ul>
   );
-});
+}
 
 export function NavPanel({
-  knowledgeBase, activeTopicId, onTopicSelect, searchTerm, onSearchChange,
-  searchResults, onToggleTheme, isCollapsed, onToggleCollapse, navFilterPath,
-  onClearNavFilter, directoryName, fileSelections, onSelectDirectory,
-  onToggleFileSelection, isLoading
+  knowledgeBase,
+  activeTopicId,
+  onTopicSelect,
+  searchTerm,
+  onSearchChange,
+  searchResults,
+  onToggleTheme,
+  onImportJSON,
+  isCollapsed,
+  onToggleCollapse,
+  navFilterPath,
+  onClearNavFilter,
 }: Props) {
-  const { root: navTree, unclassified } = useMemo(() => buildTree(knowledgeBase), [knowledgeBase]);
+  const filteredTopics = useMemo(() => {
+    if (!navFilterPath) return null;
+    const pathStr = navFilterPath.join('/');
+    return Object.values(knowledgeBase).filter(topic => 
+        topic.classificationPath?.join('/').startsWith(pathStr)
+    );
+  }, [knowledgeBase, navFilterPath]);
+
+  const { root: navTree, unclassified } = useMemo(() => {
+    const kb = filteredTopics ? Object.fromEntries(filteredTopics.map(t => [t.id, t])) : knowledgeBase;
+    return buildTree(kb);
+  }, [knowledgeBase, filteredTopics]);
+
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const openKeys = useMemo(() => {
     const topic = activeTopicId ? knowledgeBase[activeTopicId] : null;
     return navFilterPath ? new Set(Object.keys(navTree.children)) : new Set(topic?.classificationPath ?? []);
   }, [activeTopicId, knowledgeBase, navFilterPath, navTree]);
-  
-  const loadedFilesCount = fileSelections.filter(f => f.selected).length;
-  const totalTopicsCount = Object.keys(knowledgeBase).length;
 
   if (isCollapsed) {
     return (
       <div className="panel-header collapsed">
         <button className="collapse-btn" onClick={onToggleCollapse} title="Expand Panel">
-          <PanelCollapseIcon isLeft={false} />
+          ›
         </button>
       </div>
     );
@@ -17611,86 +17688,70 @@ export function NavPanel({
       <div className="panel-header">
         <h3 className="panel-title">Knowledge Engine</h3>
         <button className="collapse-btn" onClick={onToggleCollapse} title="Collapse Panel">
-            <PanelCollapseIcon isLeft={true} />
+          ‹
         </button>
       </div>
 
       <div className="panel-content">
         <div className="nav-controls">
           <button type="button" className="control-btn" onClick={onToggleTheme} title="Toggle Theme">
-            <ThemeIcon /> Theme
+            <span className="emoji">🎨</span>
           </button>
+          <button type="button" className="control-btn import-btn" onClick={() => fileInputRef.current?.click()} title="Import JSON">
+            <span className="emoji">📥</span>
+          </button>
+          <input ref={fileInputRef} type="file" accept=".json,application/json" multiple hidden onChange={onImportJSON} />
         </div>
-        
-        <div className="file-manager">
-            <button className="control-btn import-btn" onClick={onSelectDirectory} disabled={isLoading}>
-                {directoryName ? `📂 ${directoryName}`: '📂 Select Directory'}
-            </button>
-            {fileSelections.length > 0 && (
-                <ul className="file-selection-list">
-                    {fileSelections.map(file => (
-                        <li key={file.name}>
-                            <label>
-                                <input 
-                                    type="checkbox" 
-                                    checked={file.selected} 
-                                    onChange={() => onToggleFileSelection(file.name)}
-                                    disabled={isLoading}
-                                />
-                                <span>{file.name}</span>
-                            </label>
-                        </li>
-                    ))}
-                </ul>
-            )}
-        </div>
-
-        <input type="text" id="search-input" placeholder="🔍 Search..." value={searchTerm} onChange={(e) => onSearchChange(e.target.value)} />
+        <input type="text" id="search-input" placeholder="🔍 Search (e.g., 'UC', 'fistula')..." value={searchTerm} onChange={(e) => onSearchChange(e.target.value)} />
       </div>
 
       <div id="nav-list">
           {searchResults ? (
-            <div className="search-results-list">
-                <h3 className="panel-title-sub">Search Results</h3>
-                <ul>
-                    {searchResults.length > 0 ? (
-                    searchResults.map(res => (
-                        <li key={res.item.id}>
-                            <a href="#" className={`${res.item.id === activeTopicId ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); onTopicSelect(res.item.id); }} >
-                            <span className="topic-title">
-                                <span className={`emoji type-${res.item.primaryType}`}>{getIcon(res.item.primaryType)}</span>
-                                <Highlight text={res.item.title} highlight={searchTerm} />
-                            </span>
-                            <span className="relevance-score" title="Relevance">{Math.round((1 - (res.score ?? 0)) * 100)}%</span>
-                            </a>
-                        </li>
-                    ))
-                    ) : ( <li className="no-results">No results found.</li> )}
-                </ul>
+            <ul style={{padding: '0 1.25rem'}}>
+                <h3 className="panel-title" style={{padding: '0 0 .5rem 0'}}>Search Results</h3>
+                {searchResults.length > 0 ? (
+                searchResults.map(res => {
+                    const score = res.score ?? 0;
+                    const relevance = Math.max(0, Math.min(100, Math.round((1 - score) * 100)));
+                    const it = res.item;
+                    return (
+                    <li key={it.id}>
+                        <a href="#" className={`type-${it.primaryType} ${it.id === activeTopicId ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); onTopicSelect(it.id); }} >
+                        <span className="topic-title">
+                            <span className="emoji">{emojiFor(it.primaryType)}</span>
+                            <Highlight text={it.title} highlight={searchTerm} />
+                        </span>
+                        <span className="relevance-score" title="Relevance">{relevance}%</span>
+                        </a>
+                    </li>
+                    );
+                })
+                ) : (
+                <li style={{color: 'var(--text-muted)', padding: '1rem'}}>No results.</li>
+                )}
+            </ul>
+          ) : navFilterPath ? (
+            <div style={{padding: '0 1.25rem'}}>
+                <div className="filter-header">
+                    <h3 className="panel-title">Filtered by</h3>
+                    <button className="clear-filter-btn" onClick={onClearNavFilter}>Clear &times;</button>
+                </div>
+                <p className="filter-path">{navFilterPath.join(' / ')}</p>
+                <NavNode node={navTree} activeTopicId={activeTopicId} onTopicSelect={onTopicSelect} openKeys={openKeys} />
             </div>
           ) : (
-            <div className="nav-tree-container">
-              {navFilterPath ? (
-                <>
-                    <div className="filter-header">
-                        <h3 className="panel-title-sub">Filtered by</h3>
-                        <button className="clear-filter-btn" onClick={onClearNavFilter}>Clear &times;</button>
-                    </div>
-                    <p className="filter-path">{navFilterPath.join(' / ')}</p>
-                </>
-              ) : <h3 className="panel-title-sub">Topics</h3> }
-
+            <div style={{padding: '0 1.25rem'}}>
+              <h3 className="panel-title" style={{padding: '0 0 .5rem 0'}}>Topics</h3>
               <NavNode node={navTree} activeTopicId={activeTopicId} onTopicSelect={onTopicSelect} openKeys={openKeys} />
-              
-              {unclassified.length > 0 && !navFilterPath && (
+              {unclassified.length > 0 && (
                 <details open>
                     <summary>Unclassified</summary>
                     <ul>
                         {unclassified.map(item => (
                             <li key={item.id}>
-                                <a href="#" className={`${item.id === activeTopicId ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); onTopicSelect(item.id); }} aria-current={item.id === activeTopicId ? 'page' : undefined}>
+                                <a href="#" className={`type-${item.primaryType} ${item.id === activeTopicId ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); onTopicSelect(item.id); }} aria-current={item.id === activeTopicId ? 'page' : undefined}>
                                     <span className="topic-title">
-                                        <span className={`emoji type-${item.primaryType}`}>{getIcon(item.primaryType)}</span>
+                                        <span className="emoji">{emojiFor(item.primaryType)}</span>
                                         <span>{item.title}</span>
                                     </span>
                                 </a>
@@ -17701,9 +17762,6 @@ export function NavPanel({
               )}
             </div>
           )}
-      </div>
-      <div className="status-bar">
-        {isLoading ? 'Loading...' : `${totalTopicsCount} topics from ${loadedFilesCount} files.`}
       </div>
     </>
   );
@@ -17810,49 +17868,6 @@ export default function RichHtml({ html, onTopicSelect }: Props) {
 
   return <div onClick={handleClick} dangerouslySetInnerHTML={{ __html: safe }} />;
 }
-===== ./src/components/Toast.tsx =====
-// src/components/Toast.tsx
-import { useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import type { ToastNotification } from '../types';
-
-interface ToastProps {
-  toast: ToastNotification;
-  onDismiss: (id: number) => void;
-}
-
-const Toast = ({ toast, onDismiss }: ToastProps) => {
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      onDismiss(toast.id);
-    }, 5000); // Auto-dismiss after 5 seconds
-
-    return () => clearTimeout(timer);
-  }, [toast.id, onDismiss]);
-
-  return (
-    <div className={`toast toast-${toast.type}`}>
-      {toast.message}
-      <button onClick={() => onDismiss(toast.id)}>&times;</button>
-    </div>
-  );
-};
-
-interface ToastContainerProps {
-  toasts: ToastNotification[];
-  onDismiss: (id: number) => void;
-}
-
-export const ToastContainer = ({ toasts, onDismiss }: ToastContainerProps) => {
-  return createPortal(
-    <div className="toast-container">
-      {toasts.map(toast => (
-        <Toast key={toast.id} toast={toast} onDismiss={onDismiss} />
-      ))}
-    </div>,
-    document.body
-  );
-};
 ===== ./src/components/TopicView.tsx =====
 // src/components/TopicView.tsx
 import React from 'react';
@@ -17966,157 +17981,6 @@ export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, o
     </>
   );
 }
-===== ./src/hooks/useKnowledgeBase.ts =====
-// src/hooks/useKnowledgeBase.ts
-import { useState, useCallback, useEffect, useRef } from 'react';
-import type { KnowledgeBase, Topic, FileSelection } from '../types';
-import { normalizeTopic } from '../utils/normalization';
-
-const LS_FILES_KEY = 'KE_selectedFiles';
-
-export function useKnowledgeBase() {
-  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase>({});
-  const [fileSelections, setFileSelections] = useState<FileSelection[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  
-  const dirHandleRef = useRef<FileSystemDirectoryHandle | null>(null);
-  const [directoryName, setDirectoryName] = useState<string | null>(null);
-
-  // Effect to load initial state from localStorage
-  useEffect(() => {
-    try {
-      const savedFiles = localStorage.getItem(LS_FILES_KEY);
-      if (savedFiles) {
-        setFileSelections(JSON.parse(savedFiles));
-      }
-    } catch (e) {
-      console.error("Failed to load file selections from localStorage", e);
-      localStorage.removeItem(LS_FILES_KEY);
-    }
-  }, []);
-
-  const processAndLoadFiles = useCallback(async (
-    handle: FileSystemDirectoryHandle,
-    selections: FileSelection[]
-  ): Promise<{ summary: string; added: string[]; removed: string[]; totalTopics: number; totalFiles: number; }> => {
-    setIsLoading(true);
-    setError(null);
-
-    const oldSelectedFiles = fileSelections.filter(f => f.selected).map(f => f.name);
-    const newSelectedFiles = selections.filter(f => f.selected).map(f => f.name);
-
-    const filesToAdd = newSelectedFiles.filter(name => !oldSelectedFiles.includes(name));
-    const filesToRemove = oldSelectedFiles.filter(name => !newSelectedFiles.includes(name));
-    
-    const newKnowledgeBase: KnowledgeBase = {};
-    let loadedFileCount = 0;
-
-    for (const file of selections) {
-      if (!file.selected) continue;
-      
-      try {
-        const fileHandle = await handle.getFileHandle(file.name);
-        const fileData = await fileHandle.getFile();
-        const text = await fileData.text();
-        const jsonData = JSON.parse(text);
-
-        const entries = Object.entries(jsonData as Record<string, unknown>);
-        for (const [idKey, rawTopic] of entries) {
-          if (!rawTopic || typeof idKey !== 'string' || idKey.startsWith('zzz_')) continue;
-          
-          const normalized = normalizeTopic(idKey, rawTopic);
-          if (!normalized.id.startsWith('zzz_')) {
-            newKnowledgeBase[normalized.id] = normalized;
-          }
-        }
-        loadedFileCount++;
-      } catch (e) {
-        console.error(`Error processing file ${file.name}:`, e);
-        setError(`Failed to load ${file.name}. It might be corrupted.`);
-      }
-    }
-
-    // Clean up connections
-    const validIds = new Set(Object.keys(newKnowledgeBase));
-    for (const id of validIds) {
-        const topic = newKnowledgeBase[id];
-        if (topic.connections) {
-            topic.connections = topic.connections.filter(c => validIds.has(c.to));
-        }
-    }
-
-    setKnowledgeBase(newKnowledgeBase);
-    setFileSelections(selections);
-    localStorage.setItem(LS_FILES_KEY, JSON.stringify(selections));
-    setIsLoading(false);
-
-    return {
-      summary: `Loaded ${Object.keys(newKnowledgeBase).length} topics from ${loadedFileCount} files.`,
-      added: filesToAdd,
-      removed: filesToRemove,
-      totalTopics: Object.keys(newKnowledgeBase).length,
-      totalFiles: loadedFileCount,
-    };
-  }, [fileSelections]);
-
-  const selectDirectory = useCallback(async () => {
-    try {
-      const handle = await window.showDirectoryPicker();
-      dirHandleRef.current = handle;
-      setDirectoryName(handle.name);
-
-      const savedSelections = new Map(fileSelections.map(f => [f.name, f.selected]));
-      const newSelections: FileSelection[] = [];
-
-      for await (const entry of handle.values()) {
-        if (entry.kind === 'file' && entry.name.endsWith('.json')) {
-          newSelections.push({
-            name: entry.name,
-            selected: savedSelections.get(entry.name) ?? false, // Default to false, but respect saved state
-          });
-        }
-      }
-      newSelections.sort((a, b) => a.name.localeCompare(b.name));
-      
-      return processAndLoadFiles(handle, newSelections);
-
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        console.log("Directory selection was aborted by the user.");
-      } else {
-        console.error("Error selecting directory:", err);
-        setError("Could not access the selected directory.");
-      }
-      return null;
-    }
-  }, [fileSelections, processAndLoadFiles]);
-
-  const toggleFileSelection = useCallback(async (fileName: string) => {
-    const handle = dirHandleRef.current;
-    if (!handle) {
-      setError("Please select a directory first.");
-      return null;
-    }
-
-    const newSelections = fileSelections.map(f =>
-      f.name === fileName ? { ...f, selected: !f.selected } : f
-    );
-    
-    return processAndLoadFiles(handle, newSelections);
-  }, [fileSelections, processAndLoadFiles]);
-
-  return {
-    knowledgeBase,
-    fileSelections,
-    directoryName,
-    isLoading,
-    error,
-    selectDirectory,
-    toggleFileSelection,
-  };
-}
-
 ===== ./src/hooks/useResizablePanels.ts =====
 // src/hooks/useResizablePanels.ts
 import { useState, useCallback, useRef, useEffect } from 'react';
@@ -18199,35 +18063,36 @@ export function useResizablePanels(config: Config) {
 :root {
     --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
     --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px;
-    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
-    --shadow-lg: 0 10px 30px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.07);
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04); --shadow-lg: 0 10px 30px rgba(0,0,0,0.1);
+    --nav-width: 22%;
+    --connections-width: 25%;
     --header-height: 60px; /* For mobile view */
 }
 
 /* Light Theme Colors */
 :root {
-    --c-disease-light: #c026d3; --c-disease-bg-light: #fdf2f8;
-    --c-structure-light: #4f46e5; --c-structure-bg-light: #eef2ff;
-    --c-process-light: #ea580c; --c-process-bg-light: #fff7ed;
-    --c-substance-light: #0d9488; --c-substance-bg-light: #f0fdfa;
-    --c-finding-light: #0284c7; --c-finding-bg-light: #f0f9ff;
-    --c-concept-light: #65a30d; --c-concept-bg-light: #f7fee7;
+    --c-disease-light: #d946ef; --c-disease-bg-light: #fae8ff;
+    --c-structure-light: #6366f1; --c-structure-bg-light: #e0e7ff;
+    --c-process-light: #f97316; --c-process-bg-light: #ffedd5;
+    --c-substance-light: #14b8a6; --c-substance-bg-light: #ccfbf1;
+    --c-finding-light: #0ea5e9; --c-finding-bg-light: #e0f2fe;
+    --c-concept-light: #84cc16; --c-concept-bg-light: #ecfccb;
     --text-light: #1f2937; --bg-light: #f9fafb; --node-bg-light: #ffffff; --bg-alt-light: #f3f4f6;
-    --line-light: #e5e7eb; --text-muted-light: #6b7280; --link-light: #4338ca;
+    --line-light: #e5e7eb; --text-muted-light: #6b7280; --link-light: #4f46e5;
     --c-default-light: #6b7280; --c-default-bg-light: #f3f4f6;
     --c-gray: #9ca3af;
 }
 
 /* Dark Theme Colors */
 html[data-theme='dark'] {
-    --c-disease-dark: #e879f9; --c-disease-bg-dark: #2e103c;
-    --c-structure-dark: #a5b4fc; --c-structure-bg-dark: #222c64;
-    --c-process-dark: #fb923c; --c-process-bg-dark: #432008;
-    --c-substance-dark: #5eead4; --c-substance-bg-dark: #0f3c3a;
-    --c-finding-dark: #7dd3fc; --c-finding-bg-dark: #0f3c5a;
-    --c-concept-dark: #bef264; --c-concept-bg-dark: #2e440c;
-    --text-dark: #e5e7eb; --bg-dark: #111827; --node-bg-dark: #1f2937; --bg-alt-dark: #374151;
-    --line-dark: #374151; --text-muted-dark: #9ca3af; --link-dark: #a5b4fc;
+    --c-disease-dark: #c084fc; --c-disease-bg-dark: #3b0764;
+    --c-structure-dark: #a5b4fc; --c-structure-bg-dark: #3730a3;
+    --c-process-dark: #fb923c; --c-process-bg-dark: #4a210b;
+    --c-substance-dark: #2dd4bf; --c-substance-bg-dark: #0f766e;
+    --c-finding-dark: #38bdf8; --c-finding-bg-dark: #0c4a6e;
+    --c-concept-dark: #a3e635; --c-concept-bg-dark: #3f6212;
+    --text-dark: #d1d5db; --bg-dark: #111827; --node-bg-dark: #1f2937; --bg-alt-dark: #374151;
+    --line-dark: #374151; --text-muted-dark: #9ca3af; --link-dark: #818cf8;
     --c-default-dark: #9ca3af; --c-default-bg-dark: #374151;
     --c-gray: #52525b;
 }
@@ -18280,36 +18145,29 @@ html[data-theme='dark'] .type-default-border   { border-left-color: var(--c-defa
 
 /* Base Styles */
 html { scroll-behavior: smooth; }
-body, html { margin:0; padding:0; height:100%; font-family:var(--font-main); background-color:var(--bg-color); color:var(--text-color); transition: background-color .2s, color .2s; -webkit-font-smoothing: antialiased; line-height: 1.6; }
-::selection { background-color: var(--link-color); color:#fff; }
+body, html { margin:0; padding:0; height:100%; font-family:var(--font-main); background-color:var(--bg-color); color:var(--text-color); transition: background-color .2s, color .2s; -webkit-font-smoothing: antialiased; }
+::selection { background-color: var(--type-color, var(--c-structure-light)); color:#fff; }
 .emoji { display:inline-block; margin-right:.5em; vertical-align:-0.1em; }
-h1,h2,h3,h4,h5,h6 { line-height: 1.3; }
-
-/* Custom Scrollbar */
-::-webkit-scrollbar { width: 8px; height: 8px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--line-color); border-radius: 4px; }
-::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
 
 /* Layout */
 .container { display:flex; height:100vh; overflow: hidden; }
-.nav-panel { background:var(--node-bg); border-right:1px solid var(--line-color); display:flex; flex-direction:column; transition: all .2s; flex-shrink: 0; }
+.nav-panel { background:var(--node-bg); border-right:1px solid var(--line-color); display:flex; flex-direction:column; transition: all .2s; flex-shrink: 0; overflow-y: auto; overflow-x: hidden; }
 .main-panel { flex-grow:1; overflow-y:auto; position: relative; }
-.connections-panel { background:var(--bg-alt-color); border-left:1px solid var(--line-color); display:flex; flex-direction:column; transition:all .2s; flex-shrink: 0; }
+.connections-panel { background:var(--bg-alt-color); border-left:1px solid var(--line-color); display:flex; flex-direction:column; transition:all .2s; flex-shrink: 0; overflow-y: auto; overflow-x: hidden; }
 
 .panel-header.collapsed { padding: 1.25rem 0; justify-content: center; }
 .nav-panel.collapsed, .connections-panel.collapsed { overflow: hidden; padding: 0; }
 
-.panel-header { display: flex; align-items: center; justify-content: space-between; margin: 0; padding: 1.25rem; }
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin: 0 0 .5rem 0; padding: 1.25rem 1.25rem 0 1.25rem; }
 .panel-content { padding: 0 1.25rem 1.25rem 1.25rem; }
 .panel-title { font-size:1rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); margin: 0; }
 .collapse-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; line-height: 1; font-size: 1.2rem; border-radius: var(--radius-sm); }
 .collapse-btn:hover { background-color: var(--bg-alt-color); color: var(--text-color); }
 html[data-theme='dark'] .collapse-btn:hover { background-color: var(--bg-color); }
 
-.resizer-handle { width: 5px; cursor: col-resize; background: transparent; transition: background-color 0.2s; flex-shrink: 0; }
+.resizer-handle { width: 5px; cursor: col-resize; background: var(--bg-alt-color); transition: background-color 0.2s; flex-shrink: 0; }
 .resizer-handle:hover { background: var(--link-color); }
-.resizer-handle.disabled { cursor: default; }
+.resizer-handle.disabled { cursor: default; background: transparent; }
 
 /* Nav Panel Controls */
 .nav-controls { display:flex; gap:.5rem; margin-bottom:1rem; }
@@ -18317,19 +18175,18 @@ html[data-theme='dark'] .collapse-btn:hover { background-color: var(--bg-color);
 .import-btn { background-color: var(--c-structure-bg-light); color: var(--c-structure-light); border-color:transparent; }
 html[data-theme='dark'] .import-btn { background-color: var(--c-structure-bg-dark); color: var(--c-structure-dark); }
 .control-btn:hover { background-color:var(--bg-alt-color); color:var(--text-color); border-color:var(--text-muted); }
-.control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
-#search-input { width:100%; box-sizing:border-box; font-family:var(--font-main); font-size:14px; padding:.6rem .8rem; border-radius:var(--radius-md); border:1px solid var(--line-color); background-color:var(--bg-alt-color); color:var(--text-color); }
-#search-input:focus-visible { outline:none; border-color:var(--link-color); box-shadow:0 0 0 3px var(--c-structure-bg-light); }
-html[data-theme='dark'] #search-input:focus-visible { box-shadow:0 0 0 3px var(--c-structure-bg-dark); }
-#nav-list mark { background-color: var(--c-finding-bg-light); color: var(--text-color); border-radius: 2px; padding: 0 2px; }
-html[data-theme='dark'] #nav-list mark { background-color: var(--c-finding-bg-dark); }
+#search-input { width:100%; box-sizing:border-box; font-family:var(--font-main); font-size:14px; padding:.6rem .8rem; border-radius:var(--radius-md); border:1px solid var(--line-color); background-color:var(--bg-alt-color); color:var(--text-color); margin-bottom:1rem; }
+#search-input:focus { outline:none; border-color:var(--c-structure-light); box-shadow:0 0 0 2px var(--c-structure-bg-light); }
+html[data-theme='dark'] #search-input:focus { border-color:var(--c-structure-dark); box-shadow:0 0 0 2px var(--c-structure-bg-dark); }
+#nav-list mark { background-color: var(--c-finding-bg-light); color: var(--c-finding-light); border-radius: 2px; padding: 0 2px; }
+html[data-theme='dark'] #nav-list mark { background-color: var(--c-finding-bg-dark); color: var(--c-finding-dark); }
 
 /* Nav List */
-#nav-list { flex-grow: 1; overflow-y: auto; padding: 0 1.25rem; }
+#nav-list { flex-grow: 1; overflow-y: auto; }
 .nav-panel ul { list-style:none; padding-left:0; margin: 0; }
 .nav-panel a { text-decoration:none; color:var(--text-muted); cursor:pointer; padding:.5rem .75rem; border-radius:var(--radius-md); font-weight:500; transition:background-color .2s, color .2s; display:flex; align-items:center; justify-content:space-between; gap:.25rem; margin-bottom:2px; }
-.nav-panel a .topic-title { display:flex; align-items:center; gap:.5rem; }
+.nav-panel a .topic-title { display:flex; align-items:center; gap:.25rem; }
 .nav-panel a:hover { background-color:var(--bg-alt-color); color:var(--text-color); }
 .nav-panel a.active { background-color:var(--type-bg); color:var(--type-color); font-weight:600; }
 
@@ -18349,11 +18206,11 @@ a.active .relevance-score { background-color:var(--node-bg); color:var(--type-co
 .filter-path { font-style: italic; color: var(--text-muted); font-size: 0.9em; margin: 0 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--line-color); }
 
 /* Main Panel: Topic View */
-.main-panel-content { padding: 2rem 2.5rem; max-width: 800px; margin: 0 auto; }
+.main-panel-content { padding: 2.5rem; }
 .topic-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--line-color); padding-bottom:1rem; margin-bottom:1.5rem; }
 .topic-header-main { display:flex; align-items:center; gap:1rem; }
-.topic-icon { font-size:2rem; width:48px; height:48px; flex-shrink:0; border-radius:var(--radius-md); background-color:var(--type-bg); color: var(--type-color); display:flex; align-items:center; justify-content:center; }
-.topic-header h2 { margin:0; font-size:2rem; }
+.topic-icon { font-size:2rem; width:48px; height:48px; flex-shrink:0; border-radius:var(--radius-md); background-color:var(--type-bg); display:flex; align-items:center; justify-content:center; }
+.topic-header h2 { margin:0; font-size:2.25rem; }
 .tags-container { margin-top:.5rem; display:flex; flex-wrap:wrap; gap:.5rem; }
 .tag-item { background-color:var(--bg-alt-color); border:1px solid var(--line-color); color:var(--text-muted); padding:2px 8px; border-radius:99px; font-size:.75em; font-weight:500; }
 .topic-header button { font-family:var(--font-main); background:var(--bg-alt-color); color:var(--text-color); border:1px solid var(--line-color); padding:.5rem 1rem; border-radius:var(--radius-md); cursor:pointer; font-weight:500; transition:all .2s; display: flex; align-items: center; gap: 0.5rem; }
@@ -18365,30 +18222,20 @@ a.active .relevance-score { background-color:var(--node-bg); color:var(--type-co
 .breadcrumb-separator { margin: 0 0.5em; }
 
 h4 .emoji { font-size:.9em; }
-
-/* --- READABILITY FIX: .at-a-glance --- */
-.at-a-glance { 
-    padding:1.25rem; margin-bottom:1.5rem; border-radius:var(--radius-md); 
-    background:var(--type-bg); border-left:4px solid var(--type-color); 
-    color: var(--text-color); /* Use standard text color for readability */
-}
-.at-a-glance h4 { color: var(--type-color); } /* Use type color for heading accent */
+.at-a-glance { padding:1.25rem; margin-bottom:1.5rem; border-radius:var(--radius-md); background:var(--type-bg); border-left:4px solid var(--type-color); color:var(--type-color);}
 .at-a-glance ul { margin:0; padding-left:1.25rem; }
-.at-a-glance a { color: var(--type-color); font-weight: 600; } /* Make links inside use type color */
-html[data-theme='dark'] .at-a-glance a { filter: brightness(1.2); }
+.at-a-glance li, .at-a-glance p, .at-a-glance b, .at-a-glance strong { color:inherit; }
 
 .classification-path { color:var(--text-muted); font-size:.9em; margin-bottom:1.5rem; }
 .internal-link { color:var(--link-color); font-weight:600; text-decoration:none; border-bottom:1px solid transparent; transition:border-color .2s; }
 .internal-link:hover { border-color:currentColor; }
 
 /* Connections Panel */
-.connections-panel .panel-content { overflow-y: auto; }
 .connections-panel h4 { margin-top:0; }
 .connections-panel ul { list-style:none; padding:0; margin-bottom:1.5rem; }
-.connections-panel li { background-color:var(--node-bg); border-radius:var(--radius-md); padding:.75rem 1rem; margin-bottom:.5rem; box-shadow:var(--shadow-sm); border:1px solid var(--line-color); display: flex; flex-wrap: wrap; align-items: center; gap: 0 0.5rem; }
+.connections-panel li { background-color:var(--node-bg); border-radius:var(--radius-md); padding:.75rem 1rem; margin-bottom:.5rem; box-shadow:var(--shadow-sm); border:1px solid var(--line-color); }
 .connections-panel li.no-connections { background: transparent; border: none; box-shadow: none; color: var(--text-muted); padding-left: 0; }
-.connection-label { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:.2em .6em; border-radius:var(--radius-sm); }
-/* --- READABILITY FIX: .connection-label --- */
+.connection-label { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:.2em .6em; border-radius:var(--radius-sm); margin-left:.5rem; }
 .connection-label.type-disease { background-color: var(--c-disease-bg-light); color: var(--c-disease-light); }
 .connection-label.type-structure { background-color: var(--c-structure-bg-light); color: var(--c-structure-light); }
 .connection-label.type-process { background-color: var(--c-process-bg-light); color: var(--c-process-light); }
@@ -18406,14 +18253,14 @@ html[data-theme='dark'] .connection-label.type-concept { background-color: var(-
 html[data-theme='dark'] .connection-label.type-default { background-color: var(--c-default-bg-dark); color: var(--c-default-dark); }
 
 .filter-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
-.filter-pill { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; border: 1px solid; cursor: pointer; background-color: transparent; opacity: 0.6; transition: all 0.2s; }
-.filter-pill:hover { opacity: 1; }
-.filter-pill.active { opacity: 1; background-color: var(--type-bg); }
+.filter-pill { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; border: 1px solid; cursor: pointer; background-color: transparent; opacity: 0.6; }
+.filter-pill.active, .filter-pill:hover { opacity: 1; }
+.filter-pill.active { background-color: var(--type-bg); }
 
 /* Popover & Modal */
 #popover { display:none; position:fixed; background-color:var(--node-bg); border:1px solid var(--line-color); box-shadow:var(--shadow-lg); padding:1rem; z-index:1000; max-width:320px; border-radius:var(--radius-lg); pointer-events:none; }
 #popover h4 { margin-top: 0; }
-#popover p { margin-bottom: 0; font-size: 0.9em; color: var(--text-muted); }
+#popover p { margin-bottom: 0; }
 
 .modal { display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background-color:rgba(17,24,39,0.8); backdrop-filter: blur(4px); }
 .modal-content { background-color:var(--bg-color); margin:5% auto; padding:20px; border:1px solid var(--line-color); width:80%; max-width:1200px; height:80%; display:flex; flex-direction:column; border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); }
@@ -18432,8 +18279,7 @@ html[data-theme='dark'] .connection-label.type-default { background-color: var(-
 @media (max-width: 1024px) {
   .container { flex-direction: column; height: auto; min-height: 100vh; }
   .main-panel { order: 1; padding: 0; }
-  .main-panel-content { padding: 1rem; padding-top: calc(var(--header-height) + 1rem); max-width: 100%; }
-  .topic-header h2 { font-size: 1.75rem; }
+  .main-panel-content { padding: 1.5rem; padding-top: calc(var(--header-height) + 1.5rem); }
 
   .nav-panel, .connections-panel {
     position: fixed;
@@ -18599,147 +18445,6 @@ html[data-theme='dark'] .react-flow__node-default:hover .custom-node-body {
     stroke: var(--line-color);
     stroke-width: 2px;
 }
-
-
-/* --- Styles from Previous Update --- */
-
-/* File Manager in NavPanel */
-.file-manager {
-  margin-bottom: 1rem;
-}
-.file-manager .import-btn {
-  width: 100%;
-  justify-content: flex-start;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.file-selection-list {
-  list-style: none;
-  padding: 0;
-  margin: 0.75rem 0 0 0;
-  max-height: 150px;
-  overflow-y: auto;
-  border: 1px solid var(--line-color);
-  border-radius: var(--radius-md);
-  background-color: var(--bg-alt-color);
-}
-.file-selection-list li {
-  padding: 0.5rem 0.75rem;
-  font-size: 0.9em;
-}
-.file-selection-list li:not(:last-child) {
-  border-bottom: 1px solid var(--line-color);
-}
-.file-selection-list label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
-}
-.file-selection-list input[type="checkbox"] {
-  accent-color: var(--link-color);
-}
-
-/* Status Bar */
-.status-bar {
-  padding: 0.5rem 1.25rem;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-  border-top: 1px solid var(--line-color);
-  background-color: var(--bg-alt-color);
-  flex-shrink: 0;
-  margin-top: auto;
-}
-html[data-theme='dark'] .status-bar {
-    background-color: var(--bg-color);
-}
-
-/* Sub-titles in NavPanel */
-.panel-title-sub {
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: .05em;
-  color: var(--text-muted);
-  margin: 0;
-  padding: 0 0 .5rem 0;
-}
-.search-results-list, .nav-tree-container {
-  padding: 0; /* Let #nav-list handle padding */
-}
-.search-results-list .no-results, .nav-tree-container .no-results {
-  color: var(--text-muted);
-  padding: 1rem 0;
-}
-
-/* Error Banner in Main Panel */
-.error-banner {
-  background-color: var(--c-disease-bg-light);
-  color: var(--c-disease-light);
-  border: 1px solid var(--c-disease-light);
-  padding: 1rem;
-  border-radius: var(--radius-md);
-  margin-bottom: 1.5rem;
-}
-html[data-theme='dark'] .error-banner {
-  background-color: var(--c-disease-bg-dark);
-  color: var(--c-disease-dark);
-  border-color: var(--c-disease-dark);
-}
-
-/* Toast Notifications */
-.toast-container {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  z-index: 9999;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-end;
-}
-
-@keyframes toast-in {
-  from {
-    transform: translateX(100%);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-.toast {
-  background: var(--node-bg);
-  color: var(--text-color);
-  padding: 12px 20px;
-  border-radius: var(--radius-md);
-  box-shadow: var(--shadow-lg);
-  border-left: 4px solid;
-  display: flex;
-  align-items: center;
-  gap: 15px;
-  animation: toast-in 0.3s ease-out;
-  min-width: 250px;
-}
-.toast-success { border-color: var(--c-concept-light); }
-.toast-info    { border-color: var(--c-finding-light); }
-.toast-error   { border-color: var(--c-disease-light); }
-
-html[data-theme='dark'] .toast-success { border-color: var(--c-concept-dark); }
-html[data-theme='dark'] .toast-info    { border-color: var(--c-finding-dark); }
-html[data-theme='dark'] .toast-error   { border-color: var(--c-disease-dark); }
-
-.toast button {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 1.2rem;
-  cursor: pointer;
-  padding: 0;
-  line-height: 1;
-}
 ===== ./src/main.tsx =====
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
@@ -18756,40 +18461,31 @@ createRoot(document.getElementById('root')!).render(
 // src/types.ts
 
 export interface Connection {
+  /** 连接类型，例如 "associated_with"、"causes" 等 */
   type: string;
+  /** 指向的主题 id（出边） */
   to: string;
 }
 
 export interface Topic {
   id: string;
   title: string;
-  primaryType: string;
+  primaryType: string;          // disease / structure / process / substance / finding / concept ...
   tags?: string[];
-  classificationPath?: string[];
+  classificationPath?: string[]; // 用于左侧层级导航（可选）
   content: {
     definition?: string;
     atAGlance?: string;
     takeAway?: string;
-    [key: string]: unknown;
+    [key: string]: unknown;     // 其他任意命名的小节
   };
-  connections?: Connection[];
+  connections?: Connection[];   // 出边列表
 }
 
 export interface KnowledgeBase {
   [id: string]: Topic;
 }
 
-// 新增类型
-export interface FileSelection {
-  name: string;
-  selected: boolean;
-}
-
-export interface ToastNotification {
-  id: number;
-  message: string;
-  type: 'info' | 'success' | 'error';
-}
 ===== ./src/utils/elkLayout.ts =====
 // src/utils/elkLayout.ts
 import ELK, { type ElkNode, type LayoutOptions, type ElkExtendedEdge } from 'elkjs/lib/elk.bundled.js';
@@ -18849,51 +18545,6 @@ export const getElkLayoutedElements = async (
 
   return { nodes: layoutedNodes, edges };
 };
-===== ./src/utils/normalization.ts =====
-// src/utils/normalization.ts
-import type { Topic } from '../types';
-
-function isRecord(v: unknown): v is Record<string, unknown> {
-  return !!v && typeof v === 'object' && !Array.isArray(v);
-}
-
-function cleanStringsInObject(obj: any): any {
-    if (typeof obj === 'string') {
-        return obj.normalize('NFC').replace(/‚Äî/g, '—').replace(/‚Ä¶/g, '…');
-    }
-    if (Array.isArray(obj)) {
-        return obj.map(cleanStringsInObject);
-    }
-    if (isRecord(obj)) {
-        return Object.fromEntries(
-            Object.entries(obj).map(([key, value]) => [key, cleanStringsInObject(value)])
-        );
-    }
-    return obj;
-}
-
-export function normalizeTopic(idKey: string, raw: any): Topic {
-  const cleanedRaw = cleanStringsInObject(raw);
-  const id = (cleanedRaw?.id ?? idKey)?.toString?.() ?? idKey;
-  const title = (typeof cleanedRaw?.title === 'string' && cleanedRaw.title.trim()) || id;
-  const primaryType = (typeof cleanedRaw?.primaryType === 'string' && cleanedRaw.primaryType) || 'concept';
-  const classificationPath = Array.isArray(cleanedRaw?.classificationPath) ? cleanedRaw.classificationPath.filter((x: any) => typeof x === 'string' && x.trim()) : [];
-  const tags = Array.isArray(cleanedRaw?.tags) ? cleanedRaw.tags.filter((x: any) => typeof x === 'string' && x.trim()) : [];
-  const content = isRecord(cleanedRaw?.content) ? cleanedRaw.content : {};
-  const connections = Array.isArray(cleanedRaw?.connections) ? cleanedRaw.connections : [];
-
-  return {
-    ...(isRecord(cleanedRaw) ? cleanedRaw : {}),
-    id,
-    title,
-    primaryType,
-    classificationPath,
-    tags,
-    content,
-    connections,
-  } as Topic;
-}
-
 ===== ./src/utils/semanticUtils.ts =====
 // src/utils/semanticUtils.ts
 
@@ -19009,3 +18660,14 @@ export default defineConfig({
   plugins: [react()],
 })
 
+
+```
+
+这是我的一个知识库项目，我现在还想进一步改进文件io的体验:
+1.我希望这个程序可以指定某个文件夹作为默认的导入的目录，如果目录下有多个文件的话，用户可以自己选择导入哪几个（类似多选题）
+2.用户的选择可以被记住，下次打开的是后自动导入这些内容
+3.用户的选择可以随时修改，如果去掉某个选项，则该选项的文件的所有notes都会被去掉，加入某个选项，则某个选项的文件的notes都会被导入
+4.用户打开文件的时候不会弹出“导入成功的通知”，但会有个小状态栏一样的东西显示目前的notes的概览信息（仅仅在navpanel里面显示），在用户修改选项的时候则会弹出提示，提示用户加入了什么，去掉了什么。不过改进弹窗机制，不要用现在的机制
+5.还有其他你认为可以提升体验的东西
+
+请你先告诉我你的修改方案

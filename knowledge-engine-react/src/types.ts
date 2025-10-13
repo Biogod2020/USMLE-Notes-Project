@@ -1,27 +1,37 @@
 // src/types.ts
 
 export interface Connection {
-  /** 连接类型，例如 "associated_with"、"causes" 等 */
   type: string;
-  /** 指向的主题 id（出边） */
   to: string;
 }
 
 export interface Topic {
   id: string;
   title: string;
-  primaryType: string;          // disease / structure / process / substance / finding / concept ...
+  primaryType: string;
   tags?: string[];
-  classificationPath?: string[]; // 用于左侧层级导航（可选）
+  classificationPath?: string[];
   content: {
     definition?: string;
     atAGlance?: string;
     takeAway?: string;
-    [key: string]: unknown;     // 其他任意命名的小节
+    [key: string]: unknown;
   };
-  connections?: Connection[];   // 出边列表
+  connections?: Connection[];
 }
 
 export interface KnowledgeBase {
   [id: string]: Topic;
+}
+
+// 新增类型
+export interface FileSelection {
+  name: string;
+  selected: boolean;
+}
+
+export interface ToastNotification {
+  id: number;
+  message: string;
+  type: 'info' | 'success' | 'error';
 }

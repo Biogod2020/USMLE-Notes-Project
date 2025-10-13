@@ -1,6 +1,4 @@
 ```
-===== ./.DS_Store =====
-
 ===== ./.gitignore =====
 # Logs
 logs
@@ -107,14 +105,14 @@ find . \
       "version": "0.0.0",
       "dependencies": {
         "@tisoap/react-flow-smart-edge": "^4.0.1",
+        "@xyflow/react": "^12.0.2",
         "d3-color": "^3.1.0",
         "d3-force": "^3.0.0",
         "dompurify": "^3.1.6",
         "elkjs": "^0.9.3",
         "fuse.js": "^7.0.0",
         "react": "^18.3.1",
-        "react-dom": "^18.3.1",
-        "reactflow": "^11.11.4"
+        "react-dom": "^18.3.1"
       },
       "devDependencies": {
         "@types/d3-color": "^3.1.3",
@@ -1102,108 +1100,6 @@ find . \
         "node": ">= 8"
       }
     },
-    "node_modules/@reactflow/background": {
-      "version": "11.3.14",
-      "resolved": "https://registry.npmmirror.com/@reactflow/background/-/background-11.3.14.tgz",
-      "integrity": "sha512-Gewd7blEVT5Lh6jqrvOgd4G6Qk17eGKQfsDXgyRSqM+CTwDqRldG2LsWN4sNeno6sbqVIC2fZ+rAUBFA9ZEUDA==",
-      "license": "MIT",
-      "dependencies": {
-        "@reactflow/core": "11.11.4",
-        "classcat": "^5.0.3",
-        "zustand": "^4.4.1"
-      },
-      "peerDependencies": {
-        "react": ">=17",
-        "react-dom": ">=17"
-      }
-    },
-    "node_modules/@reactflow/controls": {
-      "version": "11.2.14",
-      "resolved": "https://registry.npmmirror.com/@reactflow/controls/-/controls-11.2.14.tgz",
-      "integrity": "sha512-MiJp5VldFD7FrqaBNIrQ85dxChrG6ivuZ+dcFhPQUwOK3HfYgX2RHdBua+gx+40p5Vw5It3dVNp/my4Z3jF0dw==",
-      "license": "MIT",
-      "dependencies": {
-        "@reactflow/core": "11.11.4",
-        "classcat": "^5.0.3",
-        "zustand": "^4.4.1"
-      },
-      "peerDependencies": {
-        "react": ">=17",
-        "react-dom": ">=17"
-      }
-    },
-    "node_modules/@reactflow/core": {
-      "version": "11.11.4",
-      "resolved": "https://registry.npmmirror.com/@reactflow/core/-/core-11.11.4.tgz",
-      "integrity": "sha512-H4vODklsjAq3AMq6Np4LE12i1I4Ta9PrDHuBR9GmL8uzTt2l2jh4CiQbEMpvMDcp7xi4be0hgXj+Ysodde/i7Q==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/d3": "^7.4.0",
-        "@types/d3-drag": "^3.0.1",
-        "@types/d3-selection": "^3.0.3",
-        "@types/d3-zoom": "^3.0.1",
-        "classcat": "^5.0.3",
-        "d3-drag": "^3.0.0",
-        "d3-selection": "^3.0.0",
-        "d3-zoom": "^3.0.0",
-        "zustand": "^4.4.1"
-      },
-      "peerDependencies": {
-        "react": ">=17",
-        "react-dom": ">=17"
-      }
-    },
-    "node_modules/@reactflow/minimap": {
-      "version": "11.7.14",
-      "resolved": "https://registry.npmmirror.com/@reactflow/minimap/-/minimap-11.7.14.tgz",
-      "integrity": "sha512-mpwLKKrEAofgFJdkhwR5UQ1JYWlcAAL/ZU/bctBkuNTT1yqV+y0buoNVImsRehVYhJwffSWeSHaBR5/GJjlCSQ==",
-      "license": "MIT",
-      "dependencies": {
-        "@reactflow/core": "11.11.4",
-        "@types/d3-selection": "^3.0.3",
-        "@types/d3-zoom": "^3.0.1",
-        "classcat": "^5.0.3",
-        "d3-selection": "^3.0.0",
-        "d3-zoom": "^3.0.0",
-        "zustand": "^4.4.1"
-      },
-      "peerDependencies": {
-        "react": ">=17",
-        "react-dom": ">=17"
-      }
-    },
-    "node_modules/@reactflow/node-resizer": {
-      "version": "2.2.14",
-      "resolved": "https://registry.npmmirror.com/@reactflow/node-resizer/-/node-resizer-2.2.14.tgz",
-      "integrity": "sha512-fwqnks83jUlYr6OHcdFEedumWKChTHRGw/kbCxj0oqBd+ekfs+SIp4ddyNU0pdx96JIm5iNFS0oNrmEiJbbSaA==",
-      "license": "MIT",
-      "dependencies": {
-        "@reactflow/core": "11.11.4",
-        "classcat": "^5.0.4",
-        "d3-drag": "^3.0.0",
-        "d3-selection": "^3.0.0",
-        "zustand": "^4.4.1"
-      },
-      "peerDependencies": {
-        "react": ">=17",
-        "react-dom": ">=17"
-      }
-    },
-    "node_modules/@reactflow/node-toolbar": {
-      "version": "1.3.14",
-      "resolved": "https://registry.npmmirror.com/@reactflow/node-toolbar/-/node-toolbar-1.3.14.tgz",
-      "integrity": "sha512-rbynXQnH/xFNu4P9H+hVqlEUafDCkEoCy0Dg9mG22Sg+rY/0ck6KkrAQrYrTgXusd+cEJOMK0uOOFCK2/5rSGQ==",
-      "license": "MIT",
-      "dependencies": {
-        "@reactflow/core": "11.11.4",
-        "classcat": "^5.0.3",
-        "zustand": "^4.4.1"
-      },
-      "peerDependencies": {
-        "react": ">=17",
-        "react-dom": ">=17"
-      }
-    },
     "node_modules/@rolldown/pluginutils": {
       "version": "1.0.0-beta.27",
       "resolved": "https://registry.npmmirror.com/@rolldown/pluginutils/-/pluginutils-1.0.0-beta.27.tgz",
@@ -1576,100 +1472,10 @@ find . \
         "@babel/types": "^7.28.2"
       }
     },
-    "node_modules/@types/d3": {
-      "version": "7.4.3",
-      "resolved": "https://registry.npmmirror.com/@types/d3/-/d3-7.4.3.tgz",
-      "integrity": "sha512-lZXZ9ckh5R8uiFVt8ogUNf+pIrK4EsWrx2Np75WvF/eTpJ0FMHNhjXk8CKEx/+gpHbNQyJWehbFaTvqmHWB3ww==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/d3-array": "*",
-        "@types/d3-axis": "*",
-        "@types/d3-brush": "*",
-        "@types/d3-chord": "*",
-        "@types/d3-color": "*",
-        "@types/d3-contour": "*",
-        "@types/d3-delaunay": "*",
-        "@types/d3-dispatch": "*",
-        "@types/d3-drag": "*",
-        "@types/d3-dsv": "*",
-        "@types/d3-ease": "*",
-        "@types/d3-fetch": "*",
-        "@types/d3-force": "*",
-        "@types/d3-format": "*",
-        "@types/d3-geo": "*",
-        "@types/d3-hierarchy": "*",
-        "@types/d3-interpolate": "*",
-        "@types/d3-path": "*",
-        "@types/d3-polygon": "*",
-        "@types/d3-quadtree": "*",
-        "@types/d3-random": "*",
-        "@types/d3-scale": "*",
-        "@types/d3-scale-chromatic": "*",
-        "@types/d3-selection": "*",
-        "@types/d3-shape": "*",
-        "@types/d3-time": "*",
-        "@types/d3-time-format": "*",
-        "@types/d3-timer": "*",
-        "@types/d3-transition": "*",
-        "@types/d3-zoom": "*"
-      }
-    },
-    "node_modules/@types/d3-array": {
-      "version": "3.2.2",
-      "resolved": "https://registry.npmmirror.com/@types/d3-array/-/d3-array-3.2.2.tgz",
-      "integrity": "sha512-hOLWVbm7uRza0BYXpIIW5pxfrKe0W+D5lrFiAEYR+pb6w3N2SwSMaJbXdUfSEv+dT4MfHBLtn5js0LAWaO6otw==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-axis": {
-      "version": "3.0.6",
-      "resolved": "https://registry.npmmirror.com/@types/d3-axis/-/d3-axis-3.0.6.tgz",
-      "integrity": "sha512-pYeijfZuBd87T0hGn0FO1vQ/cgLk6E1ALJjfkC0oJ8cbwkZl3TpgS8bVBLZN+2jjGgg38epgxb2zmoGtSfvgMw==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/d3-selection": "*"
-      }
-    },
-    "node_modules/@types/d3-brush": {
-      "version": "3.0.6",
-      "resolved": "https://registry.npmmirror.com/@types/d3-brush/-/d3-brush-3.0.6.tgz",
-      "integrity": "sha512-nH60IZNNxEcrh6L1ZSMNA28rj27ut/2ZmI3r96Zd+1jrZD++zD3LsMIjWlvg4AYrHn/Pqz4CF3veCxGjtbqt7A==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/d3-selection": "*"
-      }
-    },
-    "node_modules/@types/d3-chord": {
-      "version": "3.0.6",
-      "resolved": "https://registry.npmmirror.com/@types/d3-chord/-/d3-chord-3.0.6.tgz",
-      "integrity": "sha512-LFYWWd8nwfwEmTZG9PfQxd17HbNPksHBiJHaKuY1XeqscXacsS2tyoo6OdRsjf+NQYeB6XrNL3a25E3gH69lcg==",
-      "license": "MIT"
-    },
     "node_modules/@types/d3-color": {
       "version": "3.1.3",
       "resolved": "https://registry.npmmirror.com/@types/d3-color/-/d3-color-3.1.3.tgz",
       "integrity": "sha512-iO90scth9WAbmgv7ogoq57O9YpKmFBbmoEoCHDB2xMBY0+/KVrqAaCDyCE16dUspeOvIxFFRI+0sEtqDqy2b4A==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-contour": {
-      "version": "3.0.6",
-      "resolved": "https://registry.npmmirror.com/@types/d3-contour/-/d3-contour-3.0.6.tgz",
-      "integrity": "sha512-BjzLgXGnCWjUSYGfH1cpdo41/hgdWETu4YxpezoztawmqsvCeep+8QGfiY6YbDvfgHz/DkjeIkkZVJavB4a3rg==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/d3-array": "*",
-        "@types/geojson": "*"
-      }
-    },
-    "node_modules/@types/d3-delaunay": {
-      "version": "6.0.4",
-      "resolved": "https://registry.npmmirror.com/@types/d3-delaunay/-/d3-delaunay-6.0.4.tgz",
-      "integrity": "sha512-ZMaSKu4THYCU6sV64Lhg6qjf1orxBthaC161plr5KuPHo3CNm8DTHiLw/5Eq2b6TsNP0W0iJrUOFscY6Q450Hw==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-dispatch": {
-      "version": "3.0.7",
-      "resolved": "https://registry.npmmirror.com/@types/d3-dispatch/-/d3-dispatch-3.0.7.tgz",
-      "integrity": "sha512-5o9OIAdKkhN1QItV2oqaE5KMIiXAvDWBDPrD85e58Qlz1c1kI/J0NcqbEG88CoTwJrYe7ntUCVfeUl2UJKbWgA==",
       "license": "MIT"
     },
     "node_modules/@types/d3-drag": {
@@ -1681,52 +1487,11 @@ find . \
         "@types/d3-selection": "*"
       }
     },
-    "node_modules/@types/d3-dsv": {
-      "version": "3.0.7",
-      "resolved": "https://registry.npmmirror.com/@types/d3-dsv/-/d3-dsv-3.0.7.tgz",
-      "integrity": "sha512-n6QBF9/+XASqcKK6waudgL0pf/S5XHPPI8APyMLLUHd8NqouBGLsU8MgtO7NINGtPBtk9Kko/W4ea0oAspwh9g==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-ease": {
-      "version": "3.0.2",
-      "resolved": "https://registry.npmmirror.com/@types/d3-ease/-/d3-ease-3.0.2.tgz",
-      "integrity": "sha512-NcV1JjO5oDzoK26oMzbILE6HW7uVXOHLQvHshBUW4UMdZGfiY6v5BeQwh9a9tCzv+CeefZQHJt5SRgK154RtiA==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-fetch": {
-      "version": "3.0.7",
-      "resolved": "https://registry.npmmirror.com/@types/d3-fetch/-/d3-fetch-3.0.7.tgz",
-      "integrity": "sha512-fTAfNmxSb9SOWNB9IoG5c8Hg6R+AzUHDRlsXsDZsNp6sxAEOP0tkP3gKkNSO/qmHPoBFTxNrjDprVHDQDvo5aA==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/d3-dsv": "*"
-      }
-    },
     "node_modules/@types/d3-force": {
       "version": "3.0.10",
       "resolved": "https://registry.npmmirror.com/@types/d3-force/-/d3-force-3.0.10.tgz",
       "integrity": "sha512-ZYeSaCF3p73RdOKcjj+swRlZfnYpK1EbaDiYICEEp5Q6sUiqFaFQ9qgoshp5CzIyyb/yD09kD9o2zEltCexlgw==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-format": {
-      "version": "3.0.4",
-      "resolved": "https://registry.npmmirror.com/@types/d3-format/-/d3-format-3.0.4.tgz",
-      "integrity": "sha512-fALi2aI6shfg7vM5KiR1wNJnZ7r6UuggVqtDA+xiEdPZQwy/trcQaHnwShLuLdta2rTymCNpxYTiMZX/e09F4g==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-geo": {
-      "version": "3.1.0",
-      "resolved": "https://registry.npmmirror.com/@types/d3-geo/-/d3-geo-3.1.0.tgz",
-      "integrity": "sha512-856sckF0oP/diXtS4jNsiQw/UuK5fQG8l/a9VVLeSouf1/PPbBE1i1W852zVwKwYCBkFJJB7nCFTbk6UMEXBOQ==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/geojson": "*"
-      }
-    },
-    "node_modules/@types/d3-hierarchy": {
-      "version": "3.1.7",
-      "resolved": "https://registry.npmmirror.com/@types/d3-hierarchy/-/d3-hierarchy-3.1.7.tgz",
-      "integrity": "sha512-tJFtNoYBtRtkNysX1Xq4sxtjK8YgoWUNpIiUee0/jHGRwqvzYxkq0hGVbbOGSz+JgFxxRu4K8nb3YpG3CMARtg==",
+      "dev": true,
       "license": "MIT"
     },
     "node_modules/@types/d3-interpolate": {
@@ -1738,76 +1503,10 @@ find . \
         "@types/d3-color": "*"
       }
     },
-    "node_modules/@types/d3-path": {
-      "version": "3.1.1",
-      "resolved": "https://registry.npmmirror.com/@types/d3-path/-/d3-path-3.1.1.tgz",
-      "integrity": "sha512-VMZBYyQvbGmWyWVea0EHs/BwLgxc+MKi1zLDCONksozI4YJMcTt8ZEuIR4Sb1MMTE8MMW49v0IwI5+b7RmfWlg==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-polygon": {
-      "version": "3.0.2",
-      "resolved": "https://registry.npmmirror.com/@types/d3-polygon/-/d3-polygon-3.0.2.tgz",
-      "integrity": "sha512-ZuWOtMaHCkN9xoeEMr1ubW2nGWsp4nIql+OPQRstu4ypeZ+zk3YKqQT0CXVe/PYqrKpZAi+J9mTs05TKwjXSRA==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-quadtree": {
-      "version": "3.0.6",
-      "resolved": "https://registry.npmmirror.com/@types/d3-quadtree/-/d3-quadtree-3.0.6.tgz",
-      "integrity": "sha512-oUzyO1/Zm6rsxKRHA1vH0NEDG58HrT5icx/azi9MF1TWdtttWl0UIUsjEQBBh+SIkrpd21ZjEv7ptxWys1ncsg==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-random": {
-      "version": "3.0.3",
-      "resolved": "https://registry.npmmirror.com/@types/d3-random/-/d3-random-3.0.3.tgz",
-      "integrity": "sha512-Imagg1vJ3y76Y2ea0871wpabqp613+8/r0mCLEBfdtqC7xMSfj9idOnmBYyMoULfHePJyxMAw3nWhJxzc+LFwQ==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-scale": {
-      "version": "4.0.9",
-      "resolved": "https://registry.npmmirror.com/@types/d3-scale/-/d3-scale-4.0.9.tgz",
-      "integrity": "sha512-dLmtwB8zkAeO/juAMfnV+sItKjlsw2lKdZVVy6LRr0cBmegxSABiLEpGVmSJJ8O08i4+sGR6qQtb6WtuwJdvVw==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/d3-time": "*"
-      }
-    },
-    "node_modules/@types/d3-scale-chromatic": {
-      "version": "3.1.0",
-      "resolved": "https://registry.npmmirror.com/@types/d3-scale-chromatic/-/d3-scale-chromatic-3.1.0.tgz",
-      "integrity": "sha512-iWMJgwkK7yTRmWqRB5plb1kadXyQ5Sj8V/zYlFGMUBbIPKQScw+Dku9cAAMgJG+z5GYDoMjWGLVOvjghDEFnKQ==",
-      "license": "MIT"
-    },
     "node_modules/@types/d3-selection": {
       "version": "3.0.11",
       "resolved": "https://registry.npmmirror.com/@types/d3-selection/-/d3-selection-3.0.11.tgz",
       "integrity": "sha512-bhAXu23DJWsrI45xafYpkQ4NtcKMwWnAC/vKrd2l+nxMFuvOT3XMYTIj2opv8vq8AO5Yh7Qac/nSeP/3zjTK0w==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-shape": {
-      "version": "3.1.7",
-      "resolved": "https://registry.npmmirror.com/@types/d3-shape/-/d3-shape-3.1.7.tgz",
-      "integrity": "sha512-VLvUQ33C+3J+8p+Daf+nYSOsjB4GXp19/S/aGo60m9h1v6XaxjiT82lKVWJCfzhtuZ3yD7i/TPeC/fuKLLOSmg==",
-      "license": "MIT",
-      "dependencies": {
-        "@types/d3-path": "*"
-      }
-    },
-    "node_modules/@types/d3-time": {
-      "version": "3.0.4",
-      "resolved": "https://registry.npmmirror.com/@types/d3-time/-/d3-time-3.0.4.tgz",
-      "integrity": "sha512-yuzZug1nkAAaBlBBikKZTgzCeA+k1uy4ZFwWANOfKw5z5LRhV0gNA7gNkKm7HoK+HRN0wX3EkxGk0fpbWhmB7g==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-time-format": {
-      "version": "4.0.3",
-      "resolved": "https://registry.npmmirror.com/@types/d3-time-format/-/d3-time-format-4.0.3.tgz",
-      "integrity": "sha512-5xg9rC+wWL8kdDj153qZcsJ0FWiFt0J5RB6LYUNZjwSnesfblqrI/bJ1wBdJ8OQfncgbJG5+2F+qfqnqyzYxyg==",
-      "license": "MIT"
-    },
-    "node_modules/@types/d3-timer": {
-      "version": "3.0.2",
-      "resolved": "https://registry.npmmirror.com/@types/d3-timer/-/d3-timer-3.0.2.tgz",
-      "integrity": "sha512-Ps3T8E8dZDam6fUyNiMkekK3XUsaUEik+idO9/YjPtfj2qruF8tFBXS7XhtE4iIXBLxhmLjP3SXpLhVf21I9Lw==",
       "license": "MIT"
     },
     "node_modules/@types/d3-transition": {
@@ -1844,12 +1543,6 @@ find . \
       "resolved": "https://registry.npmmirror.com/@types/estree/-/estree-1.0.8.tgz",
       "integrity": "sha512-dWHzHa2WqEXI/O1E9OjrocMTKJl2mSrEolh1Iomrv6U+JuNwaHXsXx9bLu5gG7BUWFIN0skIQJQ/L1rIex4X6w==",
       "dev": true,
-      "license": "MIT"
-    },
-    "node_modules/@types/geojson": {
-      "version": "7946.0.16",
-      "resolved": "https://registry.npmmirror.com/@types/geojson/-/geojson-7946.0.16.tgz",
-      "integrity": "sha512-6C8nqWur3j98U6+lXDfTUWIfgvZU+EumvpHKcYjujKH7woYyLj2sUmff0tRhrqM7BohUw7Pz3ZB1jj2gW9Fvmg==",
       "license": "MIT"
     },
     "node_modules/@types/json-schema": {
@@ -2203,7 +1896,6 @@ find . \
       "resolved": "https://registry.npmmirror.com/@xyflow/react/-/react-12.8.6.tgz",
       "integrity": "sha512-SksAm2m4ySupjChphMmzvm55djtgMDPr+eovPDdTnyGvShf73cvydfoBfWDFllooIQ4IaiUL5yfxHRwU0c37EA==",
       "license": "MIT",
-      "peer": true,
       "dependencies": {
         "@xyflow/system": "0.0.70",
         "classcat": "^5.0.3",
@@ -2219,7 +1911,6 @@ find . \
       "resolved": "https://registry.npmmirror.com/@xyflow/system/-/system-0.0.70.tgz",
       "integrity": "sha512-PpC//u9zxdjj0tfTSmZrg3+sRbTz6kop/Amky44U2Dl51sxzDTIUfXMwETOYpmr2dqICWXBIJwXL2a9QWtX2XA==",
       "license": "MIT",
-      "peer": true,
       "dependencies": {
         "@types/d3-drag": "^3.0.7",
         "@types/d3-interpolate": "^3.0.4",
@@ -3581,24 +3272,6 @@ find . \
         "node": ">=0.10.0"
       }
     },
-    "node_modules/reactflow": {
-      "version": "11.11.4",
-      "resolved": "https://registry.npmmirror.com/reactflow/-/reactflow-11.11.4.tgz",
-      "integrity": "sha512-70FOtJkUWH3BAOsN+LU9lCrKoKbtOPnz2uq0CV2PLdNSwxTXOhCbsZr50GmZ+Rtw3jx8Uv7/vBFtCGixLfd4Og==",
-      "license": "MIT",
-      "dependencies": {
-        "@reactflow/background": "11.3.14",
-        "@reactflow/controls": "11.2.14",
-        "@reactflow/core": "11.11.4",
-        "@reactflow/minimap": "11.7.14",
-        "@reactflow/node-resizer": "2.2.14",
-        "@reactflow/node-toolbar": "1.3.14"
-      },
-      "peerDependencies": {
-        "react": ">=17",
-        "react-dom": ">=17"
-      }
-    },
     "node_modules/resolve-from": {
       "version": "4.0.0",
       "resolved": "https://registry.npmmirror.com/resolve-from/-/resolve-from-4.0.0.tgz",
@@ -4025,14 +3698,14 @@ find . \
   },
   "dependencies": {
     "@tisoap/react-flow-smart-edge": "^4.0.1",
+    "@xyflow/react": "^12.0.2",
     "d3-color": "^3.1.0",
     "d3-force": "^3.0.0",
     "dompurify": "^3.1.6",
     "elkjs": "^0.9.3",
     "fuse.js": "^7.0.0",
     "react": "^18.3.1",
-    "react-dom": "^18.3.1",
-    "reactflow": "^11.11.4"
+    "react-dom": "^18.3.1"
   },
   "devDependencies": {
     "@types/d3-color": "^3.1.3",
@@ -4050,7 +3723,6 @@ find . \
     "vite": "^5.4.8"
   }
 }
-
 ===== ./public/.DS_Store =====
    Bud1            %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 @      �                                        @      �                                          @      �                                          @                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   E   %                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       DSDB                             `          �                                           @      �                                          @      �                                          @                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 ===== ./public/vite.svg =====
@@ -17564,7 +17236,7 @@ export function ConnectionsPanel({ knowledgeBase, activeTopic, onTopicSelect, is
 ===== ./src/components/CustomNode.tsx =====
 // src/components/CustomNode.tsx
 import { memo } from 'react';
-import { type NodeProps } from 'reactflow';
+import { type NodeProps, Handle, Position, type Node } from '@xyflow/react';
 
 const EMOJI_MAP: Record<string, string> = {
   disease: '🦠', structure: '🏛️', process: '⚙️',
@@ -17572,12 +17244,22 @@ const EMOJI_MAP: Record<string, string> = {
 };
 const getEmoji = (type: string) => EMOJI_MAP[type] || '📄';
 
-// 移除了 <Handle /> 组件
-const CustomNode = ({ data }: NodeProps<{ title: string; type: string; isCenter: boolean }>) => {
+// FIX 1: 定义 data 对象的具体类型
+type CustomNodeData = {
+  title: string;
+  type: string;
+  isCenter: boolean;
+};
+
+// FIX 2: 将 CustomNodeData 应用到 NodeProps 泛型上
+const CustomNode = ({ data }: NodeProps<Node<CustomNodeData>>) => {
   const isCenterClass = data.isCenter ? 'is-center' : '';
 
   return (
     <div className={`custom-node-body type-${data.type} ${isCenterClass}`}>
+      <Handle type="source" position={Position.Top} style={{ visibility: 'hidden', top: '-8px', width: '10px', height: '10px' }} />
+      <Handle type="target" position={Position.Bottom} style={{ visibility: 'hidden', bottom: '-8px', width: '10px', height: '10px' }} />
+
       <div className="node-header">
           <span className="node-icon">{getEmoji(data.type)}</span>
           <span className="node-type">{data.type}</span>
@@ -17588,88 +17270,11 @@ const CustomNode = ({ data }: NodeProps<{ title: string; type: string; isCenter:
 };
 
 export default memo(CustomNode);
-===== ./src/components/FloatingEdge.tsx =====
-// src/components/FloatingEdge.tsx
-import { useCallback } from 'react';
-import { useStore, getBezierPath, type EdgeProps, BaseEdge, EdgeLabelRenderer } from 'reactflow';
-import { getEdgeParams } from '../utils/graphUtils';
-
-function FloatingEdge({
-  id,
-  source,
-  target,
-  markerEnd,
-  style,
-  data,
-  selected,
-}: EdgeProps) {
-  const sourceNode = useStore(useCallback((store) => store.nodeInternals.get(source), [source]));
-  const targetNode = useStore(useCallback((store) => store.nodeInternals.get(target), [target]));
-
-  if (!sourceNode || !targetNode) {
-    return null;
-  }
-
-  const { sx, sy, tx, ty, sourcePos, targetPos } = getEdgeParams(sourceNode, targetNode);
-
-  // 这里的 curvature 控制弯曲程度。
-  // 如果是双向连接 (data.isBidirectional 为 true)，根据 offsetIndex 正负来决定弯曲方向。
-  // 如果不是双向，给一个很小的曲率让线条稍微柔和一点，或者 0 让它变直。
-  const baseCurvature = 0.25;
-  const curvature = data?.isBidirectional 
-    ? baseCurvature * (data.offsetIndex || 1) // e.g., 0.25 or -0.25
-    : 0; // 单向连接使用直线或极小曲率
-
-  const [edgePath, labelX, labelY] = getBezierPath({
-    sourceX: sx,
-    sourceY: sy,
-    sourcePosition: sourcePos,
-    targetPosition: targetPos,
-    targetX: tx,
-    targetY: ty,
-    curvature: curvature,
-  });
-
-  // 计算标签样式
-  const labelStyle = {
-    position: 'absolute',
-    transform: `translate(-50%, -50%) translate(${labelX}px,${labelY}px)`,
-    pointerEvents: 'all',
-    zIndex: selected ? 1000 : 10, // 选中时标签置顶
-  } as React.CSSProperties;
-
-  // 动态调整标签背景颜色以匹配线条颜色（可选，这里使用通用背景）
-  const edgeColor = style?.stroke || 'var(--text-muted)';
-
-  return (
-    <>
-      <BaseEdge path={edgePath} markerEnd={markerEnd} style={style} id={id} />
-      {data?.label && (
-        <EdgeLabelRenderer>
-          <div style={labelStyle} className="nodrag nopan">
-            <div 
-                className="edge-label-text" 
-                style={{ 
-                    color: edgeColor, 
-                    borderColor: edgeColor,
-                    backgroundColor: 'var(--bg-color)', // 确保标签文字下有背景遮挡线条
-                    fontWeight: selected ? 700 : 500,
-                }}
-            >
-              {data.label}
-            </div>
-          </div>
-        </EdgeLabelRenderer>
-      )}
-    </>
-  );
-}
-
-export default FloatingEdge;
 ===== ./src/components/GraphModal.tsx =====
 // src/components/GraphModal.tsx
-import { useCallback, useLayoutEffect, useMemo } from 'react';
-import ReactFlow, {
+import { useCallback, useLayoutEffect, type MouseEvent } from 'react';
+import {
+  ReactFlow,
   Controls,
   Background,
   useNodesState,
@@ -17680,18 +17285,18 @@ import ReactFlow, {
   type Edge,
   MarkerType,
   ConnectionLineType,
-} from 'reactflow';
-import 'reactflow/dist/style.css';
-import { color as d3Color } from 'd3-color'; // 用于颜色变亮变暗
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import { color as d3Color } from 'd3-color';
+import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge';
 
-import type { KnowledgeBase, Connection } from '../types';
+import type { KnowledgeBase } from '../types';
 import CustomNode from './CustomNode';
-import FloatingEdge from './FloatingEdge'; // <-- 引入新的浮动边
 import { getFamilyForType } from '../utils/semanticUtils';
 import { getElkLayoutedElements } from '../utils/elkLayout';
 
 const nodeTypes = { default: CustomNode };
-const edgeTypes = { floating: FloatingEdge }; // <-- 注册浮动边
+const edgeTypes = { smart: SmartBezierEdge };
 
 interface Props {
   isOpen: boolean;
@@ -17712,41 +17317,34 @@ const adjustColor = (cssVar: string, opacity: number = 1, darken: boolean = fals
     const c = d3Color(rgbStr);
     if (!c) return '#999';
     
-    if (darken) c.brighter(-0.6); // 变暗
-    else c.brighter(0.3); // 变亮 (d3-color 的 brighter 参数为正时变亮)
+    if (darken) c.brighter(-0.6);
+    else c.brighter(0.3);
     
     c.opacity = opacity;
     return c.toString();
 };
 
-
 function GraphView({ knowledgeBase, centerNodeId, onNodeClick }: Omit<Props, 'isOpen' | 'onClose'>) {
+  // CRITICAL FIX: Initialize useNodesState and useEdgesState with an empty array [].
+  // This allows TypeScript to correctly infer the state type as Node[] and Edge[], not never[].
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const { fitView } = useReactFlow();
 
-  // ELK 布局配置调整：允许更宽的布局，减少垂直堆叠
   const runLayout = useCallback(async (currentNodes: Node[], currentEdges: Edge[]) => {
-    // 确保节点有尺寸供计算
     const nodesWithDim = currentNodes.map(n => ({...n, width: 220, height: 80}));
     const { nodes: layoutedNodes } = await getElkLayoutedElements(nodesWithDim, currentEdges);
     setNodes(layoutedNodes);
-    // Edges don't need layout update by ELK directly for floating edges
     setEdges(currentEdges); 
 
     window.requestAnimationFrame(() => fitView({ padding: 0.2, duration: 400 }));
   }, [setNodes, setEdges, fitView]);
 
-  // 生成图谱数据的逻辑
   useLayoutEffect(() => {
     if (!centerNodeId) return;
 
-    // 1. 确定要显示的节点集合 (中心节点 + 一级邻居)
     const visibleNodeIds = new Set([centerNodeId]);
-    
-    // Outgoing neighbors
     knowledgeBase[centerNodeId]?.connections?.forEach(conn => visibleNodeIds.add(conn.to));
-    // Incoming neighbors
     Object.values(knowledgeBase).forEach(topic => {
         if (topic.id === centerNodeId) return;
         topic.connections?.forEach(conn => {
@@ -17754,13 +17352,12 @@ function GraphView({ knowledgeBase, centerNodeId, onNodeClick }: Omit<Props, 'is
         });
     });
 
-    // 2. 生成 Nodes
     const newNodes: Node[] = Array.from(visibleNodeIds)
       .filter(id => knowledgeBase[id] && !knowledgeBase[id]!.id.startsWith('zzz_'))
       .map(id => ({
         id,
         type: 'default',
-        position: { x: 0, y: 0 }, // 初始位置由 ELK 计算
+        position: { x: 0, y: 0 },
         data: {
           title: knowledgeBase[id]!.title,
           type: knowledgeBase[id]!.primaryType,
@@ -17768,118 +17365,62 @@ function GraphView({ knowledgeBase, centerNodeId, onNodeClick }: Omit<Props, 'is
         },
       }));
 
-    // 3. 生成原始 Edges 并处理双向连接和样式
-    const rawEdges: any[] = [];
-    const edgeMap = new Map<string, any>(); // 用于检测 A-B 和 B-A
-
+    const newEdges: Edge[] = [];
     const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-    const grayColor = isDark ? '#6b7280' : '#9ca3af'; // Tailwind gray-500/400
+    const grayColor = isDark ? '#6b7280' : '#9ca3af';
 
     Array.from(visibleNodeIds).forEach(sourceId => {
         const topic = knowledgeBase[sourceId];
         if (!topic || topic.id.startsWith('zzz_')) return;
 
-        topic.connections?.forEach((conn, idx) => {
+        topic.connections?.forEach(conn => {
             if (!visibleNodeIds.has(conn.to)) return;
-            if (sourceId === conn.to) return; // 忽略自环
+            if (sourceId === conn.to) return;
 
             const targetId = conn.to;
             const family = getFamilyForType(conn.type);
             const baseColorVar = `--c-${family.color}-${isDark ? 'dark' : 'light'}`;
             
-            // --- 样式逻辑 ---
             let finalColor = grayColor;
-            let strokeDasharray = '5, 5'; // 默认虚线 (邻居之间)
+            let strokeDasharray = '5, 5';
             let strokeWidth = 1.5;
             let zIndex = 1;
-
             const isConnectedToCenter = sourceId === centerNodeId || targetId === centerNodeId;
 
             if (isConnectedToCenter) {
-                strokeDasharray = 'none'; // 实线
+                strokeDasharray = 'none';
                 strokeWidth = 2.5;
-                zIndex = 10; // 中心连接置于上层
-
+                zIndex = 10;
                 if (sourceId === centerNodeId) {
-                    // Outgoing form center: 浅色
                     finalColor = adjustColor(baseColorVar, 1, false);
                 } else {
-                    // Incoming to center: 深色
                     finalColor = adjustColor(baseColorVar, 1, true);
                 }
             }
-
-            const edgeId = `e-${sourceId}-${targetId}-${conn.type}`;
-            const edgeObj = {
-                id: edgeId,
+            
+            newEdges.push({
+                id: `e-${sourceId}-${targetId}-${conn.type}`,
                 source: sourceId,
                 target: targetId,
-                type: 'floating', // 使用自定义浮动边
-                data: { 
-                    label: conn.type.replace(/_/g, ' '),
-                    isBidirectional: false, // 稍后计算
-                    offsetIndex: 0          // 稍后计算
-                },
+                type: 'smart',
+                label: conn.type.replace(/_/g, ' '),
                 style: { stroke: finalColor, strokeWidth, strokeDasharray, opacity: 0.9 },
                 markerEnd: { 
                     type: MarkerType.ArrowClosed, 
                     color: finalColor,
-                    width: 20, height: 20, // 箭头更大更明显
+                    width: 20, height: 20,
                 },
                 zIndex,
-            };
-
-            rawEdges.push(edgeObj);
-            // 用排序后的 ID 作为 key 来检测这两个节点之间是否有边
-            const pairKey = [sourceId, targetId].sort().join('::');
-            if (!edgeMap.has(pairKey)) {
-                edgeMap.set(pairKey, []);
-            }
-            edgeMap.get(pairKey).push(edgeObj);
+            });
         });
     });
 
-    // 4. 处理双向边曲率
-    const finalEdges: Edge[] = [];
-    const processedPairs = new Set<string>();
-
-    for (const edge of rawEdges) {
-        const pairKey = [edge.source, edge.target].sort().join('::');
-        if (processedPairs.has(pairKey)) continue;
-
-        const edgesBetweenPair = edgeMap.get(pairKey);
-        
-        // 检查是否存在反向边 (A->B 和 B->A)
-        const hasDirect = edgesBetweenPair.some((e: any) => e.source === edge.source && e.target === edge.target);
-        const hasReverse = edgesBetweenPair.some((e: any) => e.source === edge.target && e.target === edge.source);
-
-        if (hasDirect && hasReverse) {
-            // 是双向连接，设置曲率偏移
-            edgesBetweenPair.forEach((e: any) => {
-                e.data.isBidirectional = true;
-                // 简单的逻辑：source ID 字符串小的 offset 为 1，大的为 -1
-                e.data.offsetIndex = e.source < e.target ? 1 : -1;
-                finalEdges.push(e);
-            });
-        } else {
-            // 单向连接，直接添加
-            edgesBetweenPair.forEach((e: any) => finalEdges.push(e));
-        }
-        processedPairs.add(pairKey);
-    }
-
-    runLayout(newNodes, finalEdges);
+    runLayout(newNodes, newEdges);
   }, [centerNodeId, knowledgeBase, runLayout]);
   
-
-  // 双击节点扩展图谱 (逻辑同理，需要应用相同的边处理逻辑)
-  const handleNodeDoubleClick = useCallback((event: React.MouseEvent, node: Node) => {
-     // 为了保持代码简洁，这里暂时省略双击扩展的完整实现，
-     // 核心思路是获取新邻居后，把当前 nodes/edges 和新 nodes/edges 合并，
-     // 再次运行上述 "3. 生成原始 Edges" 和 "4. 处理双向边曲率" 的逻辑。
-     // 如果这是必要功能，我可以补充完整代码。
+  const handleNodeDoubleClick = useCallback((_: MouseEvent, node: Node) => {
      const nodeId = node.id;
-     onNodeClick(nodeId); // 暂时让双击变为切换中心节点
+     onNodeClick(nodeId);
   }, [onNodeClick]);
   
   return (
@@ -17896,20 +17437,16 @@ function GraphView({ knowledgeBase, centerNodeId, onNodeClick }: Omit<Props, 'is
       fitView
       minZoom={0.1}
       className="bg-pattern"
-      // 禁用默认的连接行为，因为我们是展示型图谱
       nodesConnectable={false} 
       nodesDraggable={true}
     >
-      <Controls showInteractive={false}>
-      </Controls>
+      <Controls showInteractive={false} />
       <Background gap={20} size={1} />
     </ReactFlow>
   );
 }
 
-// Main Component
 export function GraphModal({ isOpen, onClose, ...props }: Props) {
-  // ... (保持不变)
   const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
   }
@@ -17938,7 +17475,7 @@ export function GraphModal({ isOpen, onClose, ...props }: Props) {
         </div>
         <div style={{flexGrow: 1, position: 'relative'}}>
             <ReactFlowProvider>
-            <GraphView {...props} />
+              <GraphView {...props} />
             </ReactFlowProvider>
         </div>
       </div>
@@ -18543,7 +18080,7 @@ export function useResizablePanels(config: Config) {
     --text-light: #1f2937; --bg-light: #f9fafb; --node-bg-light: #ffffff; --bg-alt-light: #f3f4f6;
     --line-light: #e5e7eb; --text-muted-light: #6b7280; --link-light: #4f46e5;
     --c-default-light: #6b7280; --c-default-bg-light: #f3f4f6;
-    --c-gray: #9ca3af; /* <-- NEW */
+    --c-gray: #9ca3af;
 }
 
 /* Dark Theme Colors */
@@ -18557,7 +18094,7 @@ html[data-theme='dark'] {
     --text-dark: #d1d5db; --bg-dark: #111827; --node-bg-dark: #1f2937; --bg-alt-dark: #374151;
     --line-dark: #374151; --text-muted-dark: #9ca3af; --link-dark: #818cf8;
     --c-default-dark: #9ca3af; --c-default-bg-dark: #374151;
-    --c-gray: #52525b; /* <-- NEW */
+    --c-gray: #52525b;
 }
 
 /* Theme variable assignment */
@@ -18838,6 +18375,7 @@ html[data-theme='dark'] .react-flow__node-default:hover .custom-node-body {
 .custom-node-body.is-center {
     border: 2px solid var(--link-color);
     box-shadow: 0 0 20px -5px var(--link-color);
+    transform: scale(1.05);
 }
 
 .node-header {
@@ -18862,12 +18400,9 @@ html[data-theme='dark'] .react-flow__node-default:hover .custom-node-body {
     color: var(--text-color);
     font-weight: 500;
     text-align: left;
+    white-space: normal;
 }
 
-.react-flow__edge-text {
-    fill: var(--text-muted) !important;
-    font-size: 11px;
-}
 .react-flow__edge-path {
     stroke-opacity: 0.8;
 }
@@ -18897,71 +18432,18 @@ html[data-theme='dark'] .react-flow__node-default:hover .custom-node-body {
     background-color: var(--bg-color) !important;
 }
 
-/* --- SMART EDGES --- */
-.react-flow__edge .react-flow__edge-textwrapper button {
-    background-color: var(--bg-alt-color);
-    color: var(--text-color);
-    border: 1px solid var(--line-color);
-    padding: 2px 6px;
-    border-radius: var(--radius-sm);
-    font-size: 10px;
-    opacity: 0.8;
-}
-
-.react-flow__edge:hover .react-flow__edge-textwrapper button {
-    opacity: 1;
-}
-
-
-/* --- Graph Modal Styles --- */
-.modal-content {
-    /* 确保 ReactFlow 容器有高度 */
-    height: 90vh; 
-    width: 95vw;
-    max-width: 1600px;
-    padding: 0; /* 移除内边距以便 ReactFlow 填满 */
-    overflow: hidden;
-}
-.modal-header {
-    padding: 1rem 1.5rem;
-    margin-bottom: 0;
-    background: var(--bg-alt-color);
-    z-index: 10;
-}
-
-/* --- Custom Node Styles (Adjusted for no handles) --- */
-.custom-node-body {
-    width: 200px; /* 稍微窄一点 */
-    /* 移除 overflow: hidden 以便阴影更好看 */
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    font-size: 12px;
-}
-.node-header { padding: 0.4rem 0.6rem; }
-.node-title { padding: 0.5rem 0.6rem; white-space: normal;  }
-
-.custom-node-body.is-center {
-    border-width: 3px;
-    transform: scale(1.1); /* 中心节点稍微大一点 */
-    z-index: 1000;
-}
-
-/* --- Floating Edge Label Styles --- */
-.edge-label-text {
-    padding: 2px 6px;
-    border-radius: 4px;
-    border: 1px solid;
+/* --- SmartEdge / React Flow Edge Label Styles --- */
+.react-flow__edge-text {
     font-size: 10px;
     text-transform: uppercase;
-    /* 加上细微阴影提高对比度 */
-    box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-    white-space: nowrap;
-    /* 确保背景是不透明的，遮挡住下面的线条 */
-    backdrop-filter: blur(2px); 
+    fill: var(--text-muted);
+    font-weight: 500;
 }
 
-/* 调整 React Flow 的 Edge Marker 默认样式 */
-.react-flow__arrowhead polyline {
-    stroke-width: 1px; /* 让箭头稍微锐利一点 */
+.react-flow__edge-textbg {
+    fill: var(--bg-color);
+    stroke: var(--line-color);
+    stroke-width: 2px;
 }
 ===== ./src/main.tsx =====
 import { StrictMode } from 'react'
@@ -19006,8 +18488,9 @@ export interface KnowledgeBase {
 
 ===== ./src/utils/elkLayout.ts =====
 // src/utils/elkLayout.ts
-import ELK, { type ElkNode, type LayoutOptions, type ElkExtendedEdge } from 'elkjs/lib/elk.bundled.js'; // 修正: 使用 ElkExtendedEdge
-import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from 'reactflow';
+import ELK, { type ElkNode, type LayoutOptions, type ElkExtendedEdge } from 'elkjs/lib/elk.bundled.js';
+// FIX: 导入路径从 'reactflow' 改为 '@xyflow/react'
+import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from '@xyflow/react';
 
 const elk = new ELK();
 
@@ -19024,7 +18507,6 @@ export const getElkLayoutedElements = async (
   nodes: ReactFlowNode[],
   edges: ReactFlowEdge[],
 ): Promise<{ nodes: ReactFlowNode[], edges: ReactFlowEdge[] }> => {
-  // 修正: ElkExtendedEdge[] 是我们构建输入图时需要使用的正确类型
   const elkNodes: ElkNode[] = [];
   const elkEdges: ElkExtendedEdge[] = []; 
 
@@ -19037,7 +18519,6 @@ export const getElkLayoutedElements = async (
   }
 
   for (const edge of edges) {
-    // 这里的对象现在完全匹配 ElkExtendedEdge 类型
     elkEdges.push({
       id: edge.id,
       sources: [edge.source],
@@ -19049,7 +18530,7 @@ export const getElkLayoutedElements = async (
     id: 'root',
     layoutOptions: elkOptions,
     children: elkNodes,
-    edges: elkEdges, // 这里的类型现在匹配了
+    edges: elkEdges,
   };
 
   const layoutedGraph = await elk.layout(graph);
@@ -19064,117 +18545,6 @@ export const getElkLayoutedElements = async (
 
   return { nodes: layoutedNodes, edges };
 };
-===== ./src/utils/graphUtils.ts =====
-// src/utils/graphUtils.ts
-import { Position, type Node, type XYPosition } from 'reactflow'; // 修正: 导入正确的 XYPosition
-
-// 获取以节点中心为原点的节点参数
-function getNodeParams(node: Node) {
-  if (!node || !node.positionAbsolute) {
-    return { x: 0, y: 0, width: 0, height: 0 };
-  }
-
-  return {
-    x: node.positionAbsolute.x,
-    y: node.positionAbsolute.y,
-    width: node.width || 0,
-    height: node.height || 0,
-  };
-}
-
-// 移除: 未使用的函数 getModulus
-// function getModulus(p: XYPosition) {
-//   return Math.sqrt(p.x * p.x + p.y * p.y);
-// }
-
-// 计算边与节点边界的交点
-export function getEdgeParams(source: Node, target: Node) {
-  const sourceParams = getNodeParams(source);
-  const targetParams = getNodeParams(target);
-
-  const sourceCenter = {
-    x: sourceParams.x + sourceParams.width / 2,
-    y: sourceParams.y + sourceParams.height / 2,
-  };
-
-  const targetCenter = {
-    x: targetParams.x + targetParams.width / 2,
-    y: targetParams.y + targetParams.height / 2,
-  };
-
-  // 计算源节点周边的交点
-  const w = sourceParams.width / 2;
-  const h = sourceParams.height / 2;
-
-  const x2 = targetCenter.x - sourceCenter.x;
-  const y2 = targetCenter.y - sourceCenter.y;
-
-  const xx = x2 === 0 ? 1e-5 : x2; // 防止除以零
-  const tan = y2 / xx;
-  
-  // 移除: 未使用的变量 tan2
-  // const tan2 = tan * tan;
-
-  // 计算交点坐标 (相对于中心)
-  let xx1, yy1;
-  if (Math.abs(x2) * h > Math.abs(y2) * w) {
-      // 与左右边界相交
-      xx1 = Math.sign(x2) * w;
-      yy1 = xx1 * tan;
-  } else {
-      // 与上下边界相交
-      yy1 = Math.sign(y2) * h;
-      xx1 = yy1 / tan;
-  }
-
-  const sx = sourceCenter.x + xx1;
-  const sy = sourceCenter.y + yy1;
-
-  // 对目标节点做同样的计算
-  const wt = targetParams.width / 2;
-  const ht = targetParams.height / 2;
-  const x2t = sourceCenter.x - targetCenter.x;
-  const y2t = sourceCenter.y - targetCenter.y;
-  const xxt = x2t === 0 ? 1e-5 : x2t;
-  const tant = y2t / xxt;
-
-  let xxt1, yyt1;
-  if (Math.abs(x2t) * ht > Math.abs(y2t) * wt) {
-      xxt1 = Math.sign(x2t) * wt;
-      yyt1 = xxt1 * tant;
-  } else {
-      yyt1 = Math.sign(y2t) * ht;
-      xxt1 = yyt1 / tant;
-  }
-
-  const tx = targetCenter.x + xxt1;
-  const ty = targetCenter.y + yyt1;
-
-  // 确定 Handle 的位置（用于计算曲率方向）
-  let sourcePosition = Position.Top;
-  let targetPosition = Position.Top;
-
-  if (Math.abs(xx1) > Math.abs(yy1)) {
-      sourcePosition = xx1 > 0 ? Position.Right : Position.Left;
-  } else {
-      sourcePosition = yy1 > 0 ? Position.Bottom : Position.Top;
-  }
-
-  if (Math.abs(xxt1) > Math.abs(yyt1)) {
-      targetPosition = xxt1 > 0 ? Position.Right : Position.Left;
-  } else {
-      targetPosition = yyt1 > 0 ? Position.Bottom : Position.Top;
-  }
-
-  return {
-    sx,
-    sy,
-    tx,
-    ty,
-    sourcePos: sourcePosition,
-    targetPos: targetPosition,
-  };
-}
 ===== ./src/utils/semanticUtils.ts =====
 // src/utils/semanticUtils.ts
 
@@ -19290,6 +18660,14 @@ export default defineConfig({
   plugins: [react()],
 })
 
+
 ```
 
-我的graph无法正常显示，请你帮我检查一下有什么问题，然后搜索互联网提出解决方案
+这是我的一个知识库项目，我现在还想进一步改进文件io的体验:
+1.我希望这个程序可以指定某个文件夹作为默认的导入的目录，如果目录下有多个文件的话，用户可以自己选择导入哪几个（类似多选题）
+2.用户的选择可以被记住，下次打开的是后自动导入这些内容
+3.用户的选择可以随时修改，如果去掉某个选项，则该选项的文件的所有notes都会被去掉，加入某个选项，则某个选项的文件的notes都会被导入
+4.用户打开文件的时候不会弹出“导入成功的通知”，但会有个小状态栏一样的东西显示目前的notes的概览信息（仅仅在navpanel里面显示），在用户修改选项的时候则会弹出提示，提示用户加入了什么，去掉了什么。不过改进弹窗机制，不要用现在的机制
+5.还有其他你认为可以提升体验的东西
+
+请你先告诉我你的修改方案

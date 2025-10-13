@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Knowledge Engine v10 - Refactored</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+  
+  <!-- 链接到新的外部 CSS 文件 -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="container">
+    <div class="nav-panel"></div>
+    <div class="main-panel" id="main-panel"></div>
+    <div class="connections-panel" id="connections-panel"></div>
+  </div>
+
+  <div id="popover"></div>
+
+  <div id="graph-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2><span class="emoji">🕸️</span>Knowledge Graph</h2>
+        <span class="close-btn" id="close-graph-modal">&times;</span>
+      </div>
+      <div id="graph-container"></div>
+    </div>
+  </div>
+
+  <!-- 外部依赖库 -->
+  <script src="https://unpkg.com/vis-network/standalone/umd/vis-network.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/fuse.js/dist/fuse.min.js"></script>
+  
+  <!-- 链接到新的外部 JS 文件，使用 type="module" -->
+  <script type="module" src="../src/main.js"></script>
+</body>
+</html>

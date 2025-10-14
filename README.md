@@ -8,8 +8,8 @@
 
 一款为 USMLE 学习者设计的高性能、本地优先的知识图谱浏览器。本项目利用现代 Web 技术栈构建，并通过 Tauri 框架打包为跨平台的桌面应用程序，旨在提供一个快速、可定制且离线的知识探索体验。
 
-![Screenshot Placeholder](https://via.placeholder.com/1200x600.png?text=Your+App+Screenshot+Here)
-*（强烈建议您在此处替换为一张应用截图）*
+![Screenshot Placeholder](./demo.png)
+
 
 ---
 

@@ -1,10 +1,17 @@
 // src/hooks/useKnowledgeBase.ts
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { toast } from 'sonner';
+
+// [REFACTORED] Import Tauri's native APIs instead of relying on web APIs
+import { open } from '@tauri-apps/plugin-dialog';
+import { readTextFile, readDir } from '@tauri-apps/plugin-fs';
+
 import type { KnowledgeBase, FileSelection } from '../types';
 import { normalizeTopic } from '../utils/normalization';
 
+// [REFACTORED] We now store the string path, not a handle object
 const LS_FILES_KEY = 'KE_selectedFiles';
+const LS_DIR_PATH_KEY = 'KE_lastDirPath';
 
 export function useKnowledgeBase() {
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase>({});
@@ -12,31 +19,44 @@ export function useKnowledgeBase() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  const dirHandleRef = useRef<FileSystemDirectoryHandle | null>(null);
+  // [REFACTORED] State now holds the path string and directory name for display
+  const [currentDirPath, setCurrentDirPath] = useState<string | null>(null);
   const [directoryName, setDirectoryName] = useState<string | null>(null);
 
-  // Effect to load initial state from localStorage
+  // Effect to load initial state from localStorage (remains the same)
   useEffect(() => {
     try {
       const savedFiles = localStorage.getItem(LS_FILES_KEY);
       if (savedFiles) {
         setFileSelections(JSON.parse(savedFiles));
       }
+      const savedPath = localStorage.getItem(LS_DIR_PATH_KEY);
+       if (savedPath) {
+        setCurrentDirPath(savedPath);
+        const dirName = savedPath.split(/[/\\]/).pop() ?? savedPath;
+        setDirectoryName(dirName);
+        // Optional: Auto-load on startup if path and files are found
+        if (savedFiles) {
+           loadFilesFromPath(savedPath, JSON.parse(savedFiles));
+        }
+       }
     } catch (e) {
-      console.error("Failed to load file selections from localStorage", e);
+      console.error("Failed to load state from localStorage", e);
       localStorage.removeItem(LS_FILES_KEY);
+      localStorage.removeItem(LS_DIR_PATH_KEY);
     }
-  }, []);
+  }, []); // Note: Empty dependency array ensures this runs only once on mount
 
-  const processAndLoadFiles = useCallback(async (
-    handle: FileSystemDirectoryHandle,
-    selections: FileSelection[]
-  ): Promise<{ summary: string; added: string[]; removed: string[]; totalTopics: number; totalFiles: number; }> => {
+  // [REFACTORED] Main file processing logic, now accepts a path string
+  const loadFilesFromPath = useCallback(async (
+    dirPath: string,
+    selectionsToLoad: FileSelection[]
+  ): Promise<{ added: string[]; removed: string[] }> => {
     setIsLoading(true);
     setError(null);
 
     const oldSelectedFiles = fileSelections.filter(f => f.selected).map(f => f.name);
-    const newSelectedFiles = selections.filter(f => f.selected).map(f => f.name);
+    const newSelectedFiles = selectionsToLoad.filter(f => f.selected).map(f => f.name);
 
     const filesToAdd = newSelectedFiles.filter(name => !oldSelectedFiles.includes(name));
     const filesToRemove = oldSelectedFiles.filter(name => !newSelectedFiles.includes(name));
@@ -44,13 +64,13 @@ export function useKnowledgeBase() {
     const newKnowledgeBase: KnowledgeBase = {};
     let loadedFileCount = 0;
 
-    for (const file of selections) {
+    for (const file of selectionsToLoad) {
       if (!file.selected) continue;
       
       try {
-        const fileHandle = await handle.getFileHandle(file.name);
-        const fileData = await fileHandle.getFile();
-        const text = await fileData.text();
+        // [REFACTORED] Use Tauri's fs.readTextFile with a constructed path
+        const filePath = `${dirPath}/${file.name}`.replace(/\/\//g, '/');
+        const text = await readTextFile(filePath);
         const jsonData = JSON.parse(text);
 
         const entries = Object.entries(jsonData as Record<string, unknown>);
@@ -64,8 +84,9 @@ export function useKnowledgeBase() {
         }
         loadedFileCount++;
       } catch (e) {
-        console.error(`Error processing file ${file.name}:`, e);
-        setError(`Failed to load ${file.name}. It might be corrupted.`);
+        console.error(`Error processing file ${file.name} via Tauri FS:`, e);
+        setError(`Failed to load ${file.name}. It might be corrupted or inaccessible.`);
+        toast.error(`Failed to load ${file.name}`);
       }
     }
 
@@ -79,60 +100,62 @@ export function useKnowledgeBase() {
     }
 
     setKnowledgeBase(newKnowledgeBase);
-    setFileSelections(selections);
-    localStorage.setItem(LS_FILES_KEY, JSON.stringify(selections));
+    setFileSelections(selectionsToLoad);
+    localStorage.setItem(LS_FILES_KEY, JSON.stringify(selectionsToLoad));
     setIsLoading(false);
 
-    return {
-      summary: `Loaded ${Object.keys(newKnowledgeBase).length} topics from ${loadedFileCount} files.`,
-      added: filesToAdd,
-      removed: filesToRemove,
-      totalTopics: Object.keys(newKnowledgeBase).length,
-      totalFiles: loadedFileCount,
-    };
-  }, [fileSelections]);
+    return { added: filesToAdd, removed: filesToRemove };
+  }, [fileSelections]); // Depends on previous fileSelections to calculate diff
 
+  // [REFACTORED] Replaced showDirectoryPicker with Tauri's native dialog
   const selectDirectory = useCallback(async () => {
     try {
-      if (!('showDirectoryPicker' in window)) {
-        
-        toast.error('当前浏览器不支持目录选择（File System Access API，文件系统访问应用程序编程接口）。');
-        return ;
+      const selectedPath = await open({ directory: true, multiple: false });
+
+      if (typeof selectedPath !== 'string') {
+        console.log("Directory selection was cancelled.");
+        return null;
       }
-      const handle = await (window as Required<Window>).showDirectoryPicker!();
-      dirHandleRef.current = handle;
-      setDirectoryName(handle.name);
+      
+      const dirName = selectedPath.split(/[/\\]/).pop() ?? selectedPath;
+      setDirectoryName(dirName);
+      setCurrentDirPath(selectedPath);
+      localStorage.setItem(LS_DIR_PATH_KEY, selectedPath);
 
-      const savedSelections = new Map(fileSelections.map(f => [f.name, f.selected]));
+      const savedSelectionsMap = new Map(fileSelections.map(f => [f.name, f.selected]));
       const newSelections: FileSelection[] = [];
-
-      for await (const entry of handle.values()) {
-        if (entry.kind === 'file' && entry.name.endsWith('.json')) {
+      
+      // [REFACTORED] Use Tauri's fs.readDir
+      const entries = await readDir(selectedPath);
+      for (const entry of entries) {
+        if (entry.isFile && entry.name?.endsWith('.json')) {
           newSelections.push({
             name: entry.name,
-            selected: savedSelections.get(entry.name) ?? false, // Default to false, but respect saved state
+            selected: savedSelectionsMap.get(entry.name) ?? false,
           });
         }
       }
       newSelections.sort((a, b) => a.name.localeCompare(b.name));
       
-      return processAndLoadFiles(handle, newSelections);
+      return await loadFilesFromPath(selectedPath, newSelections);
 
     } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') {
-        console.log("Directory selection was aborted by the user.");
-      } else {
-        console.error("Error selecting directory:", err);
-        setError("Could not access the selected directory.");
-      }
+      // [IMPROVED LOGGING]
+      // This will print the detailed error from the native side to the console.
+      console.error("Tauri API Error:", err); 
+
+      // Display a more useful error message to the user.
+      const errorMessage = typeof err === 'string' ? err : 'An unknown error occurred. Check the developer console for details.';
+      setError(errorMessage);
+      toast.error(errorMessage);
       return null;
     }
-  }, [fileSelections, processAndLoadFiles]);
+  }, [fileSelections, loadFilesFromPath]);
 
   const toggleFileSelection = useCallback(async (fileName: string) => {
-    const handle = dirHandleRef.current;
-    if (!handle) {
+    if (!currentDirPath) {
       setError("Please select a directory first.");
+      toast.error("Please select a directory first.");
       return null;
     }
 
@@ -140,8 +163,8 @@ export function useKnowledgeBase() {
       f.name === fileName ? { ...f, selected: !f.selected } : f
     );
     
-    return processAndLoadFiles(handle, newSelections);
-  }, [fileSelections, processAndLoadFiles]);
+    return await loadFilesFromPath(currentDirPath, newSelections);
+  }, [fileSelections, currentDirPath, loadFilesFromPath]);
 
   return {
     knowledgeBase,

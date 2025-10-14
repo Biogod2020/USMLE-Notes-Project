@@ -1,0 +1,2278 @@
+
+===== ./App.tsx =====
+// src/App.tsx
+import { Toaster } from 'sonner';
+import { useEffect, useMemo, useState } from 'react';
+import type { Topic, ToastNotification } from './types'; // 确保 Topic 和 KnowledgeBase 都从 './types' 导入
+import { NavPanel } from './components/NavPanel';
+import { TopicView } from './components/TopicView';
+import { ConnectionsPanel } from './components/ConnectionsPanel';
+import { GraphModal } from './components/GraphModal';
+import { Popover } from './components/Popover';
+import { ToastContainer } from './components/Toast';
+import { useResizablePanels } from './hooks/useResizablePanels';
+import { useKnowledgeBase } from './hooks/useKnowledgeBase';
+import Fuse, { type FuseResult } from 'fuse.js';
+
+export type SearchResult = FuseResult<SearchItem>;
+
+type SearchItem = {
+  id: string;
+  title: string;
+  acronym: string;
+  primaryType: string;
+  tags: string[];
+  fullContent: string;
+};
+
+interface PopoverData {
+  content: { emoji: string; title: string; definition: string };
+  x: number;
+  y: number;
+}
+const TYPE_EMOJI: Record<string, string> = {
+  disease: '🦠',
+  structure: '🏛️',
+  process: '⚙️',
+  substance: '🧪',
+  finding: '❗',
+  concept: '💡',
+};
+const getEmoji = (type: string) => TYPE_EMOJI[type] || '📄';
+
+function stripHtml(html: string) {
+  const doc = new DOMParser().parseFromString(html ?? '', 'text/html');
+  return doc?.body?.textContent ?? '';
+}
+
+function generateAcronym(title: string) {
+  const words = (title ?? '').split(/\s+/).filter(Boolean);
+  const caps = words
+    .filter((w) => /^[A-Z]/.test(w))
+    .map((w) => w[0])
+    .join('');
+  return (caps || words.map((w) => w[0]).join('')).toUpperCase();
+}
+
+const panelConfig = {
+  nav: { initial: 320, min: 280 },
+  connections: { initial: 350, min: 300 },
+};
+const collapsedWidth = '50px';
+
+export default function App() {
+  const [activeTopicId, setActiveTopicId] = useState<string | null>(null);
+  const [isGraphModalOpen, setIsGraphModalOpen] = useState(false);
+  const [popoverData, setPopoverData] = useState<PopoverData | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isConnectionsOpen, setIsConnectionsOpen] = useState(false);
+  const [navFilterPath, setNavFilterPath] = useState<string[] | null>(null);
+  const [toasts, setToasts] = useState<ToastNotification[]>([]);
+
+  const {
+    knowledgeBase,
+    fileSelections,
+    directoryName,
+    isLoading,
+    error,
+    selectDirectory,
+    toggleFileSelection,
+  } = useKnowledgeBase();
+
+  const addToast = (message: string, type: ToastNotification['type'] = 'info') => {
+    const id = Date.now();
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id: number) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+  
+  const handleSelectDirectory = async () => {
+    const result = await selectDirectory();
+    if (result) {
+        // Initial load, don't show toast unless there's an error from the hook
+    }
+  };
+
+  const handleToggleFile = async (fileName: string) => {
+    const result = await toggleFileSelection(fileName);
+    if(result) {
+        if(result.added.length > 0) {
+            addToast(`Added topics from: ${result.added.join(', ')}`, 'success');
+        }
+        if (result.removed.length > 0) {
+            addToast(`Removed topics from: ${result.removed.join(', ')}`, 'info');
+        }
+    }
+  };
+
+  // Auto-select first topic on initial load
+  useEffect(() => {
+    if (!activeTopicId && Object.keys(knowledgeBase).length > 0) {
+      const firstTopicId = Object.values(knowledgeBase)
+        .filter((t) => !!t && typeof t.id === 'string' && !t.id.startsWith('zzz_'))
+        .sort((a, b) => a.title.localeCompare(b.title))[0]?.id ?? null;
+      setActiveTopicId(firstTopicId);
+    }
+  }, [knowledgeBase, activeTopicId]);
+
+  const { sizes, startDragging, isCollapsed, toggleCollapse } = useResizablePanels(panelConfig);
+
+  const fuse = useMemo(() => {
+    const data: SearchItem[] = Object.values(knowledgeBase)
+      .filter((t): t is Topic => !!t && typeof t.id === 'string' && !t.id.startsWith('zzz_'))
+      .map((t) => ({
+        id: t.id,
+        title: t.title,
+        acronym: generateAcronym(t.title),
+        primaryType: t.primaryType,
+        tags: t.tags ?? [],
+        fullContent: Object.values(t.content ?? {}).map((v) => stripHtml(String(v ?? ''))).join(' '),
+      }));
+
+    return new Fuse<SearchItem>(data, {
+      keys: [
+        { name: 'title', weight: 1.0 },
+        { name: 'acronym', weight: 0.9 },
+        { name: 'tags', weight: 0.7 },
+        { name: 'fullContent', weight: 0.2 },
+      ],
+      includeScore: true,
+      threshold: 0.4,
+      minMatchCharLength: 2,
+      ignoreLocation: true,
+    });
+  }, [knowledgeBase]);
+
+  const searchResults: SearchResult[] | null = useMemo(() => {
+    if (!searchTerm.trim()) return null;
+    return fuse.search(searchTerm.trim());
+  }, [fuse, searchTerm]);
+
+  useEffect(() => {
+    const sys = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    const t = localStorage.getItem('theme') ?? sys;
+    document.documentElement.setAttribute('data-theme', t);
+  }, []);
+
+  useEffect(() => {
+    const handleMouseOver = (e: MouseEvent) => {
+      const link = (e.target as HTMLElement).closest('a[data-topic-id]');
+      if (link instanceof HTMLAnchorElement) {
+        const topicId = link.dataset.topicId;
+        const topic = topicId ? knowledgeBase[topicId] : null;
+        if (topic) {
+          const rect = link.getBoundingClientRect();
+          setPopoverData({
+            content: {
+              emoji: getEmoji(topic.primaryType),
+              title: topic.title,
+              definition: stripHtml(topic.content?.definition ?? 'No definition.'),
+            },
+            x: rect.left + window.scrollX,
+            y: rect.top + window.scrollY,
+          });
+        }
+      }
+    };
+    const handleMouseOut = (e: MouseEvent) => {
+      const link = (e.target as HTMLElement).closest('a[data-topic-id]');
+      if (link) {
+        setPopoverData(null);
+      }
+    };
+    document.body.addEventListener('mouseover', handleMouseOver);
+    document.body.addEventListener('mouseout', handleMouseOut);
+    return () => {
+      document.body.removeEventListener('mouseover', handleMouseOver);
+      document.body.removeEventListener('mouseout', handleMouseOut);
+    };
+  }, [knowledgeBase]);
+
+  const toggleTheme = () => {
+    const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+    const next = cur === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('theme', next);
+  };
+
+  const handleTopicSelect = (id: string) => {
+    if (activeTopicId !== id) {
+      setActiveTopicId(id);
+    }
+    setNavFilterPath(null);
+    setIsNavOpen(false);
+    setIsConnectionsOpen(false);
+  };
+  
+  const handleBreadcrumbClick = (path: string[]) => {
+    setNavFilterPath(path);
+    setSearchTerm('');
+    if (window.innerWidth <= 1024) {
+        setIsNavOpen(true);
+    }
+  };
+
+  const handleGraphNodeClick = (id: string) => {
+    setActiveTopicId(id);
+    setIsGraphModalOpen(false);
+  };
+  
+  const handleSearchChange = (term: string) => {
+    setSearchTerm(term);
+    if (term) {
+        setNavFilterPath(null);
+    }
+  };
+
+  const activeTopic = activeTopicId ? knowledgeBase[activeTopicId] ?? null : null;
+  const closeAllDrawers = () => {
+    setIsNavOpen(false);
+    setIsConnectionsOpen(false);
+  }
+
+  return (
+    <>
+      <div className="container">
+        <div
+          className={`mobile-overlay ${isNavOpen || isConnectionsOpen ? 'visible' : ''}`}
+          onClick={closeAllDrawers}
+        />
+
+        <aside
+          className={`nav-panel ${isNavOpen ? 'open' : ''} ${isCollapsed.nav ? 'collapsed' : ''}`}
+          style={{
+            flexBasis: isCollapsed.nav ? collapsedWidth : `${sizes.nav}px`,
+            minWidth: isCollapsed.nav ? collapsedWidth : `${panelConfig.nav.min}px`,
+          }}
+        >
+          <NavPanel
+            knowledgeBase={knowledgeBase}
+            activeTopicId={activeTopicId}
+            onTopicSelect={handleTopicSelect}
+            searchTerm={searchTerm}
+            onSearchChange={handleSearchChange}
+            searchResults={searchResults}
+            onToggleTheme={toggleTheme}
+            isCollapsed={isCollapsed.nav}
+            onToggleCollapse={() => toggleCollapse('nav')}
+            navFilterPath={navFilterPath}
+            onClearNavFilter={() => setNavFilterPath(null)}
+            // New props for file management
+            directoryName={directoryName}
+            fileSelections={fileSelections}
+            onSelectDirectory={handleSelectDirectory}
+            onToggleFileSelection={handleToggleFile}
+            isLoading={isLoading}
+          />
+        </aside>
+
+        <div
+            className={`resizer-handle ${isCollapsed.nav || isCollapsed.connections ? 'disabled' : ''}`}
+            onMouseDown={() => startDragging('nav')}
+        />
+
+        <main className={`main-panel type-${activeTopic?.primaryType || 'default'}`}>
+          <div className="mobile-header">
+              <button className="mobile-header-btn" onClick={() => setIsNavOpen(true)}>☰</button>
+              <span className="mobile-header-title">{activeTopic?.title || 'Knowledge Engine'}</span>
+              <button className="mobile-header-btn" onClick={() => setIsConnectionsOpen(true)}>↔</button>
+          </div>
+          <div className="main-panel-content">
+            {error && <div className="error-banner">{error}</div>}
+            <TopicView
+              topic={activeTopic}
+              onTopicSelect={handleTopicSelect}
+              onGraphViewClick={() => setIsGraphModalOpen(true)}
+              onOpenNav={() => setIsNavOpen(true)}
+              onBreadcrumbClick={handleBreadcrumbClick}
+            />
+          </div>
+        </main>
+        
+        <div
+            className={`resizer-handle ${isCollapsed.nav || isCollapsed.connections ? 'disabled' : ''}`}
+            onMouseDown={() => startDragging('connections')}
+        />
+
+        <aside
+          className={`connections-panel ${isConnectionsOpen ? 'open' : ''} ${isCollapsed.connections ? 'collapsed' : ''}`}
+          style={{
+            flexBasis: isCollapsed.connections ? collapsedWidth : `${sizes.connections}px`,
+            minWidth: isCollapsed.connections ? collapsedWidth : `${panelConfig.connections.min}px`,
+          }}
+        >
+          <ConnectionsPanel
+            knowledgeBase={knowledgeBase}
+            activeTopic={activeTopic}
+            onTopicSelect={handleTopicSelect}
+            isCollapsed={isCollapsed.connections}
+            onToggleCollapse={() => toggleCollapse('connections')}
+          />
+        </aside>
+      </div>
+
+      <GraphModal
+        isOpen={isGraphModalOpen}
+        onClose={() => setIsGraphModalOpen(false)}
+        knowledgeBase={knowledgeBase}
+        centerNodeId={activeTopicId}
+        onNodeClick={handleGraphNodeClick}
+      />
+      <Popover data={popoverData} />
+      <ToastContainer toasts={toasts} onDismiss={removeToast} />
+      <Toaster richColors /> 
+    </>
+  );
+}
+===== ./assets/react.svg =====
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" aria-hidden="true" role="img" class="iconify iconify--logos" width="35.93" height="32" preserveAspectRatio="xMidYMid meet" viewBox="0 0 256 228"><path fill="#00D8FF" d="M210.483 73.824a171.49 171.49 0 0 0-8.24-2.597c.465-1.9.893-3.777 1.273-5.621c6.238-30.281 2.16-54.676-11.769-62.708c-13.355-7.7-35.196.329-57.254 19.526a171.23 171.23 0 0 0-6.375 5.848a155.866 155.866 0 0 0-4.241-3.917C100.759 3.829 77.587-4.822 63.673 3.233C50.33 10.957 46.379 33.89 51.995 62.588a170.974 170.974 0 0 0 1.892 8.48c-3.28.932-6.445 1.924-9.474 2.98C17.309 83.498 0 98.307 0 113.668c0 15.865 18.582 31.778 46.812 41.427a145.52 145.52 0 0 0 6.921 2.165a167.467 167.467 0 0 0-2.01 9.138c-5.354 28.2-1.173 50.591 12.134 58.266c13.744 7.926 36.812-.22 59.273-19.855a145.567 145.567 0 0 0 5.342-4.923a168.064 168.064 0 0 0 6.92 6.314c21.758 18.722 43.246 26.282 56.54 18.586c13.731-7.949 18.194-32.003 12.4-61.268a145.016 145.016 0 0 0-1.535-6.842c1.62-.48 3.21-.974 4.76-1.488c29.348-9.723 48.443-25.443 48.443-41.52c0-15.417-17.868-30.326-45.517-39.844Zm-6.365 70.984c-1.4.463-2.836.91-4.3 1.345c-3.24-10.257-7.612-21.163-12.963-32.432c5.106-11 9.31-21.767 12.459-31.957c2.619.758 5.16 1.557 7.61 2.4c23.69 8.156 38.14 20.213 38.14 29.504c0 9.896-15.606 22.743-40.946 31.14Zm-10.514 20.834c2.562 12.94 2.927 24.64 1.23 33.787c-1.524 8.219-4.59 13.698-8.382 15.893c-8.067 4.67-25.32-1.4-43.927-17.412a156.726 156.726 0 0 1-6.437-5.87c7.214-7.889 14.423-17.06 21.459-27.246c12.376-1.098 24.068-2.894 34.671-5.345a134.17 134.17 0 0 1 1.386 6.193ZM87.276 214.515c-7.882 2.783-14.16 2.863-17.955.675c-8.075-4.657-11.432-22.636-6.853-46.752a156.923 156.923 0 0 1 1.869-8.499c10.486 2.32 22.093 3.988 34.498 4.994c7.084 9.967 14.501 19.128 21.976 27.15a134.668 134.668 0 0 1-4.877 4.492c-9.933 8.682-19.886 14.842-28.658 17.94ZM50.35 144.747c-12.483-4.267-22.792-9.812-29.858-15.863c-6.35-5.437-9.555-10.836-9.555-15.216c0-9.322 13.897-21.212 37.076-29.293c2.813-.98 5.757-1.905 8.812-2.773c3.204 10.42 7.406 21.315 12.477 32.332c-5.137 11.18-9.399 22.249-12.634 32.792a134.718 134.718 0 0 1-6.318-1.979Zm12.378-84.26c-4.811-24.587-1.616-43.134 6.425-47.789c8.564-4.958 27.502 2.111 47.463 19.835a144.318 144.318 0 0 1 3.841 3.545c-7.438 7.987-14.787 17.08-21.808 26.988c-12.04 1.116-23.565 2.908-34.161 5.309a160.342 160.342 0 0 1-1.76-7.887Zm110.427 27.268a347.8 347.8 0 0 0-7.785-12.803c8.168 1.033 15.994 2.404 23.343 4.08c-2.206 7.072-4.956 14.465-8.193 22.045a381.151 381.151 0 0 0-7.365-13.322Zm-45.032-43.861c5.044 5.465 10.096 11.566 15.065 18.186a322.04 322.04 0 0 0-30.257-.006c4.974-6.559 10.069-12.652 15.192-18.18ZM82.802 87.83a323.167 323.167 0 0 0-7.227 13.238c-3.184-7.553-5.909-14.98-8.134-22.152c7.304-1.634 15.093-2.97 23.209-3.984a321.524 321.524 0 0 0-7.848 12.897Zm8.081 65.352c-8.385-.936-16.291-2.203-23.593-3.793c2.26-7.3 5.045-14.885 8.298-22.6a321.187 321.187 0 0 0 7.257 13.246c2.594 4.48 5.28 8.868 8.038 13.147Zm37.542 31.03c-5.184-5.592-10.354-11.779-15.403-18.433c4.902.192 9.899.29 14.978.29c5.218 0 10.376-.117 15.453-.343c-4.985 6.774-10.018 12.97-15.028 18.486Zm52.198-57.817c3.422 7.8 6.306 15.345 8.596 22.52c-7.422 1.694-15.436 3.058-23.88 4.071a382.417 382.417 0 0 0 7.859-13.026a347.403 347.403 0 0 0 7.425-13.565Zm-16.898 8.101a358.557 358.557 0 0 1-12.281 19.815a329.4 329.4 0 0 1-23.444.823c-7.967 0-15.716-.248-23.178-.732a310.202 310.202 0 0 1-12.513-19.846h.001a307.41 307.41 0 0 1-10.923-20.627a310.278 310.278 0 0 1 10.89-20.637l-.001.001a307.318 307.318 0 0 1 12.413-19.761c7.613-.576 15.42-.876 23.31-.876H128c7.926 0 15.743.303 23.354.883a329.357 329.357 0 0 1 12.335 19.695a358.489 358.489 0 0 1 11.036 20.54a329.472 329.472 0 0 1-11 20.722Zm22.56-122.124c8.572 4.944 11.906 24.881 6.52 51.026c-.344 1.668-.73 3.367-1.15 5.09c-10.622-2.452-22.155-4.275-34.23-5.408c-7.034-10.017-14.323-19.124-21.64-27.008a160.789 160.789 0 0 1 5.888-5.4c18.9-16.447 36.564-22.941 44.612-18.3ZM128 90.808c12.625 0 22.86 10.235 22.86 22.86s-10.235 22.86-22.86 22.86s-22.86-10.235-22.86-22.86s10.235-22.86 22.86-22.86Z"></path></svg>
+===== ./components/ConnectionsPanel.tsx =====
+// src/components/ConnectionsPanel.tsx
+import { useMemo, useState } from 'react';
+import type { KnowledgeBase, Topic } from '../types';
+import { getFamilyForType, SEMANTIC_FAMILIES } from '../utils/semanticUtils';
+
+const fallbackLabel = (t: string) => (t || '').replace(/_/g, ' ');
+
+interface Props {
+  knowledgeBase: KnowledgeBase;
+  activeTopic: Topic | null;
+  onTopicSelect: (id: string) => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
+}
+
+export function ConnectionsPanel({ knowledgeBase, activeTopic, onTopicSelect, isCollapsed, onToggleCollapse }: Props) {
+  const [activeFilters, setActiveFilters] = useState<Set<string>>(new Set());
+
+  const backlinks = useMemo(() => {
+    if (!activeTopic) return [];
+    const res: { from: string; type: string }[] = [];
+    for (const t of Object.values(knowledgeBase)) {
+      for (const c of t?.connections ?? []) {
+        if (c?.to === activeTopic.id) res.push({ from: t.id, type: c.type });
+      }
+    }
+    return res;
+  }, [knowledgeBase, activeTopic]);
+  
+  const toggleFilter = (familyName: string) => {
+    setActiveFilters(prev => {
+        const newSet = new Set(prev);
+        if (newSet.has(familyName)) {
+            newSet.delete(familyName);
+        } else {
+            newSet.add(familyName);
+        }
+        return newSet;
+    });
+  };
+
+  const outgoingConnections = useMemo(() => activeTopic?.connections?.filter(c => {
+    if (activeFilters.size === 0) return true;
+    const family = getFamilyForType(c.type);
+    return activeFilters.has(family.name);
+  }) ?? [], [activeTopic, activeFilters]);
+
+  const incomingConnections = useMemo(() => backlinks.filter(b => {
+    if (activeFilters.size === 0) return true;
+    const family = getFamilyForType(b.type);
+    return activeFilters.has(family.name);
+  }), [backlinks, activeFilters]);
+
+  if (isCollapsed) {
+    return (
+      <div className="panel-header collapsed">
+        <button className="collapse-btn" onClick={onToggleCollapse} title="Expand Panel">‹</button>
+      </div>
+    );
+  }
+
+  if (!activeTopic) {
+    return (
+      <>
+        <div className="panel-header">
+          <h3 className="panel-title">Connections</h3>
+          <button className="collapse-btn" onClick={onToggleCollapse} title="Collapse Panel">›</button>
+        </div>
+        <div className="panel-content">
+            <p style={{color: 'var(--text-muted)'}}>Select a topic to see connections.</p>
+        </div>
+      </>
+    );
+  }
+
+  return (
+    <>
+      <div className="panel-header">
+        <h3 className="panel-title">Connections</h3>
+        <button className="collapse-btn" onClick={onToggleCollapse} title="Collapse Panel">›</button>
+      </div>
+      <div className="panel-content">
+        {/* Filter UI */}
+        <div className="filter-pills">
+            {Object.values(SEMANTIC_FAMILIES).filter(f => f.name !== 'Other').map(family => (
+                <button 
+                    key={family.name}
+                    className={`filter-pill type-${family.color} ${activeFilters.has(family.name) ? 'active' : ''}`}
+                    onClick={() => toggleFilter(family.name)}
+                >
+                    {family.name}
+                </button>
+            ))}
+        </div>
+
+        <div>
+          <h4><span className="emoji">↗️</span>Outgoing</h4>
+          <ul>
+            {outgoingConnections.length > 0 ? (
+              outgoingConnections.map((c, i) => {
+                const target = knowledgeBase[c.to];
+                if (!target) return null;
+                const family = getFamilyForType(c.type);
+                return (
+                  <li key={`${c.to}-${i}`} className={`type-${family.color}-border`}>
+                    <span className={`connection-label type-${family.color}`}>{fallbackLabel(c.type)} →</span>
+                    <a href="#" className="internal-link" data-topic-id={target.id} onClick={(e) => { e.preventDefault(); onTopicSelect(target.id); }}>
+                      {target.title}
+                    </a>
+                  </li>
+                );
+              })
+            ) : (
+              <li className="no-connections">No matching outgoing links.</li>
+            )}
+          </ul>
+        </div>
+
+        <div style={{ marginTop: '1rem' }}>
+          <h4><span className="emoji">↙️</span>Incoming</h4>
+          <ul>
+            {incomingConnections.length > 0 ? (
+              incomingConnections.map((b, i) => {
+                const source = knowledgeBase[b.from];
+                if (!source) return null;
+                const family = getFamilyForType(b.type);
+                return (
+                  <li key={`${b.from}-${i}`} className={`type-${family.color}-border`}>
+                     <a href="#" className="internal-link" data-topic-id={source.id} onClick={(e) => { e.preventDefault(); onTopicSelect(source.id); }}>
+                      {source.title}
+                    </a>
+                    {/* MODIFICATION: Improved readability */}
+                    <span style={{ margin: '0 0.5ch' }}>→</span> 
+                    <span className={`connection-label type-${family.color}`}>{fallbackLabel(b.type)}</span>
+                  </li>
+                );
+              })
+            ) : (
+              <li className="no-connections">No matching incoming links.</li>
+            )}
+          </ul>
+        </div>
+      </div>
+    </>
+  );
+}
+===== ./components/CustomNode.tsx =====
+// src/components/CustomNode.tsx
+import { memo } from 'react';
+import { type NodeProps, Handle, Position, type Node } from '@xyflow/react';
+
+const EMOJI_MAP: Record<string, string> = {
+  disease: '🦠', structure: '🏛️', process: '⚙️',
+  substance: '🧪', finding: '❗', concept: '💡',
+};
+const getEmoji = (type: string) => EMOJI_MAP[type] || '📄';
+
+// FIX 1: 定义 data 对象的具体类型
+type CustomNodeData = {
+  title: string;
+  type: string;
+  isCenter: boolean;
+};
+
+// FIX 2: 将 CustomNodeData 应用到 NodeProps 泛型上
+const CustomNode = ({ data }: NodeProps<Node<CustomNodeData>>) => {
+  const isCenterClass = data.isCenter ? 'is-center' : '';
+
+  return (
+    <div className={`custom-node-body type-${data.type} ${isCenterClass}`}>
+      <Handle type="source" position={Position.Top} style={{ visibility: 'hidden', top: '-8px', width: '10px', height: '10px' }} />
+      <Handle type="target" position={Position.Bottom} style={{ visibility: 'hidden', bottom: '-8px', width: '10px', height: '10px' }} />
+
+      <div className="node-header">
+          <span className="node-icon">{getEmoji(data.type)}</span>
+          <span className="node-type">{data.type}</span>
+      </div>
+      <div className="node-title">{data.title}</div>
+    </div>
+  );
+};
+
+export default memo(CustomNode);
+===== ./components/GraphModal.tsx =====
+// src/components/GraphModal.tsx
+import { useCallback, useLayoutEffect, type MouseEvent } from 'react';
+import {
+  ReactFlow,
+  Controls,
+  Background,
+  useNodesState,
+  useEdgesState,
+  ReactFlowProvider,
+  useReactFlow,
+  type Node,
+  type Edge,
+  MarkerType,
+  ConnectionLineType,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
+import { color as d3Color } from 'd3-color';
+import { SmartBezierEdge } from '@tisoap/react-flow-smart-edge';
+
+import type { KnowledgeBase } from '../types';
+import CustomNode from './CustomNode';
+import { getFamilyForType } from '../utils/semanticUtils';
+import { getElkLayoutedElements } from '../utils/elkLayout';
+
+const nodeTypes = { default: CustomNode };
+const edgeTypes = { smart: SmartBezierEdge };
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  knowledgeBase: KnowledgeBase;
+  centerNodeId: string | null;
+  onNodeClick: (topicId: string) => void;
+}
+
+// Helper to adjust color brightness
+const adjustColor = (cssVar: string, opacity: number = 1, darken: boolean = false): string => {
+    const tempDiv = document.createElement('div');
+    tempDiv.style.color = `var(${cssVar})`;
+    document.body.appendChild(tempDiv);
+    const rgbStr = getComputedStyle(tempDiv).color;
+    document.body.removeChild(tempDiv);
+    
+    const c = d3Color(rgbStr);
+    if (!c) return '#999';
+    
+    if (darken) c.brighter(-0.6);
+    else c.brighter(0.3);
+    
+    c.opacity = opacity;
+    return c.toString();
+};
+
+function GraphView({ knowledgeBase, centerNodeId, onNodeClick }: Omit<Props, 'isOpen' | 'onClose'>) {
+  // CRITICAL FIX: Initialize useNodesState and useEdgesState with an empty array [].
+  // This allows TypeScript to correctly infer the state type as Node[] and Edge[], not never[].
+  const initialNodes: Node[] = [];
+  const initialEdges: Edge[] = [];
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
+
+  const { fitView } = useReactFlow();
+
+  const runLayout = useCallback(async (currentNodes: Node[], currentEdges: Edge[]) => {
+    const nodesWithDim = currentNodes.map(n => ({...n, width: 220, height: 80}));
+    const { nodes: layoutedNodes } = await getElkLayoutedElements(nodesWithDim, currentEdges);
+    setNodes(layoutedNodes);
+    setEdges(currentEdges); 
+
+    window.requestAnimationFrame(() => fitView({ padding: 0.2, duration: 400 }));
+  }, [setNodes, setEdges, fitView]);
+
+  useLayoutEffect(() => {
+    if (!centerNodeId) return;
+
+    const visibleNodeIds = new Set([centerNodeId]);
+    knowledgeBase[centerNodeId]?.connections?.forEach(conn => visibleNodeIds.add(conn.to));
+    Object.values(knowledgeBase).forEach(topic => {
+        if (topic.id === centerNodeId) return;
+        topic.connections?.forEach(conn => {
+            if (conn.to === centerNodeId) visibleNodeIds.add(topic.id);
+        });
+    });
+
+    const newNodes: Node[] = Array.from(visibleNodeIds)
+      .filter(id => knowledgeBase[id] && !knowledgeBase[id]!.id.startsWith('zzz_'))
+      .map(id => ({
+        id,
+        type: 'default',
+        position: { x: 0, y: 0 },
+        data: {
+          title: knowledgeBase[id]!.title,
+          type: knowledgeBase[id]!.primaryType,
+          isCenter: id === centerNodeId,
+        },
+      }));
+
+    const newEdges: Edge[] = [];
+    const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+    const grayColor = isDark ? '#6b7280' : '#9ca3af';
+
+    Array.from(visibleNodeIds).forEach(sourceId => {
+        const topic = knowledgeBase[sourceId];
+        if (!topic || topic.id.startsWith('zzz_')) return;
+
+        topic.connections?.forEach(conn => {
+            if (!visibleNodeIds.has(conn.to)) return;
+            if (sourceId === conn.to) return;
+
+            const targetId = conn.to;
+            const family = getFamilyForType(conn.type);
+            const baseColorVar = `--c-${family.color}-${isDark ? 'dark' : 'light'}`;
+            
+            let finalColor = grayColor;
+            let strokeDasharray = '5, 5';
+            let strokeWidth = 1.5;
+            let zIndex = 1;
+            const isConnectedToCenter = sourceId === centerNodeId || targetId === centerNodeId;
+
+            if (isConnectedToCenter) {
+                strokeDasharray = 'none';
+                strokeWidth = 2.5;
+                zIndex = 10;
+                if (sourceId === centerNodeId) {
+                    finalColor = adjustColor(baseColorVar, 1, false);
+                } else {
+                    finalColor = adjustColor(baseColorVar, 1, true);
+                }
+            }
+            
+            newEdges.push({
+                id: `e-${sourceId}-${targetId}-${conn.type}`,
+                source: sourceId,
+                target: targetId,
+                type: 'smart',
+                label: conn.type.replace(/_/g, ' '),
+                style: { stroke: finalColor, strokeWidth, strokeDasharray, opacity: 0.9 },
+                markerEnd: { 
+                    type: MarkerType.ArrowClosed, 
+                    color: finalColor,
+                    width: 20, height: 20,
+                },
+                zIndex,
+            });
+        });
+    });
+
+    runLayout(newNodes, newEdges);
+  }, [centerNodeId, knowledgeBase, runLayout]);
+  
+  const handleNodeDoubleClick = useCallback((_: MouseEvent, node: Node) => {
+     const nodeId = node.id;
+     onNodeClick(nodeId);
+  }, [onNodeClick]);
+  
+  return (
+    <ReactFlow
+      nodes={nodes}
+      edges={edges}
+      onNodesChange={onNodesChange}
+      onEdgesChange={onEdgesChange}
+      onNodeClick={(_, node: Node) => onNodeClick(node.id)}
+      onNodeDoubleClick={handleNodeDoubleClick}
+      nodeTypes={nodeTypes}
+      edgeTypes={edgeTypes}
+      connectionLineType={ConnectionLineType.Bezier}
+      fitView
+      minZoom={0.1}
+      className="bg-pattern"
+      nodesConnectable={false} 
+      nodesDraggable={true}
+    >
+      <Controls showInteractive={false} />
+      <Background gap={20} size={1} />
+    </ReactFlow>
+  );
+}
+
+export function GraphModal({ isOpen, onClose, ...props }: Props) {
+  const handleOverlayClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (e.target === e.currentTarget) onClose();
+  }
+  
+  useLayoutEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    }
+    if (isOpen) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [isOpen, onClose]);
+  
+  if (!isOpen) return null;
+
+  return (
+    <div className="modal" style={{ display: 'block' }} onClick={handleOverlayClick}>
+      <div className="modal-content" style={{display: 'flex', flexDirection: 'column'}}>
+        <div className="modal-header">
+          <h2><span className="emoji">🕸️</span>Knowledge Graph</h2>
+          <div style={{fontSize: '0.8em', color: 'var(--text-muted)', marginLeft: '1rem'}}>
+            Solid = Direct connection to center. Dashed = Contextual connection.
+          </div>
+          <span className="close-btn" onClick={onClose}>&times;</span>
+        </div>
+        <div style={{flexGrow: 1, position: 'relative'}}>
+            <ReactFlowProvider>
+              <GraphView {...props} />
+            </ReactFlowProvider>
+        </div>
+      </div>
+    </div>
+  );
+}
+===== ./components/Icons.tsx =====
+// src/components/Icons.tsx
+import React from 'react';
+
+const iconProps = {
+  width: "1em",
+  height: "1em",
+  viewBox: "0 0 24 24",
+  fill: "none",
+  stroke: "currentColor",
+  strokeWidth: "2",
+  strokeLinecap: "round" as const,
+  strokeLinejoin: "round" as const,
+};
+
+export const DiseaseIcon = () => (
+  <svg {...iconProps}><path d="M12 2v4M12 20v2M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M20 12h-2M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" /><circle cx="12" cy="12" r="4" /></svg>
+);
+export const StructureIcon = () => (
+  <svg {...iconProps}><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z" /><polyline points="3.27 6.96 12 12.01 20.73 6.96" /><line x1="12" y1="22.08" x2="12" y2="12" /></svg>
+);
+export const ProcessIcon = () => (
+  <svg {...iconProps}><path d="M3 6h3M5 3v3M18 6h3M20 3v3M9 18h3M11 15v3M3 13v3a2 2 0 0 0 2 2h3M16 3h3a2 2 0 0 1 2 2v3" /><path d="M12 3a1 1 0 0 0-1-1H9a2 2 0 0 0-2 2v2c0 1.1.9 2 2 2h2a1 1 0 0 0 1-1Z" /><path d="m14 14-2-2 2-2" /><path d="m10 10 2 2-2 2" /></svg>
+);
+export const SubstanceIcon = () => (
+  <svg {...iconProps}><path d="M10.3 2.3 12 6l1.7-3.7M6 6l1.7-3.7L9.4 6M14.6 6l1.7-3.7L18 6" /><path d="M6 20c-1.1 0-2-.9-2-2V8c0-1.1.9-2 2-2h12c1.1 0 2 .9 2 2v10c0 1.1-.9 2-2 2H6Z" /></svg>
+);
+export const FindingIcon = () => (
+  <svg {...iconProps}><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+);
+export const ConceptIcon = () => (
+  <svg {...iconProps}><path d="m9.06 18.9-6.52-6.52a2.41 2.41 0 0 1 0-3.41L8.9 2.57a2.41 2.41 0 0 1 3.41 0l6.52 6.52a2.41 2.41 0 0 1 0 3.41L12.47 18.9a2.41 2.41 0 0 1-3.41 0z" /><line x1="2" y1="12" x2="22" y2="12" /></svg>
+);
+export const ThemeIcon = () => (
+  <svg {...iconProps}><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" /></svg>
+);
+export const ImportIcon = () => (
+  <svg {...iconProps}><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" /></svg>
+);
+export const GraphIcon = () => (
+  <svg {...iconProps}><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><line x1="8.59" y1="13.51" x2="15.42" y2="17.49" /><line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg>
+);
+export const PanelCollapseIcon = ({ isLeft }: { isLeft: boolean }) => (
+    <svg {...iconProps} style={{ transform: isLeft ? 'rotate(180deg)' : 'none' }}>
+        <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+        <line x1="9" y1="3" x2="9" y2="21" />
+    </svg>
+);
+export const MenuIcon = () => (
+  <svg {...iconProps}><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="18" x2="21" y2="18" /></svg>
+)
+
+const TYPE_ICONS: Record<string, React.ReactNode> = {
+  disease: <DiseaseIcon />,
+  structure: <StructureIcon />,
+  process: <ProcessIcon />,
+  substance: <SubstanceIcon />,
+  finding: <FindingIcon />,
+  concept: <ConceptIcon />,
+};
+export const getIcon = (type: string) => TYPE_ICONS[type] || <ConceptIcon />;
+
+===== ./components/NavPanel.tsx =====
+// src/components/NavPanel.tsx
+import { useMemo, memo } from 'react';
+import type { KnowledgeBase, Topic, FileSelection } from '../types';
+import type { SearchResult } from '../App';
+import { getIcon, ThemeIcon, PanelCollapseIcon } from './Icons';
+
+interface NavNodeData { children: Record<string, NavNodeData>; items: Topic[]; }
+
+interface Props {
+  knowledgeBase: KnowledgeBase;
+  activeTopicId: string | null;
+  onTopicSelect: (id: string) => void;
+  searchTerm: string;
+  onSearchChange: (s: string) => void;
+  searchResults: SearchResult[] | null;
+  onToggleTheme: () => void;
+  isCollapsed: boolean;
+  onToggleCollapse: () => void;
+  navFilterPath: string[] | null;
+  onClearNavFilter: () => void;
+  directoryName: string | null;
+  fileSelections: FileSelection[];
+  onSelectDirectory: () => void;
+  onToggleFileSelection: (fileName: string) => void;
+  isLoading: boolean;
+}
+
+const Highlight = memo(({ text, highlight }: { text: string; highlight: string }) => {
+    if (!highlight.trim()) return <>{text}</>;
+    const regex = new RegExp(`(${highlight})`, 'gi');
+    const parts = text.split(regex);
+    return (
+        <span>
+            {parts.map((part, i) =>
+                part.toLowerCase() === highlight.toLowerCase() ? <mark key={i}>{part}</mark> : <span key={i}>{part}</span>
+            )}
+        </span>
+    );
+});
+
+function buildTree(kb: KnowledgeBase): { root: NavNodeData, unclassified: Topic[] } {
+  const root: NavNodeData = { children: {}, items: [] };
+  const unclassified: Topic[] = [];
+  Object.values(kb)
+    .filter(t => t && typeof t.id === 'string' && !t.id.startsWith('zzz_'))
+    .sort((a, b) => a.title.localeCompare(b.title))
+    .forEach(t => {
+      if (t.classificationPath?.length) {
+        let cur = root;
+        for (const seg of t.classificationPath) {
+          cur.children[seg] ??= { children: {}, items: [] };
+          cur = cur.children[seg]!;
+        }
+        cur.items.push(t!);
+      } else {
+        unclassified.push(t!);
+      }
+    });
+  return { root, unclassified };
+}
+
+const NavNode = memo(({ node, activeTopicId, onTopicSelect, openKeys }: {
+  node: NavNodeData;
+  activeTopicId: string | null;
+  onTopicSelect: (id: string) => void;
+  openKeys: Set<string>;
+}) => {
+  return (
+    <ul>
+      {Object.entries(node.children).sort((a,b) => a[0].localeCompare(b[0])).map(([seg, child]) => (
+        <li key={seg}>
+          <details open={openKeys.has(seg)}>
+            <summary>{seg}</summary>
+            <NavNode node={child} activeTopicId={activeTopicId} onTopicSelect={onTopicSelect} openKeys={openKeys} />
+          </details>
+        </li>
+      ))}
+      {node.items.map(item => (
+        <li key={item.id}>
+          <a
+            href="#"
+            className={`${item.id === activeTopicId ? 'active' : ''}`}
+            onClick={(e) => { e.preventDefault(); onTopicSelect(item.id); }}
+            aria-current={item.id === activeTopicId ? 'page' : undefined}
+          >
+            <span className="topic-title">
+              <span className={`emoji type-${item.primaryType}`}>{getIcon(item.primaryType)}</span>
+              <span>{item.title}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+});
+
+export function NavPanel({
+  knowledgeBase, activeTopicId, onTopicSelect, searchTerm, onSearchChange,
+  searchResults, onToggleTheme, isCollapsed, onToggleCollapse, navFilterPath,
+  onClearNavFilter, directoryName, fileSelections, onSelectDirectory,
+  onToggleFileSelection, isLoading
+}: Props) {
+  const { root: navTree, unclassified } = useMemo(() => buildTree(knowledgeBase), [knowledgeBase]);
+  const openKeys = useMemo(() => {
+    const topic = activeTopicId ? knowledgeBase[activeTopicId] : null;
+    return navFilterPath ? new Set(Object.keys(navTree.children)) : new Set(topic?.classificationPath ?? []);
+  }, [activeTopicId, knowledgeBase, navFilterPath, navTree]);
+  
+  const loadedFilesCount = fileSelections.filter(f => f.selected).length;
+  const totalTopicsCount = Object.keys(knowledgeBase).length;
+
+  if (isCollapsed) {
+    return (
+      <div className="panel-header collapsed">
+        <button className="collapse-btn" onClick={onToggleCollapse} title="Expand Panel">
+          <PanelCollapseIcon isLeft={false} />
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      <div className="panel-header">
+        <h3 className="panel-title">Knowledge Engine</h3>
+        <button className="collapse-btn" onClick={onToggleCollapse} title="Collapse Panel">
+            <PanelCollapseIcon isLeft={true} />
+        </button>
+      </div>
+
+      <div className="panel-content">
+        <div className="nav-controls">
+          <button type="button" className="control-btn" onClick={onToggleTheme} title="Toggle Theme">
+            <ThemeIcon /> Theme
+          </button>
+        </div>
+        
+        <div className="file-manager">
+            <button className="control-btn import-btn" onClick={onSelectDirectory} disabled={isLoading}>
+                {directoryName ? `📂 ${directoryName}`: '📂 Select Directory'}
+            </button>
+            {fileSelections.length > 0 && (
+                <ul className="file-selection-list">
+                    {fileSelections.map(file => (
+                        <li key={file.name}>
+                            <label>
+                                <input 
+                                    type="checkbox" 
+                                    checked={file.selected} 
+                                    onChange={() => onToggleFileSelection(file.name)}
+                                    disabled={isLoading}
+                                />
+                                <span>{file.name}</span>
+                            </label>
+                        </li>
+                    ))}
+                </ul>
+            )}
+        </div>
+
+        <input type="text" id="search-input" placeholder="🔍 Search..." value={searchTerm} onChange={(e) => onSearchChange(e.target.value)} />
+      </div>
+
+      <div id="nav-list">
+          {searchResults ? (
+            <div className="search-results-list">
+                <h3 className="panel-title-sub">Search Results</h3>
+                <ul>
+                    {searchResults.length > 0 ? (
+                    searchResults.map(res => (
+                        <li key={res.item.id}>
+                            <a href="#" className={`${res.item.id === activeTopicId ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); onTopicSelect(res.item.id); }} >
+                            <span className="topic-title">
+                                <span className={`emoji type-${res.item.primaryType}`}>{getIcon(res.item.primaryType)}</span>
+                                <Highlight text={res.item.title} highlight={searchTerm} />
+                            </span>
+                            <span className="relevance-score" title="Relevance">{Math.round((1 - (res.score ?? 0)) * 100)}%</span>
+                            </a>
+                        </li>
+                    ))
+                    ) : ( <li className="no-results">No results found.</li> )}
+                </ul>
+            </div>
+          ) : (
+            <div className="nav-tree-container">
+              {navFilterPath ? (
+                <>
+                    <div className="filter-header">
+                        <h3 className="panel-title-sub">Filtered by</h3>
+                        <button className="clear-filter-btn" onClick={onClearNavFilter}>Clear &times;</button>
+                    </div>
+                    <p className="filter-path">{navFilterPath.join(' / ')}</p>
+                </>
+              ) : <h3 className="panel-title-sub">Topics</h3> }
+
+              <NavNode node={navTree} activeTopicId={activeTopicId} onTopicSelect={onTopicSelect} openKeys={openKeys} />
+              
+              {unclassified.length > 0 && !navFilterPath && (
+                <details open>
+                    <summary>Unclassified</summary>
+                    <ul>
+                        {unclassified.map(item => (
+                            <li key={item.id}>
+                                <a href="#" className={`${item.id === activeTopicId ? 'active' : ''}`} onClick={(e) => { e.preventDefault(); onTopicSelect(item.id); }} aria-current={item.id === activeTopicId ? 'page' : undefined}>
+                                    <span className="topic-title">
+                                        <span className={`emoji type-${item.primaryType}`}>{getIcon(item.primaryType)}</span>
+                                        <span>{item.title}</span>
+                                    </span>
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                </details>
+              )}
+            </div>
+          )}
+      </div>
+      <div className="status-bar">
+        {isLoading ? 'Loading...' : `${totalTopicsCount} topics from ${loadedFilesCount} files.`}
+      </div>
+    </>
+  );
+}
+===== ./components/Popover.tsx =====
+// src/components/Popover.tsx
+import { createPortal } from 'react-dom';
+import { useRef, useState, useLayoutEffect } from 'react';
+
+// MODIFIED: Reverted data structure
+interface PopoverData {
+  content: {
+    emoji: string;
+    title: string;
+    definition: string;
+  };
+  x: number;
+  y: number;
+}
+
+interface Props {
+  data: PopoverData | null;
+}
+
+export function Popover({ data }: Props) {
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const [style, setStyle] = useState<React.CSSProperties>({ display: 'none', opacity: 0 });
+
+  useLayoutEffect(() => {
+    if (data && popoverRef.current) {
+      const { height, width } = popoverRef.current.getBoundingClientRect();
+      const margin = 10;
+      
+      let top = data.y - height - margin;
+      let left = data.x;
+
+      if (top < margin) {
+        top = data.y + margin * 2;
+      }
+      if (left + width > window.innerWidth - margin) {
+        left = window.innerWidth - width - margin;
+      }
+      if (left < margin) {
+        left = margin;
+      }
+
+      setStyle({
+        position: 'fixed',
+        left: `${left}px`,
+        top: `${top}px`,
+        display: 'block',
+        opacity: 1,
+        transition: 'opacity 0.1s ease-in-out',
+      });
+    } else {
+      setStyle({ display: 'none', opacity: 0 });
+    }
+  }, [data]);
+
+  if (!data) return null;
+
+  return createPortal(
+    <div id="popover" ref={popoverRef} style={style}>
+      {/* MODIFIED: Restored emoji rendering */}
+      <h4><span className="emoji">{data.content.emoji}</span> {data.content.title}</h4>
+      <p>{data.content.definition}</p>
+    </div>,
+    document.body
+  );
+}
+===== ./components/RichHtml.tsx =====
+// src/components/RichHtml.tsx
+import { useMemo } from 'react';
+import type { MouseEvent } from 'react';
+import DOMPurify from 'dompurify';
+
+interface Props {
+  html: string;
+  onTopicSelect: (id: string) => void;
+}
+
+/** MODIFICATION: Add class="internal-link" to match original styling and semantics */
+function linkify(raw: string): string {
+  return raw.replace(/\[\[([a-zA-Z0-9_\-]+)(?:\|(.+?))?\]\]/g, (_m, id, txt) => {
+    const text = (txt ?? id).replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    return `<a href="#" class="internal-link" data-topic-id="${id}">${text}</a>`;
+  });
+}
+
+export default function RichHtml({ html, onTopicSelect }: Props) {
+  const safe = useMemo(() => {
+    const withLinks = linkify(html ?? '');
+    return DOMPurify.sanitize(withLinks, { USE_PROFILES: { html: true } });
+  }, [html]);
+
+  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+    const a = (e.target as HTMLElement).closest('a[data-topic-id]') as HTMLAnchorElement | null;
+    if (a) {
+      e.preventDefault();
+      const id = a.dataset.topicId!;
+      onTopicSelect(id);
+    }
+  };
+
+  return <div onClick={handleClick} dangerouslySetInnerHTML={{ __html: safe }} />;
+}
+===== ./components/Toast.tsx =====
+// src/components/Toast.tsx
+import { useEffect } from 'react';
+import { createPortal } from 'react-dom';
+import type { ToastNotification } from '../types';
+
+interface ToastProps {
+  toast: ToastNotification;
+  onDismiss: (id: number) => void;
+}
+
+const Toast = ({ toast, onDismiss }: ToastProps) => {
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      onDismiss(toast.id);
+    }, 5000); // Auto-dismiss after 5 seconds
+
+    return () => clearTimeout(timer);
+  }, [toast.id, onDismiss]);
+
+  return (
+    <div className={`toast toast-${toast.type}`}>
+      {toast.message}
+      <button onClick={() => onDismiss(toast.id)}>&times;</button>
+    </div>
+  );
+};
+
+interface ToastContainerProps {
+  toasts: ToastNotification[];
+  onDismiss: (id: number) => void;
+}
+
+export const ToastContainer = ({ toasts, onDismiss }: ToastContainerProps) => {
+  return createPortal(
+    <div className="toast-container">
+      {toasts.map(toast => (
+        <Toast key={toast.id} toast={toast} onDismiss={onDismiss} />
+      ))}
+    </div>,
+    document.body
+  );
+};
+===== ./components/TopicView.tsx =====
+// src/components/TopicView.tsx
+import React from 'react';
+import type { Topic } from '../types';
+import RichHtml from './RichHtml';
+
+const EMOJI: Record<string, string> = {
+  disease: '🦠', structure: '🏛️', process: '⚙️',
+  substance: '🧪', finding: '❗', concept: '💡',
+};
+
+function iconFor(type: string) {
+  return EMOJI[type] ?? '📄';
+}
+
+interface Props {
+  topic: Topic | null;
+  onTopicSelect: (id: string) => void;
+  onGraphViewClick: () => void;
+  onOpenNav: () => void;
+  onBreadcrumbClick: (path: string[]) => void;
+}
+
+export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, onBreadcrumbClick }: Props) {
+  if (!topic) {
+    return (
+        <div style={{ opacity: 0.8, padding: '2rem', textAlign: 'center' }}>
+          <h2>Welcome!</h2>
+          <p>
+            <span className="desktop-only">Select a topic from the left panel to begin, or import your own knowledge base JSON file.</span>
+            <span className="mobile-only">
+                Tap the <button onClick={onOpenNav} className="inline-cta">☰ menu</button> to select a topic or import a file.
+            </span>
+          </p>
+        </div>
+    );
+  }
+
+  const { title, primaryType, tags, content, classificationPath } = topic;
+
+  return (
+    <>
+      <header className="topic-header">
+        <div className="topic-header-main">
+          <div className="topic-icon">{iconFor(primaryType)}</div>
+          <div>
+            {classificationPath && classificationPath.length > 0 && (
+              <div className="breadcrumb">
+                {classificationPath.map((item, index) => {
+                  const pathSlice = classificationPath.slice(0, index + 1);
+                  return (
+                    <React.Fragment key={item}>
+                      <button className="breadcrumb-item" onClick={() => onBreadcrumbClick(pathSlice)}>
+                        {item}
+                      </button>
+                      {index < classificationPath.length - 1 && <span className="breadcrumb-separator">/</span>}
+                    </React.Fragment>
+                  );
+                })}
+              </div>
+            )}
+            <h2 className={`type-${primaryType}`}>{title}</h2>
+            {tags?.length ? (
+              <div className="tags-container">
+                {tags.map(t => <span className="tag-item" key={t}>#{t}</span>)}
+              </div>
+            ) : null}
+          </div>
+        </div>
+        <div className="topic-header-actions">
+          <button type="button" onClick={onGraphViewClick}><span className="emoji">🕸️</span>Graph View</button>
+        </div>
+      </header>
+
+      {content.definition && (
+        <>
+          <h4><span className="emoji">📖</span>Definition</h4>
+          <RichHtml html={String(content.definition)} onTopicSelect={onTopicSelect} />
+        </>
+      )}
+
+      {content.atAGlance && (
+        <section className="at-a-glance">
+          <h4><span className="emoji">✨</span>At a Glance</h4>
+          <RichHtml html={String(content.atAGlance)} onTopicSelect={onTopicSelect} />
+        </section>
+      )}
+      
+      {Object.entries(content)
+        .filter(([k]) => !['definition', 'atAGlance', 'takeAway'].includes(k))
+        .map(([k, v]) => {
+          if (!v) return null;
+          const human = k
+            .replace(/_/g, ' ')
+            .replace(/([A-Z])/g, ' $1')
+            .replace(/^\w/, c => c.toUpperCase());
+          return (
+            <section key={k} style={{ marginTop: '1.5rem' }}>
+              <h4>{human}</h4>
+              <RichHtml html={String(v)} onTopicSelect={onTopicSelect} />
+            </section>
+          );
+        })}
+
+      {content.takeAway && (
+        <section style={{ background: 'var(--bg-alt-color)', padding: '1rem', borderRadius: 'var(--radius-md)', marginTop: '2rem' }}>
+          <h4><span className="emoji">🎯</span>Key Take Away</h4>
+          <RichHtml html={String(content.takeAway)} onTopicSelect={onTopicSelect} />
+        </section>
+      )}
+    </>
+  );
+}
+===== ./hooks/useKnowledgeBase.ts =====
+// src/hooks/useKnowledgeBase.ts
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import type { KnowledgeBase, FileSelection } from '../types';
+import { normalizeTopic } from '../utils/normalization';
+
+const LS_FILES_KEY = 'KE_selectedFiles';
+
+export function useKnowledgeBase() {
+  const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase>({});
+  const [fileSelections, setFileSelections] = useState<FileSelection[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  
+  const dirHandleRef = useRef<FileSystemDirectoryHandle | null>(null);
+  const [directoryName, setDirectoryName] = useState<string | null>(null);
+
+  // Effect to load initial state from localStorage
+  useEffect(() => {
+    try {
+      const savedFiles = localStorage.getItem(LS_FILES_KEY);
+      if (savedFiles) {
+        setFileSelections(JSON.parse(savedFiles));
+      }
+    } catch (e) {
+      console.error("Failed to load file selections from localStorage", e);
+      localStorage.removeItem(LS_FILES_KEY);
+    }
+  }, []);
+
+  const processAndLoadFiles = useCallback(async (
+    handle: FileSystemDirectoryHandle,
+    selections: FileSelection[]
+  ): Promise<{ summary: string; added: string[]; removed: string[]; totalTopics: number; totalFiles: number; }> => {
+    setIsLoading(true);
+    setError(null);
+
+    const oldSelectedFiles = fileSelections.filter(f => f.selected).map(f => f.name);
+    const newSelectedFiles = selections.filter(f => f.selected).map(f => f.name);
+
+    const filesToAdd = newSelectedFiles.filter(name => !oldSelectedFiles.includes(name));
+    const filesToRemove = oldSelectedFiles.filter(name => !newSelectedFiles.includes(name));
+    
+    const newKnowledgeBase: KnowledgeBase = {};
+    let loadedFileCount = 0;
+
+    for (const file of selections) {
+      if (!file.selected) continue;
+      
+      try {
+        const fileHandle = await handle.getFileHandle(file.name);
+        const fileData = await fileHandle.getFile();
+        const text = await fileData.text();
+        const jsonData = JSON.parse(text);
+
+        const entries = Object.entries(jsonData as Record<string, unknown>);
+        for (const [idKey, rawTopic] of entries) {
+          if (!rawTopic || typeof idKey !== 'string' || idKey.startsWith('zzz_')) continue;
+          
+          const normalized = normalizeTopic(idKey, rawTopic);
+          if (!normalized.id.startsWith('zzz_')) {
+            newKnowledgeBase[normalized.id] = normalized;
+          }
+        }
+        loadedFileCount++;
+      } catch (e) {
+        console.error(`Error processing file ${file.name}:`, e);
+        setError(`Failed to load ${file.name}. It might be corrupted.`);
+      }
+    }
+
+    // Clean up connections
+    const validIds = new Set(Object.keys(newKnowledgeBase));
+    for (const id of validIds) {
+        const topic = newKnowledgeBase[id];
+        if (topic.connections) {
+            topic.connections = topic.connections.filter(c => validIds.has(c.to));
+        }
+    }
+
+    setKnowledgeBase(newKnowledgeBase);
+    setFileSelections(selections);
+    localStorage.setItem(LS_FILES_KEY, JSON.stringify(selections));
+    setIsLoading(false);
+
+    return {
+      summary: `Loaded ${Object.keys(newKnowledgeBase).length} topics from ${loadedFileCount} files.`,
+      added: filesToAdd,
+      removed: filesToRemove,
+      totalTopics: Object.keys(newKnowledgeBase).length,
+      totalFiles: loadedFileCount,
+    };
+  }, [fileSelections]);
+
+  const selectDirectory = useCallback(async () => {
+    try {
+      if (!('showDirectoryPicker' in window)) {
+        
+        toast.error('当前浏览器不支持目录选择（File System Access API，文件系统访问应用程序编程接口）。');
+        return ;
+      }
+      const handle = await (window as Required<Window>).showDirectoryPicker!();
+      dirHandleRef.current = handle;
+      setDirectoryName(handle.name);
+
+      const savedSelections = new Map(fileSelections.map(f => [f.name, f.selected]));
+      const newSelections: FileSelection[] = [];
+
+      for await (const entry of handle.values()) {
+        if (entry.kind === 'file' && entry.name.endsWith('.json')) {
+          newSelections.push({
+            name: entry.name,
+            selected: savedSelections.get(entry.name) ?? false, // Default to false, but respect saved state
+          });
+        }
+      }
+      newSelections.sort((a, b) => a.name.localeCompare(b.name));
+      
+      return processAndLoadFiles(handle, newSelections);
+
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') {
+        console.log("Directory selection was aborted by the user.");
+      } else {
+        console.error("Error selecting directory:", err);
+        setError("Could not access the selected directory.");
+      }
+      return null;
+    }
+  }, [fileSelections, processAndLoadFiles]);
+
+  const toggleFileSelection = useCallback(async (fileName: string) => {
+    const handle = dirHandleRef.current;
+    if (!handle) {
+      setError("Please select a directory first.");
+      return null;
+    }
+
+    const newSelections = fileSelections.map(f =>
+      f.name === fileName ? { ...f, selected: !f.selected } : f
+    );
+    
+    return processAndLoadFiles(handle, newSelections);
+  }, [fileSelections, processAndLoadFiles]);
+
+  return {
+    knowledgeBase,
+    fileSelections,
+    directoryName,
+    isLoading,
+    error,
+    selectDirectory,
+    toggleFileSelection,
+  };
+}
+
+===== ./hooks/useResizablePanels.ts =====
+// src/hooks/useResizablePanels.ts
+import { useState, useCallback, useRef, useEffect } from 'react';
+
+type Panel = 'nav' | 'connections';
+
+interface Config {
+  nav: { initial: number; min: number };
+  connections: { initial: number; min: number };
+}
+
+export function useResizablePanels(config: Config) {
+  const [sizes, setSizes] = useState({
+    nav: config.nav.initial,
+    connections: config.connections.initial,
+  });
+
+  const [isCollapsed, setIsCollapsed] = useState({
+    nav: false,
+    connections: false,
+  });
+
+  const draggingPanel = useRef<Panel | null>(null);
+
+  const toggleCollapse = useCallback((panel: Panel) => {
+    setIsCollapsed(prev => ({ ...prev, [panel]: !prev[panel] }));
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!draggingPanel.current) return;
+
+    if (draggingPanel.current === 'nav') {
+      const newWidth = e.clientX;
+      setSizes(prev => ({
+        ...prev,
+        nav: Math.max(config.nav.min, newWidth),
+      }));
+    } else if (draggingPanel.current === 'connections') {
+      const newWidth = window.innerWidth - e.clientX;
+      setSizes(prev => ({
+        ...prev,
+        connections: Math.max(config.connections.min, newWidth),
+      }));
+    }
+  }, [config]);
+
+  const handleMouseUp = useCallback(() => {
+    draggingPanel.current = null;
+    window.removeEventListener('mousemove', handleMouseMove);
+    window.removeEventListener('mouseup', handleMouseUp);
+    document.body.style.cursor = 'default';
+    document.body.style.userSelect = 'auto';
+  }, [handleMouseMove]);
+
+  const startDragging = useCallback((panel: Panel) => {
+    draggingPanel.current = panel;
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    document.body.style.cursor = 'col-resize';
+    document.body.style.userSelect = 'none';
+  }, [handleMouseMove, handleMouseUp]);
+
+  // Handle window resize to prevent overflow
+  useEffect(() => {
+    const handleResize = () => {
+      setSizes(prev => ({
+        nav: Math.min(prev.nav, window.innerWidth - prev.connections - config.connections.min),
+        connections: Math.min(prev.connections, window.innerWidth - prev.nav - config.nav.min),
+      }));
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [config]);
+
+
+  return { sizes, startDragging, isCollapsed, toggleCollapse };
+}
+
+===== ./index.css =====
+:root {
+    --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --radius-sm: 4px; --radius-md: 8px; --radius-lg: 12px;
+    --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.06);
+    --shadow-lg: 0 10px 30px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.07);
+    --header-height: 60px; /* For mobile view */
+}
+
+/* Light Theme Colors */
+:root {
+    --c-disease-light: #c026d3; --c-disease-bg-light: #fdf2f8;
+    --c-structure-light: #4f46e5; --c-structure-bg-light: #eef2ff;
+    --c-process-light: #ea580c; --c-process-bg-light: #fff7ed;
+    --c-substance-light: #0d9488; --c-substance-bg-light: #f0fdfa;
+    --c-finding-light: #0284c7; --c-finding-bg-light: #f0f9ff;
+    --c-concept-light: #65a30d; --c-concept-bg-light: #f7fee7;
+    --text-light: #1f2937; --bg-light: #f9fafb; --node-bg-light: #ffffff; --bg-alt-light: #f3f4f6;
+    --line-light: #e5e7eb; --text-muted-light: #6b7280; --link-light: #4338ca;
+    --c-default-light: #6b7280; --c-default-bg-light: #f3f4f6;
+    --c-gray: #9ca3af;
+}
+
+/* Dark Theme Colors */
+html[data-theme='dark'] {
+    --c-disease-dark: #e879f9; --c-disease-bg-dark: #2e103c;
+    --c-structure-dark: #a5b4fc; --c-structure-bg-dark: #222c64;
+    --c-process-dark: #fb923c; --c-process-bg-dark: #432008;
+    --c-substance-dark: #5eead4; --c-substance-bg-dark: #0f3c3a;
+    --c-finding-dark: #7dd3fc; --c-finding-bg-dark: #0f3c5a;
+    --c-concept-dark: #bef264; --c-concept-bg-dark: #2e440c;
+    --text-dark: #e5e7eb; --bg-dark: #111827; --node-bg-dark: #1f2937; --bg-alt-dark: #374151;
+    --line-dark: #374151; --text-muted-dark: #9ca3af; --link-dark: #a5b4fc;
+    --c-default-dark: #9ca3af; --c-default-bg-dark: #374151;
+    --c-gray: #52525b;
+}
+
+/* Theme variable assignment */
+:root {
+    --bg-color: var(--bg-light); --node-bg: var(--node-bg-light); --bg-alt-color: var(--bg-alt-light);
+    --line-color: var(--line-light); --text-color: var(--text-light); --text-muted: var(--text-muted-light);
+    --link-color: var(--link-light);
+}
+html[data-theme='dark'] {
+    --bg-color: var(--bg-dark); --node-bg: var(--node-bg-dark); --bg-alt-color: var(--bg-alt-dark);
+    --line-color: var(--line-dark); --text-color: var(--text-dark); --text-muted: var(--text-muted-dark);
+    --link-color: var(--link-dark);
+}
+
+/* Type color assignment */
+.type-disease   { --type-color: var(--c-disease-light);   --type-bg: var(--c-disease-bg-light); }
+.type-structure { --type-color: var(--c-structure-light); --type-bg: var(--c-structure-bg-light); }
+.type-process   { --type-color: var(--c-process-light);   --type-bg: var(--c-process-bg-light); }
+.type-substance { --type-color: var(--c-substance-light); --type-bg: var(--c-substance-bg-light); }
+.type-finding   { --type-color: var(--c-finding-light);   --type-bg: var(--c-finding-bg-light); }
+.type-concept   { --type-color: var(--c-concept-light);   --type-bg: var(--c-concept-bg-light); }
+.type-default   { --type-color: var(--c-default-light);   --type-bg: var(--c-default-bg-light); }
+
+.type-disease-border   { border-left: 3px solid var(--c-disease-light); }
+.type-structure-border { border-left: 3px solid var(--c-structure-light); }
+.type-process-border   { border-left: 3px solid var(--c-process-light); }
+.type-substance-border { border-left: 3px solid var(--c-substance-light); }
+.type-finding-border   { border-left: 3px solid var(--c-finding-light); }
+.type-concept-border   { border-left: 3px solid var(--c-concept-light); }
+.type-default-border   { border-left: 3px solid var(--c-default-light); }
+
+html[data-theme='dark'] .type-disease   { --type-color: var(--c-disease-dark);   --type-bg: var(--c-disease-bg-dark); }
+html[data-theme='dark'] .type-structure { --type-color: var(--c-structure-dark); --type-bg: var(--c-structure-bg-dark); }
+html[data-theme='dark'] .type-process   { --type-color: var(--c-process-dark);   --type-bg: var(--c-process-bg-dark); }
+html[data-theme='dark'] .type-substance { --type-color: var(--c-substance-dark); --type-bg: var(--c-substance-bg-dark); }
+html[data-theme='dark'] .type-finding   { --type-color: var(--c-finding-dark);   --type-bg: var(--c-finding-bg-dark); }
+html[data-theme='dark'] .type-concept   { --type-color: var(--c-concept-dark);   --type-bg: var(--c-concept-bg-dark); }
+html[data-theme='dark'] .type-default   { --type-color: var(--c-default-dark);   --type-bg: var(--c-default-bg-dark); }
+
+html[data-theme='dark'] .type-disease-border   { border-left-color: var(--c-disease-dark); }
+html[data-theme='dark'] .type-structure-border { border-left-color: var(--c-structure-dark); }
+html[data-theme='dark'] .type-process-border   { border-left-color: var(--c-process-dark); }
+html[data-theme='dark'] .type-substance-border { border-left-color: var(--c-substance-dark); }
+html[data-theme='dark'] .type-finding-border   { border-left-color: var(--c-finding-dark); }
+html[data-theme='dark'] .type-concept-border   { border-left-color: var(--c-concept-dark); }
+html[data-theme='dark'] .type-default-border   { border-left-color: var(--c-default-dark); }
+
+
+/* Base Styles */
+html { scroll-behavior: smooth; }
+body, html { margin:0; padding:0; height:100%; font-family:var(--font-main); background-color:var(--bg-color); color:var(--text-color); transition: background-color .2s, color .2s; -webkit-font-smoothing: antialiased; line-height: 1.6; }
+::selection { background-color: var(--link-color); color:#fff; }
+.emoji { display:inline-block; margin-right:.5em; vertical-align:-0.1em; }
+h1,h2,h3,h4,h5,h6 { line-height: 1.3; }
+
+/* Custom Scrollbar */
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--line-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text-muted); }
+
+/* Layout */
+.container { display:flex; height:100vh; overflow: hidden; }
+.nav-panel { background:var(--node-bg); border-right:1px solid var(--line-color); display:flex; flex-direction:column; transition: all .2s; flex-shrink: 0; }
+.main-panel { flex-grow:1; overflow-y:auto; position: relative; }
+.connections-panel { background:var(--bg-alt-color); border-left:1px solid var(--line-color); display:flex; flex-direction:column; transition:all .2s; flex-shrink: 0; }
+
+.panel-header.collapsed { padding: 1.25rem 0; justify-content: center; }
+.nav-panel.collapsed, .connections-panel.collapsed { overflow: hidden; padding: 0; }
+
+.panel-header { display: flex; align-items: center; justify-content: space-between; margin: 0; padding: 1.25rem; }
+.panel-content { padding: 0 1.25rem 1.25rem 1.25rem; }
+.panel-title { font-size:1rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-muted); margin: 0; }
+.collapse-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; padding: 4px; line-height: 1; font-size: 1.2rem; border-radius: var(--radius-sm); }
+.collapse-btn:hover { background-color: var(--bg-alt-color); color: var(--text-color); }
+html[data-theme='dark'] .collapse-btn:hover { background-color: var(--bg-color); }
+
+.resizer-handle { width: 5px; cursor: col-resize; background: transparent; transition: background-color 0.2s; flex-shrink: 0; }
+.resizer-handle:hover { background: var(--link-color); }
+.resizer-handle.disabled { cursor: default; }
+
+/* Nav Panel Controls */
+.nav-controls { display:flex; gap:.5rem; margin-bottom:1rem; }
+.control-btn { flex-grow:1; font-family:var(--font-main); font-size:14px; padding:.6rem .75rem; border-radius:var(--radius-md); border:1px solid var(--line-color); background:transparent; color:var(--text-muted); cursor:pointer; display:flex; align-items:center; justify-content:center; gap:.5rem; transition:all .2s; font-weight:500; }
+.import-btn { background-color: var(--c-structure-bg-light); color: var(--c-structure-light); border-color:transparent; }
+html[data-theme='dark'] .import-btn { background-color: var(--c-structure-bg-dark); color: var(--c-structure-dark); }
+.control-btn:hover { background-color:var(--bg-alt-color); color:var(--text-color); border-color:var(--text-muted); }
+.control-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+#search-input { width:100%; box-sizing:border-box; font-family:var(--font-main); font-size:14px; padding:.6rem .8rem; border-radius:var(--radius-md); border:1px solid var(--line-color); background-color:var(--bg-alt-color); color:var(--text-color); }
+#search-input:focus-visible { outline:none; border-color:var(--link-color); box-shadow:0 0 0 3px var(--c-structure-bg-light); }
+html[data-theme='dark'] #search-input:focus-visible { box-shadow:0 0 0 3px var(--c-structure-bg-dark); }
+#nav-list mark { background-color: var(--c-finding-bg-light); color: var(--text-color); border-radius: 2px; padding: 0 2px; }
+html[data-theme='dark'] #nav-list mark { background-color: var(--c-finding-bg-dark); }
+
+/* Nav List */
+#nav-list { flex-grow: 1; overflow-y: auto; padding: 0 1.25rem; }
+.nav-panel ul { list-style:none; padding-left:0; margin: 0; }
+.nav-panel a { text-decoration:none; color:var(--text-muted); cursor:pointer; padding:.5rem .75rem; border-radius:var(--radius-md); font-weight:500; transition:background-color .2s, color .2s; display:flex; align-items:center; justify-content:space-between; gap:.25rem; margin-bottom:2px; }
+.nav-panel a .topic-title { display:flex; align-items:center; gap:.5rem; }
+.nav-panel a:hover { background-color:var(--bg-alt-color); color:var(--text-color); }
+.nav-panel a.active { background-color:var(--type-bg); color:var(--type-color); font-weight:600; }
+
+#nav-list details { margin-left:1rem; }
+#nav-list summary { font-weight:600; color:var(--text-color); cursor:pointer; padding:.5rem; border-radius:var(--radius-md); list-style-position:inside; }
+#nav-list summary:hover { background-color:var(--bg-alt-color); }
+#nav-list details ul { padding-left:.5rem; border-left:1px solid var(--line-color); margin-left:.5rem; }
+#nav-list details[open] > summary { margin-bottom:.25rem; }
+
+.relevance-score { font-size:.75em; color:var(--text-muted); background-color:var(--bg-alt-color); padding:2px 6px; border-radius:99px; }
+a:hover .relevance-score { background-color:var(--node-bg); }
+a.active .relevance-score { background-color:var(--node-bg); color:var(--type-color); }
+
+.filter-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 0.5rem; }
+.clear-filter-btn { background: var(--bg-alt-color); border: 1px solid var(--line-color); color: var(--text-muted); font-size: 0.75rem; padding: 2px 8px; border-radius: var(--radius-sm); cursor: pointer; }
+.clear-filter-btn:hover { background: var(--line-color); color: var(--text-color); }
+.filter-path { font-style: italic; color: var(--text-muted); font-size: 0.9em; margin: 0 0 1rem 0; padding-bottom: 0.5rem; border-bottom: 1px solid var(--line-color); }
+
+/* Main Panel: Topic View */
+.main-panel-content { padding: 2rem 2.5rem; max-width: 800px; margin: 0 auto; }
+.topic-header { display:flex; justify-content:space-between; align-items:flex-start; border-bottom:1px solid var(--line-color); padding-bottom:1rem; margin-bottom:1.5rem; }
+.topic-header-main { display:flex; align-items:center; gap:1rem; }
+.topic-icon { font-size:2rem; width:48px; height:48px; flex-shrink:0; border-radius:var(--radius-md); background-color:var(--type-bg); color: var(--type-color); display:flex; align-items:center; justify-content:center; }
+.topic-header h2 { margin:0; font-size:2rem; }
+.tags-container { margin-top:.5rem; display:flex; flex-wrap:wrap; gap:.5rem; }
+.tag-item { background-color:var(--bg-alt-color); border:1px solid var(--line-color); color:var(--text-muted); padding:2px 8px; border-radius:99px; font-size:.75em; font-weight:500; }
+.topic-header button { font-family:var(--font-main); background:var(--bg-alt-color); color:var(--text-color); border:1px solid var(--line-color); padding:.5rem 1rem; border-radius:var(--radius-md); cursor:pointer; font-weight:500; transition:all .2s; display: flex; align-items: center; gap: 0.5rem; }
+.topic-header button:hover { background-color:var(--line-color); border-color:var(--text-muted); }
+
+.breadcrumb { color: var(--text-muted); margin-bottom: 0.5rem; font-size: 0.9em; display: flex; align-items: center; flex-wrap: wrap; }
+.breadcrumb-item { background: none; border: none; padding: 0; font-family: inherit; font-size: inherit; color: var(--text-muted); text-decoration: none; cursor: pointer; }
+.breadcrumb-item:hover { color: var(--link-color); text-decoration: underline; }
+.breadcrumb-separator { margin: 0 0.5em; }
+
+h4 .emoji { font-size:.9em; }
+
+/* --- READABILITY FIX: .at-a-glance --- */
+.at-a-glance { 
+    padding:1.25rem; margin-bottom:1.5rem; border-radius:var(--radius-md); 
+    background:var(--type-bg); border-left:4px solid var(--type-color); 
+    color: var(--text-color); /* Use standard text color for readability */
+}
+.at-a-glance h4 { color: var(--type-color); } /* Use type color for heading accent */
+.at-a-glance ul { margin:0; padding-left:1.25rem; }
+.at-a-glance a { color: var(--type-color); font-weight: 600; } /* Make links inside use type color */
+html[data-theme='dark'] .at-a-glance a { filter: brightness(1.2); }
+
+.classification-path { color:var(--text-muted); font-size:.9em; margin-bottom:1.5rem; }
+.internal-link { color:var(--link-color); font-weight:600; text-decoration:none; border-bottom:1px solid transparent; transition:border-color .2s; }
+.internal-link:hover { border-color:currentColor; }
+
+/* Connections Panel */
+.connections-panel .panel-content { overflow-y: auto; }
+.connections-panel h4 { margin-top:0; }
+.connections-panel ul { list-style:none; padding:0; margin-bottom:1.5rem; }
+.connections-panel li { background-color:var(--node-bg); border-radius:var(--radius-md); padding:.75rem 1rem; margin-bottom:.5rem; box-shadow:var(--shadow-sm); border:1px solid var(--line-color); display: flex; flex-wrap: wrap; align-items: center; gap: 0 0.5rem; }
+.connections-panel li.no-connections { background: transparent; border: none; box-shadow: none; color: var(--text-muted); padding-left: 0; }
+.connection-label { font-size:.7rem; font-weight:700; text-transform:uppercase; letter-spacing:.05em; padding:.2em .6em; border-radius:var(--radius-sm); }
+/* --- READABILITY FIX: .connection-label --- */
+.connection-label.type-disease { background-color: var(--c-disease-bg-light); color: var(--c-disease-light); }
+.connection-label.type-structure { background-color: var(--c-structure-bg-light); color: var(--c-structure-light); }
+.connection-label.type-process { background-color: var(--c-process-bg-light); color: var(--c-process-light); }
+.connection-label.type-substance { background-color: var(--c-substance-bg-light); color: var(--c-substance-light); }
+.connection-label.type-finding { background-color: var(--c-finding-bg-light); color: var(--c-finding-light); }
+.connection-label.type-concept { background-color: var(--c-concept-bg-light); color: var(--c-concept-light); }
+.connection-label.type-default { background-color: var(--c-default-bg-light); color: var(--c-default-light); }
+
+html[data-theme='dark'] .connection-label.type-disease { background-color: var(--c-disease-bg-dark); color: var(--c-disease-dark); }
+html[data-theme='dark'] .connection-label.type-structure { background-color: var(--c-structure-bg-dark); color: var(--c-structure-dark); }
+html[data-theme='dark'] .connection-label.type-process { background-color: var(--c-process-bg-dark); color: var(--c-process-dark); }
+html[data-theme='dark'] .connection-label.type-substance { background-color: var(--c-substance-bg-dark); color: var(--c-substance-dark); }
+html[data-theme='dark'] .connection-label.type-finding { background-color: var(--c-finding-bg-dark); color: var(--c-finding-dark); }
+html[data-theme='dark'] .connection-label.type-concept { background-color: var(--c-concept-bg-dark); color: var(--c-concept-dark); }
+html[data-theme='dark'] .connection-label.type-default { background-color: var(--c-default-bg-dark); color: var(--c-default-dark); }
+
+.filter-pills { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+.filter-pill { font-size: 0.75rem; font-weight: 600; padding: 4px 10px; border-radius: 99px; border: 1px solid; cursor: pointer; background-color: transparent; opacity: 0.6; transition: all 0.2s; }
+.filter-pill:hover { opacity: 1; }
+.filter-pill.active { opacity: 1; background-color: var(--type-bg); }
+
+/* Popover & Modal */
+#popover { display:none; position:fixed; background-color:var(--node-bg); border:1px solid var(--line-color); box-shadow:var(--shadow-lg); padding:1rem; z-index:1000; max-width:320px; border-radius:var(--radius-lg); pointer-events:none; }
+#popover h4 { margin-top: 0; }
+#popover p { margin-bottom: 0; font-size: 0.9em; color: var(--text-muted); }
+
+.modal { display:none; position:fixed; z-index:100; left:0; top:0; width:100%; height:100%; background-color:rgba(17,24,39,0.8); backdrop-filter: blur(4px); }
+.modal-content { background-color:var(--bg-color); margin:5% auto; padding:20px; border:1px solid var(--line-color); width:80%; max-width:1200px; height:80%; display:flex; flex-direction:column; border-radius:var(--radius-lg); box-shadow:var(--shadow-lg); }
+.modal-header { display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid var(--line-color); padding-bottom:10px; margin-bottom:1rem; }
+.modal-header h2 { display: flex; align-items: center; gap: 0.5rem; }
+.close-btn { color:var(--text-muted); font-size:28px; font-weight:bold; cursor:pointer; }
+.close-btn:hover { color:var(--text-color); }
+
+/* Mobile / Responsive Styles */
+.mobile-header { display: none; }
+.mobile-overlay { display: none; }
+.desktop-only { display: inline; }
+.mobile-only { display: none; }
+.inline-cta { background: none; border: none; color: var(--link-color); text-decoration: underline; padding: 0; font-size: inherit; font-family: inherit; cursor: pointer; }
+
+@media (max-width: 1024px) {
+  .container { flex-direction: column; height: auto; min-height: 100vh; }
+  .main-panel { order: 1; padding: 0; }
+  .main-panel-content { padding: 1rem; padding-top: calc(var(--header-height) + 1rem); max-width: 100%; }
+  .topic-header h2 { font-size: 1.75rem; }
+
+  .nav-panel, .connections-panel {
+    position: fixed;
+    top: 0;
+    height: 100vh;
+    width: 85%;
+    max-width: 350px;
+    z-index: 200;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease-in-out;
+    box-shadow: var(--shadow-lg);
+  }
+  .connections-panel {
+    left: auto;
+    right: 0;
+    transform: translateX(100%);
+  }
+  .nav-panel.open, .connections-panel.open { transform: translateX(0); }
+  .resizer-handle { display: none; }
+  .panel-header .collapse-btn { display: none; }
+
+  .mobile-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 1rem;
+    height: var(--header-height);
+    background: var(--node-bg);
+    border-bottom: 1px solid var(--line-color);
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 150;
+  }
+  .mobile-header-btn {
+    background: none; border: none; color: var(--text-color); padding: 0.5rem; cursor: pointer; font-size: 1.5rem;
+  }
+  .mobile-header-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  .mobile-overlay {
+    display: block;
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: rgba(17, 24, 39, 0.6);
+    backdrop-filter: blur(2px);
+    z-index: 199;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+  }
+  .mobile-overlay.visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .desktop-only { display: none; }
+  .mobile-only { display: inline; }
+}
+
+/* --- REACT FLOW AND CUSTOM NODES --- */
+.modal-content .bg-pattern {
+    flex-grow: 1;
+}
+
+.react-flow__node-default {
+    padding: 0 !important;
+    border-radius: var(--radius-md) !important;
+    width: auto !important;
+    border: none !important;
+    background: transparent !important;
+    box-shadow: var(--shadow-lg) !important;
+    cursor: pointer;
+}
+
+.custom-node-body {
+    width: 220px;
+    background: var(--node-bg);
+    border: 1px solid var(--line-color);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    transition: all 0.2s ease;
+}
+
+.react-flow__node-default:hover .custom-node-body {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+html[data-theme='dark'] .react-flow__node-default:hover .custom-node-body {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+}
+
+.custom-node-body.is-center {
+    border: 2px solid var(--link-color);
+    box-shadow: 0 0 20px -5px var(--link-color);
+    transform: scale(1.05);
+}
+
+.node-header {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background-color: var(--type-bg);
+    color: var(--type-color);
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: capitalize;
+}
+.node-header .node-icon {
+    font-size: 1rem;
+    margin-right: 0;
+}
+
+.node-title {
+    padding: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-color);
+    font-weight: 500;
+    text-align: left;
+    white-space: normal;
+}
+
+.react-flow__edge-path {
+    stroke-opacity: 0.8;
+}
+.react-flow__edge.animated path {
+    stroke-dasharray: 5;
+    animation: dashdraw 0.5s linear infinite;
+}
+@keyframes dashdraw { to { stroke-dashoffset: -10; } }
+
+.react-flow__controls-button {
+    background-color: var(--node-bg) !important;
+    color: var(--text-color) !important;
+    border-bottom: 1px solid var(--line-color) !important;
+    box-shadow: var(--shadow-sm);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.react-flow__controls-button:hover {
+    background-color: var(--bg-alt-color) !important;
+}
+.react-flow__minimap {
+    background-color: var(--bg-alt-color) !important;
+    border-radius: var(--radius-sm);
+}
+.react-flow__background {
+    background-color: var(--bg-color) !important;
+}
+
+/* --- SmartEdge / React Flow Edge Label Styles --- */
+.react-flow__edge-text {
+    font-size: 10px;
+    text-transform: uppercase;
+    fill: var(--text-muted);
+    font-weight: 500;
+}
+
+.react-flow__edge-textbg {
+    fill: var(--bg-color);
+    stroke: var(--line-color);
+    stroke-width: 2px;
+}
+
+
+/* --- Styles from Previous Update --- */
+
+/* File Manager in NavPanel */
+.file-manager {
+  margin-bottom: 1rem;
+}
+.file-manager .import-btn {
+  width: 100%;
+  justify-content: flex-start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.file-selection-list {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0 0;
+  max-height: 150px;
+  overflow-y: auto;
+  border: 1px solid var(--line-color);
+  border-radius: var(--radius-md);
+  background-color: var(--bg-alt-color);
+}
+.file-selection-list li {
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9em;
+}
+.file-selection-list li:not(:last-child) {
+  border-bottom: 1px solid var(--line-color);
+}
+.file-selection-list label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+}
+.file-selection-list input[type="checkbox"] {
+  accent-color: var(--link-color);
+}
+
+/* Status Bar */
+.status-bar {
+  padding: 0.5rem 1.25rem;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  border-top: 1px solid var(--line-color);
+  background-color: var(--bg-alt-color);
+  flex-shrink: 0;
+  margin-top: auto;
+}
+html[data-theme='dark'] .status-bar {
+    background-color: var(--bg-color);
+}
+
+/* Sub-titles in NavPanel */
+.panel-title-sub {
+  font-size: 0.9rem;
+  text-transform: uppercase;
+  letter-spacing: .05em;
+  color: var(--text-muted);
+  margin: 0;
+  padding: 0 0 .5rem 0;
+}
+.search-results-list, .nav-tree-container {
+  padding: 0; /* Let #nav-list handle padding */
+}
+.search-results-list .no-results, .nav-tree-container .no-results {
+  color: var(--text-muted);
+  padding: 1rem 0;
+}
+
+/* Error Banner in Main Panel */
+.error-banner {
+  background-color: var(--c-disease-bg-light);
+  color: var(--c-disease-light);
+  border: 1px solid var(--c-disease-light);
+  padding: 1rem;
+  border-radius: var(--radius-md);
+  margin-bottom: 1.5rem;
+}
+html[data-theme='dark'] .error-banner {
+  background-color: var(--c-disease-bg-dark);
+  color: var(--c-disease-dark);
+  border-color: var(--c-disease-dark);
+}
+
+/* Toast Notifications */
+.toast-container {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: flex-end;
+}
+
+@keyframes toast-in {
+  from {
+    transform: translateX(100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast {
+  background: var(--node-bg);
+  color: var(--text-color);
+  padding: 12px 20px;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+  border-left: 4px solid;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  animation: toast-in 0.3s ease-out;
+  min-width: 250px;
+}
+.toast-success { border-color: var(--c-concept-light); }
+.toast-info    { border-color: var(--c-finding-light); }
+.toast-error   { border-color: var(--c-disease-light); }
+
+html[data-theme='dark'] .toast-success { border-color: var(--c-concept-dark); }
+html[data-theme='dark'] .toast-info    { border-color: var(--c-finding-dark); }
+html[data-theme='dark'] .toast-error   { border-color: var(--c-disease-dark); }
+
+.toast button {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+}
+===== ./main.tsx =====
+import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+
+createRoot(document.getElementById('root')!).render(
+  <StrictMode>
+    <App />
+  </StrictMode>,
+)
+
+===== ./mergefile.sh =====
+#!/usr/bin/env bash
+
+OUTPUT="merged_output.txt"
+# 先清空输出文件
+: > "$OUTPUT"
+
+find . \
+  \( -path "./node_modules" -o -path "./node_modules/*" \) -prune \
+  -o -type f ! -name "$OUTPUT" -print |
+  sort |
+  while IFS= read -r filepath; do
+    echo "===== ${filepath} =====" >> "$OUTPUT"
+    cat "$filepath" >> "$OUTPUT"
+    echo "" >> "$OUTPUT"
+  done
+
+
+===== ./types.ts =====
+// src/types.ts
+
+export interface Connection {
+  type: string;
+  to: string;
+}
+
+export interface Topic {
+  id: string;
+  title: string;
+  primaryType: string;
+  tags?: string[];
+  classificationPath?: string[];
+  content: {
+    definition?: string;
+    atAGlance?: string;
+    takeAway?: string;
+    [key: string]: unknown;
+  };
+  connections?: Connection[];
+}
+
+export interface KnowledgeBase {
+  [id: string]: Topic;
+}
+
+// 新增类型
+export interface FileSelection {
+  name: string;
+  selected: boolean;
+}
+
+export interface ToastNotification {
+  id: number;
+  message: string;
+  type: 'info' | 'success' | 'error';
+}
+===== ./types/file-system-access.d.ts =====
+// src/types/file-system-access.d.ts
+export {};
+
+declare global {
+  interface Window {
+    showOpenFilePicker?: (options?: OpenFilePickerOptions) => Promise<FileSystemFileHandle[]>;
+    showSaveFilePicker?: (options?: SaveFilePickerOptions) => Promise<FileSystemFileHandle>;
+    showDirectoryPicker?: (options?: DirectoryPickerOptions) => Promise<FileSystemDirectoryHandle>;
+  }
+
+  interface FileSystemDirectoryHandle {
+    entries(): AsyncIterableIterator<[string, FileSystemHandle]>;
+    keys(): AsyncIterableIterator<string>;
+    values(): AsyncIterableIterator<FileSystemHandle>;
+    [Symbol.asyncIterator](): AsyncIterableIterator<[string, FileSystemHandle]>;
+  }
+}
+
+===== ./utils/elkLayout.ts =====
+// src/utils/elkLayout.ts
+import ELK, { type ElkNode, type LayoutOptions, type ElkExtendedEdge } from 'elkjs/lib/elk.bundled.js';
+// FIX: 导入路径从 'reactflow' 改为 '@xyflow/react'
+import type { Node as ReactFlowNode, Edge as ReactFlowEdge } from '@xyflow/react';
+
+const elk = new ELK();
+
+const elkOptions: LayoutOptions = {
+  'elk.algorithm': 'layered',
+  'elk.direction': 'RIGHT',
+  'elk.layered.spacing.nodeNodeBetweenLayers': '250',
+  'elk.spacing.nodeNode': '80',
+  'elk.separateConnectedComponents': 'true',
+  'elk.edgeRouting': 'SPLINES',
+};
+
+export const getElkLayoutedElements = async (
+  nodes: ReactFlowNode[],
+  edges: ReactFlowEdge[],
+): Promise<{ nodes: ReactFlowNode[], edges: ReactFlowEdge[] }> => {
+  const elkNodes: ElkNode[] = [];
+  const elkEdges: ElkExtendedEdge[] = []; 
+
+  for (const node of nodes) {
+    elkNodes.push({
+      id: node.id,
+      width: 200,
+      height: 60,
+    });
+  }
+
+  for (const edge of edges) {
+    elkEdges.push({
+      id: edge.id,
+      sources: [edge.source],
+      targets: [edge.target],
+    });
+  }
+
+  const graph: ElkNode = {
+    id: 'root',
+    layoutOptions: elkOptions,
+    children: elkNodes,
+    edges: elkEdges,
+  };
+
+  const layoutedGraph = await elk.layout(graph);
+
+  const layoutedNodes = nodes.map(node => {
+    const elkNode = layoutedGraph.children?.find(n => n.id === node.id);
+    if (elkNode?.x && elkNode?.y) {
+      node.position = { x: elkNode.x, y: elkNode.y };
+    }
+    return node;
+  });
+
+  return { nodes: layoutedNodes, edges };
+};
+===== ./utils/normalization.ts =====
+// src/utils/normalization.ts
+import type { Topic } from '../types';
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return !!v && typeof v === 'object' && !Array.isArray(v);
+}
+
+function cleanStringsInObject(obj: any): any {
+    if (typeof obj === 'string') {
+        return obj.normalize('NFC').replace(/‚Äî/g, '—').replace(/‚Ä¶/g, '…');
+    }
+    if (Array.isArray(obj)) {
+        return obj.map(cleanStringsInObject);
+    }
+    if (isRecord(obj)) {
+        return Object.fromEntries(
+            Object.entries(obj).map(([key, value]) => [key, cleanStringsInObject(value)])
+        );
+    }
+    return obj;
+}
+
+export function normalizeTopic(idKey: string, raw: any): Topic {
+  const cleanedRaw = cleanStringsInObject(raw);
+  const id = (cleanedRaw?.id ?? idKey)?.toString?.() ?? idKey;
+  const title = (typeof cleanedRaw?.title === 'string' && cleanedRaw.title.trim()) || id;
+  const primaryType = (typeof cleanedRaw?.primaryType === 'string' && cleanedRaw.primaryType) || 'concept';
+  const classificationPath = Array.isArray(cleanedRaw?.classificationPath) ? cleanedRaw.classificationPath.filter((x: any) => typeof x === 'string' && x.trim()) : [];
+  const tags = Array.isArray(cleanedRaw?.tags) ? cleanedRaw.tags.filter((x: any) => typeof x === 'string' && x.trim()) : [];
+  const content = isRecord(cleanedRaw?.content) ? cleanedRaw.content : {};
+  const connections = Array.isArray(cleanedRaw?.connections) ? cleanedRaw.connections : [];
+
+  return {
+    ...(isRecord(cleanedRaw) ? cleanedRaw : {}),
+    id,
+    title,
+    primaryType,
+    classificationPath,
+    tags,
+    content,
+    connections,
+  } as Topic;
+}
+
+===== ./utils/semanticUtils.ts =====
+// src/utils/semanticUtils.ts
+
+// 1. 定义语义族及其关联颜色
+export const SEMANTIC_FAMILIES = {
+  HIERARCHY: { name: 'Hierarchy', color: 'structure' }, // Blue-ish
+  CAUSALITY: { name: 'Causality', color: 'disease' },   // Purple-ish
+  ACTION: { name: 'Medical Action', color: 'substance' }, // Teal-ish
+  ASSOCIATION: { name: 'Association', color: 'concept' }, // Green-ish
+  LOCATION: { name: 'Anatomy/Location', color: 'finding' }, // Cyan-ish
+  DEFAULT: { name: 'Other', color: 'default' },
+};
+
+// 2. 将连接类型中的关键词映射到这些族
+const KEYWORD_TO_FAMILY: [string[], keyof typeof SEMANTIC_FAMILIES][] = [
+  [['is_a', 'type', 'part', 'has', 'contains', 'component', 'subtype'], 'HIERARCHY'],
+  [['cause', 'lead', 'complication', 'result', 'produces', 'develops', 'secretes', 'impaired'], 'CAUSALITY'],
+  [['treat', 'diagnose', 'inhibit', 'stimulate', 'agonist', 'antagonist', 'prevent'], 'ACTION'],
+  [['assoc', 'relat', 'co-occur'], 'ASSOCIATION'],
+  [['in', 'at', 'on', 'of', 'from', 'by', 'surround', 'supply', 'connect'], 'LOCATION'],
+];
+
+// 3. 确定任何给定连接类型字符串所属族的函数
+export function getFamilyForType(type: string): { name: string; color: string } {
+  const typeLower = type.toLowerCase();
+  for (const [keywords, familyKey] of KEYWORD_TO_FAMILY) {
+    if (keywords.some(keyword => typeLower.includes(keyword))) {
+      return SEMANTIC_FAMILIES[familyKey];
+    }
+  }
+  return SEMANTIC_FAMILIES.DEFAULT;
+}
+

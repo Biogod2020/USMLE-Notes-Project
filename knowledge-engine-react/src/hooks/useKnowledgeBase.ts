@@ -13,33 +13,40 @@ import { normalizeTopic } from '../utils/normalization';
 const LS_FILES_KEY = 'KE_selectedFiles';
 const LS_DIR_PATH_KEY = 'KE_lastDirPath';
 
+type DirectoryContext =
+  | { mode: 'tauri'; path: string }
+  | { mode: 'fs-access'; handle: FileSystemDirectoryHandle };
+
+const isTauriEnv = typeof window !== 'undefined' && Boolean((window as any).__TAURI_INTERNALS__);
+const supportsFileSystemAccess = typeof window !== 'undefined' && 'showDirectoryPicker' in window;
+
 export function useKnowledgeBase() {
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase>({});
   const [fileSelections, setFileSelections] = useState<FileSelection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   
-  // [REFACTORED] State now holds the path string and directory name for display
-  const [currentDirPath, setCurrentDirPath] = useState<string | null>(null);
+  const [directoryContext, setDirectoryContext] = useState<DirectoryContext | null>(null);
   const [directoryName, setDirectoryName] = useState<string | null>(null);
 
   // Effect to load initial state from localStorage (remains the same)
   useEffect(() => {
+    if (!isTauriEnv) return;
     try {
       const savedFiles = localStorage.getItem(LS_FILES_KEY);
       if (savedFiles) {
         setFileSelections(JSON.parse(savedFiles));
       }
       const savedPath = localStorage.getItem(LS_DIR_PATH_KEY);
-       if (savedPath) {
-        setCurrentDirPath(savedPath);
+      if (savedPath) {
         const dirName = savedPath.split(/[/\\]/).pop() ?? savedPath;
         setDirectoryName(dirName);
-        // Optional: Auto-load on startup if path and files are found
+        const context: DirectoryContext = { mode: 'tauri', path: savedPath };
+        setDirectoryContext(context);
         if (savedFiles) {
-           loadFilesFromPath(savedPath, JSON.parse(savedFiles));
+          loadFilesFromSource(context, JSON.parse(savedFiles));
         }
-       }
+      }
     } catch (e) {
       console.error("Failed to load state from localStorage", e);
       localStorage.removeItem(LS_FILES_KEY);
@@ -47,9 +54,9 @@ export function useKnowledgeBase() {
     }
   }, []); // Note: Empty dependency array ensures this runs only once on mount
 
-  // [REFACTORED] Main file processing logic, now accepts a path string
-  const loadFilesFromPath = useCallback(async (
-    dirPath: string,
+  // [REFACTORED] Main file processing logic, now accepts a directory context
+  const loadFilesFromSource = useCallback(async (
+    context: DirectoryContext,
     selectionsToLoad: FileSelection[]
   ): Promise<{ added: string[]; removed: string[] }> => {
     setIsLoading(true);
@@ -68,9 +75,15 @@ export function useKnowledgeBase() {
       if (!file.selected) continue;
       
       try {
-        // [REFACTORED] Use Tauri's fs.readTextFile with a constructed path
-        const filePath = `${dirPath}/${file.name}`.replace(/\/\//g, '/');
-        const text = await readTextFile(filePath);
+        let text: string = '';
+        if (context.mode === 'tauri') {
+          const filePath = `${context.path}/${file.name}`.replace(/\/\//g, '/');
+          text = await readTextFile(filePath);
+        } else {
+          const fileHandle = await context.handle.getFileHandle(file.name);
+          const fileData = await fileHandle.getFile();
+          text = await fileData.text();
+        }
         const jsonData = JSON.parse(text);
 
         const entries = Object.entries(jsonData as Record<string, unknown>);
@@ -101,7 +114,9 @@ export function useKnowledgeBase() {
 
     setKnowledgeBase(newKnowledgeBase);
     setFileSelections(selectionsToLoad);
-    localStorage.setItem(LS_FILES_KEY, JSON.stringify(selectionsToLoad));
+    if (context.mode === 'tauri') {
+      localStorage.setItem(LS_FILES_KEY, JSON.stringify(selectionsToLoad));
+    }
     setIsLoading(false);
 
     return { added: filesToAdd, removed: filesToRemove };
@@ -110,25 +125,57 @@ export function useKnowledgeBase() {
   // [REFACTORED] Replaced showDirectoryPicker with Tauri's native dialog
   const selectDirectory = useCallback(async () => {
     try {
-      const selectedPath = await open({ directory: true, multiple: false });
+      if (isTauriEnv) {
+        const selectedPath = await open({ directory: true, multiple: false });
 
-      if (typeof selectedPath !== 'string') {
-        console.log("Directory selection was cancelled.");
+        if (typeof selectedPath !== 'string') {
+          console.log("Directory selection was cancelled.");
+          return null;
+        }
+
+        const dirName = selectedPath.split(/[/\\]/).pop() ?? selectedPath;
+        setDirectoryName(dirName);
+        const context: DirectoryContext = { mode: 'tauri', path: selectedPath };
+        setDirectoryContext(context);
+        localStorage.setItem(LS_DIR_PATH_KEY, selectedPath);
+
+        const savedSelectionsMap = new Map(fileSelections.map(f => [f.name, f.selected]));
+        const newSelections: FileSelection[] = [];
+
+        const entries = await readDir(selectedPath);
+        for (const entry of entries) {
+          if (entry.isFile && entry.name?.endsWith('.json')) {
+            newSelections.push({
+              name: entry.name,
+              selected: savedSelectionsMap.get(entry.name) ?? false,
+            });
+          }
+        }
+        newSelections.sort((a, b) => a.name.localeCompare(b.name));
+
+        return await loadFilesFromSource(context, newSelections);
+      }
+
+      if (!supportsFileSystemAccess) {
+        const message = 'Directory selection requires the desktop app or a Chromium browser that supports the File System Access API.';
+        setError(message);
+        toast.error(message);
         return null;
       }
-      
-      const dirName = selectedPath.split(/[/\\]/).pop() ?? selectedPath;
-      setDirectoryName(dirName);
-      setCurrentDirPath(selectedPath);
-      localStorage.setItem(LS_DIR_PATH_KEY, selectedPath);
+
+      const picker = await (window as any).showDirectoryPicker();
+      const permission = await picker.requestPermission?.({ mode: 'read' });
+      if (permission === 'denied') {
+        const message = 'Please grant read access to the selected directory.';
+        setError(message);
+        toast.error(message);
+        return null;
+      }
 
       const savedSelectionsMap = new Map(fileSelections.map(f => [f.name, f.selected]));
       const newSelections: FileSelection[] = [];
-      
-      // [REFACTORED] Use Tauri's fs.readDir
-      const entries = await readDir(selectedPath);
-      for (const entry of entries) {
-        if (entry.isFile && entry.name?.endsWith('.json')) {
+      for await (const entry of (picker as FileSystemDirectoryHandle).values()) {
+        if (entry.kind === 'file' && entry.name.endsWith('.json')) {
           newSelections.push({
             name: entry.name,
             selected: savedSelectionsMap.get(entry.name) ?? false,
@@ -136,8 +183,12 @@ export function useKnowledgeBase() {
         }
       }
       newSelections.sort((a, b) => a.name.localeCompare(b.name));
-      
-      return await loadFilesFromPath(selectedPath, newSelections);
+
+      const context: DirectoryContext = { mode: 'fs-access', handle: picker };
+      setDirectoryContext(context);
+      setDirectoryName(picker.name ?? 'Selected Directory');
+
+      return await loadFilesFromSource(context, newSelections);
 
     } catch (err) {
       // [IMPROVED LOGGING]
@@ -150,10 +201,10 @@ export function useKnowledgeBase() {
       toast.error(errorMessage);
       return null;
     }
-  }, [fileSelections, loadFilesFromPath]);
+  }, [fileSelections, loadFilesFromSource]);
 
   const toggleFileSelection = useCallback(async (fileName: string) => {
-    if (!currentDirPath) {
+    if (!directoryContext) {
       setError("Please select a directory first.");
       toast.error("Please select a directory first.");
       return null;
@@ -163,8 +214,8 @@ export function useKnowledgeBase() {
       f.name === fileName ? { ...f, selected: !f.selected } : f
     );
     
-    return await loadFilesFromPath(currentDirPath, newSelections);
-  }, [fileSelections, currentDirPath, loadFilesFromPath]);
+    return await loadFilesFromSource(directoryContext, newSelections);
+  }, [fileSelections, directoryContext, loadFilesFromSource]);
 
   return {
     knowledgeBase,

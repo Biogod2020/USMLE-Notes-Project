@@ -8,10 +8,16 @@ const elk = new ELK();
 const elkOptions: LayoutOptions = {
   'elk.algorithm': 'layered',
   'elk.direction': 'RIGHT',
-  'elk.layered.spacing.nodeNodeBetweenLayers': '250',
-  'elk.spacing.nodeNode': '80',
+  'elk.layered.spacing.nodeNodeBetweenLayers': '260',
+  'elk.layered.spacing.edgeNodeBetweenLayers': '90',
+  'elk.spacing.nodeNode': '120',
+  'elk.layered.thoroughness': '10',
+  'elk.layered.crossingMinimization.strategy': 'LAYER_SWEEP',
+  'elk.layered.nodePlacement.strategy': 'NETWORK_SIMPLEX',
+  'elk.layered.nodePlacement.favorStraightEdges': 'true',
+  'elk.layered.compaction.connectedComponents': 'true',
   'elk.separateConnectedComponents': 'true',
-  'elk.edgeRouting': 'SPLINES',
+  'elk.edgeRouting': 'ORTHOGONAL',
 };
 
 export const getElkLayoutedElements = async (
@@ -24,8 +30,8 @@ export const getElkLayoutedElements = async (
   for (const node of nodes) {
     elkNodes.push({
       id: node.id,
-      width: 200,
-      height: 60,
+      width: node.width ?? 200,
+      height: node.height ?? 60,
     });
   }
 
@@ -48,8 +54,11 @@ export const getElkLayoutedElements = async (
 
   const layoutedNodes = nodes.map(node => {
     const elkNode = layoutedGraph.children?.find(n => n.id === node.id);
-    if (elkNode?.x && elkNode?.y) {
-      node.position = { x: elkNode.x, y: elkNode.y };
+    if (elkNode && typeof elkNode.x === 'number' && typeof elkNode.y === 'number') {
+      return {
+        ...node,
+        position: { x: elkNode.x, y: elkNode.y },
+      };
     }
     return node;
   });

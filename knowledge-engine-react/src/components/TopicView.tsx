@@ -18,9 +18,10 @@ interface Props {
   onGraphViewClick: () => void;
   onOpenNav: () => void;
   onBreadcrumbClick: (path: string[]) => void;
+  onEditTopic: (id: string) => void;
 }
 
-export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, onBreadcrumbClick }: Props) {
+export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, onBreadcrumbClick, onEditTopic }: Props) {
   if (!topic) {
     return (
         <div style={{ opacity: 0.8, padding: '2rem', textAlign: 'center' }}>
@@ -67,6 +68,9 @@ export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, o
           </div>
         </div>
         <div className="topic-header-actions">
+          <button type="button" onClick={() => onEditTopic(topic.id)}>
+            <span className="emoji">✏️</span>Edit Topic
+          </button>
           <button type="button" onClick={onGraphViewClick}><span className="emoji">🕸️</span>Graph View</button>
         </div>
       </header>

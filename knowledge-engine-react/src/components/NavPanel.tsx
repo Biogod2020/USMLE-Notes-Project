@@ -1,6 +1,6 @@
 // src/components/NavPanel.tsx
 import { useMemo, memo } from 'react';
-import type { KnowledgeBase, Topic, FileSelection } from '../types';
+import type { KnowledgeBase, Topic, FileSelection, DataHealthSummary } from '../types';
 import type { SearchResult } from '../App';
 import { getIcon, ThemeIcon, PanelCollapseIcon } from './Icons';
 
@@ -23,6 +23,7 @@ interface Props {
   onSelectDirectory: () => void;
   onToggleFileSelection: (fileName: string) => void;
   isLoading: boolean;
+  dataHealth: DataHealthSummary | null;
 }
 
 const Highlight = memo(({ text, highlight }: { text: string; highlight: string }) => {
@@ -98,16 +99,35 @@ export function NavPanel({
   knowledgeBase, activeTopicId, onTopicSelect, searchTerm, onSearchChange,
   searchResults, onToggleTheme, isCollapsed, onToggleCollapse, navFilterPath,
   onClearNavFilter, directoryName, fileSelections, onSelectDirectory,
-  onToggleFileSelection, isLoading
+  onToggleFileSelection, isLoading, dataHealth
 }: Props) {
   const { root: navTree, unclassified } = useMemo(() => buildTree(knowledgeBase), [knowledgeBase]);
   const openKeys = useMemo(() => {
     const topic = activeTopicId ? knowledgeBase[activeTopicId] : null;
     return navFilterPath ? new Set(Object.keys(navTree.children)) : new Set(topic?.classificationPath ?? []);
   }, [activeTopicId, knowledgeBase, navFilterPath, navTree]);
-  
-  const loadedFilesCount = fileSelections.filter(f => f.selected).length;
-  const totalTopicsCount = Object.keys(knowledgeBase).length;
+
+  const anyFilesSelected = fileSelections.some(f => f.selected);
+  let statusMessage = 'Select a directory to load topics.';
+  if (isLoading) {
+    statusMessage = 'Loading topics...';
+  } else if (!directoryName) {
+    statusMessage = 'Select a directory to load topics.';
+  } else if (fileSelections.length === 0) {
+    statusMessage = 'No JSON files detected in the selected directory.';
+  } else if (!anyFilesSelected) {
+    statusMessage = 'Toggle at least one JSON file to load topics.';
+  } else if (dataHealth) {
+    const { totalTopics, selectedFiles, invalidTopics, invalidFiles } = dataHealth;
+    const topicLabel = totalTopics === 1 ? 'topic' : 'topics';
+    const fileLabel = selectedFiles === 1 ? 'file' : 'files';
+    statusMessage = `Loaded ${totalTopics} ${topicLabel} from ${selectedFiles} ${fileLabel}.`;
+    if (invalidTopics > 0 || invalidFiles > 0) {
+      const skippedLabel = invalidTopics === 1 ? 'topic' : 'topics';
+      const issueFileLabel = invalidFiles === 1 ? 'file' : 'files';
+      statusMessage += ` Skipped ${invalidTopics} ${skippedLabel} across ${invalidFiles} ${issueFileLabel}.`;
+    }
+  }
 
   if (isCollapsed) {
     return (
@@ -141,7 +161,9 @@ export function NavPanel({
             </button>
             {fileSelections.length > 0 && (
                 <ul className="file-selection-list">
-                    {fileSelections.map(file => (
+                    {fileSelections.map(file => {
+                        const issueCount = dataHealth?.fileErrors?.[file.name]?.length ?? 0;
+                        return (
                         <li key={file.name}>
                             <label>
                                 <input 
@@ -150,10 +172,21 @@ export function NavPanel({
                                     onChange={() => onToggleFileSelection(file.name)}
                                     disabled={isLoading}
                                 />
-                                <span>{file.name}</span>
+                                <span className="file-name">
+                                    <span>{file.name}</span>
+                                    {issueCount > 0 ? (
+                                      <span
+                                        className="file-issue-badge"
+                                        title={`${issueCount} validation issue${issueCount === 1 ? '' : 's'}`}
+                                      >
+                                        ⚠️ {issueCount}
+                                      </span>
+                                    ) : null}
+                                </span>
                             </label>
                         </li>
-                    ))}
+                        );
+                    })}
                 </ul>
             )}
         </div>
@@ -216,7 +249,7 @@ export function NavPanel({
           )}
       </div>
       <div className="status-bar">
-        {isLoading ? 'Loading...' : `${totalTopicsCount} topics from ${loadedFilesCount} files.`}
+            {statusMessage}
       </div>
     </>
   );

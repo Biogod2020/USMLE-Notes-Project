@@ -1,13 +1,14 @@
 // src/hooks/useKnowledgeBase.ts
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { toast } from 'sonner';
 
 // [REFACTORED] Import Tauri's native APIs instead of relying on web APIs
 import { open } from '@tauri-apps/plugin-dialog';
-import { readTextFile, readDir } from '@tauri-apps/plugin-fs';
+import { readTextFile, readDir, writeTextFile } from '@tauri-apps/plugin-fs';
 
-import type { KnowledgeBase, FileSelection } from '../types';
+import type { KnowledgeBase, FileSelection, DataHealthSummary, Topic } from '../types';
 import { normalizeTopic } from '../utils/normalization';
+import { TopicSchema } from '../utils/schema';
 
 // [REFACTORED] We now store the string path, not a handle object
 const LS_FILES_KEY = 'KE_selectedFiles';
@@ -20,11 +21,37 @@ type DirectoryContext =
 const isTauriEnv = typeof window !== 'undefined' && Boolean((window as any).__TAURI_INTERNALS__);
 const supportsFileSystemAccess = typeof window !== 'undefined' && 'showDirectoryPicker' in window;
 
+function getOverridePath(basePath: string, baseFileName: string): string {
+  const overrideDir = `${basePath}/.overrides`;
+  const nameWithoutExt = baseFileName.replace(/\.json$/i, '');
+  return `${overrideDir}/${nameWithoutExt}.overrides.json`.replace(/\/{2,}/g, '/');
+}
+
+function deepMerge<T extends Record<string, any>>(base: T, override: Partial<T>): T {
+  const result = { ...base };
+  for (const key in override) {
+    const overrideValue = override[key];
+    if (overrideValue === undefined) continue;
+    if (typeof overrideValue === 'object' && !Array.isArray(overrideValue) && overrideValue !== null) {
+      result[key] = deepMerge(result[key] || {} as any, overrideValue);
+    } else {
+      result[key] = overrideValue as T[Extract<keyof T, string>];
+    }
+  }
+  return result;
+}
+
 export function useKnowledgeBase() {
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase>({});
   const [fileSelections, setFileSelections] = useState<FileSelection[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dataHealth, setDataHealth] = useState<DataHealthSummary | null>(null);
+  const [overrides, setOverrides] = useState<KnowledgeBase>({});
+  const [topicSources, setTopicSources] = useState<Record<string, string>>({});
+  const fileCacheRef = useRef<Record<string, Record<string, unknown>>>({});
+  const overrideFileCacheRef = useRef<Record<string, Record<string, unknown>>>({});
+  const [overridesByFile, setOverridesByFile] = useState<Record<string, Record<string, Partial<Topic & { _deleted?: boolean }>>>>({});
   
   const [directoryContext, setDirectoryContext] = useState<DirectoryContext | null>(null);
   const [directoryName, setDirectoryName] = useState<string | null>(null);
@@ -62,14 +89,24 @@ export function useKnowledgeBase() {
     setIsLoading(true);
     setError(null);
 
+    const fileErrors: Record<string, string[]> = {};
+    let invalidTopics = 0;
+    const newTopicSources: Record<string, string> = {};
+    const newFileCache: Record<string, Record<string, unknown>> = {};
+    const newOverrideFileCache: Record<string, Record<string, unknown>> = {};
+    const newOverridesByFile: Record<string, Record<string, Partial<Topic & { _deleted?: boolean }>>> = {};
+
     const oldSelectedFiles = fileSelections.filter(f => f.selected).map(f => f.name);
     const newSelectedFiles = selectionsToLoad.filter(f => f.selected).map(f => f.name);
 
     const filesToAdd = newSelectedFiles.filter(name => !oldSelectedFiles.includes(name));
     const filesToRemove = oldSelectedFiles.filter(name => !newSelectedFiles.includes(name));
-    
-    const newKnowledgeBase: KnowledgeBase = {};
-    let loadedFileCount = 0;
+
+    const baseTopicsByFile: Record<string, Record<string, Topic>> = {};
+    const addFileError = (fileName: string, message: string) => {
+      fileErrors[fileName] ??= [];
+      fileErrors[fileName]!.push(message);
+    };
 
     for (const file of selectionsToLoad) {
       if (!file.selected) continue;
@@ -77,7 +114,7 @@ export function useKnowledgeBase() {
       try {
         let text: string = '';
         if (context.mode === 'tauri') {
-          const filePath = `${context.path}/${file.name}`.replace(/\/\//g, '/');
+          const filePath = `${context.path}/${file.name}`.replace(/\/{2,}/g, '/');
           text = await readTextFile(filePath);
         } else {
           const fileHandle = await context.handle.getFileHandle(file.name);
@@ -85,21 +122,78 @@ export function useKnowledgeBase() {
           text = await fileData.text();
         }
         const jsonData = JSON.parse(text);
+        newFileCache[file.name] = jsonData as Record<string, unknown>;
 
+        const fileTopics: Record<string, Topic> = {};
         const entries = Object.entries(jsonData as Record<string, unknown>);
         for (const [idKey, rawTopic] of entries) {
           if (!rawTopic || typeof idKey !== 'string' || idKey.startsWith('zzz_')) continue;
           
           const normalized = normalizeTopic(idKey, rawTopic);
-          if (!normalized.id.startsWith('zzz_')) {
-            newKnowledgeBase[normalized.id] = normalized;
+          if (normalized.id.startsWith('zzz_')) continue;
+
+          const validation = TopicSchema.safeParse(normalized);
+          if (!validation.success) {
+            invalidTopics += 1;
+            const issueSummary = validation.error.issues
+              .map(issue => {
+                const path = issue.path.join('.') || 'topic';
+                return `${path}: ${issue.message}`;
+              })
+              .join('; ');
+            addFileError(file.name, `Topic ${idKey}: ${issueSummary}`);
+            continue;
           }
+
+          fileTopics[validation.data.id] = validation.data;
+          newTopicSources[validation.data.id] = file.name;
         }
-        loadedFileCount++;
+        baseTopicsByFile[file.name] = fileTopics;
       } catch (e) {
-        console.error(`Error processing file ${file.name} via Tauri FS:`, e);
-        setError(`Failed to load ${file.name}. It might be corrupted or inaccessible.`);
-        toast.error(`Failed to load ${file.name}`);
+        console.error(`Error processing file ${file.name}:`, e);
+        const message = `Failed to load ${file.name}. It might be corrupted or inaccessible.`;
+        setError(message);
+        addFileError(file.name, typeof e === 'string' ? e : message);
+        toast.error(message);
+      }
+    }
+
+    // Load override files
+    if (context.mode === 'tauri') {
+      for (const file of selectionsToLoad) {
+        if (!file.selected) continue;
+        try {
+          const overridePath = getOverridePath(context.path, file.name);
+          const overrideText = await readTextFile(overridePath);
+          const overrideData = JSON.parse(overrideText) as Record<string, Partial<Topic & { _deleted?: boolean }>>;
+          newOverrideFileCache[file.name] = overrideData as Record<string, unknown>;
+          newOverridesByFile[file.name] = overrideData;
+        } catch (e) {
+          // Override file not existing is fine, just skip
+          if (typeof e === 'object' && e && 'message' in e && typeof e.message === 'string' && e.message.includes('No such file')) {
+            continue;
+          }
+          console.warn(`Failed to load override file for ${file.name}:`, e);
+        }
+      }
+    }
+
+    // Merge base topics with overrides
+    const newKnowledgeBase: KnowledgeBase = {};
+    for (const [fileName, fileTopics] of Object.entries(baseTopicsByFile)) {
+      const overrides = newOverridesByFile[fileName] ?? {};
+      for (const [topicId, baseTopic] of Object.entries(fileTopics)) {
+        const override = overrides[topicId];
+        if (override?._deleted) {
+          // Topic marked as deleted in override, skip it
+          continue;
+        }
+        if (override) {
+          // Merge override into base
+          newKnowledgeBase[topicId] = deepMerge(baseTopic, override);
+        } else {
+          newKnowledgeBase[topicId] = baseTopic;
+        }
       }
     }
 
@@ -117,6 +211,24 @@ export function useKnowledgeBase() {
     if (context.mode === 'tauri') {
       localStorage.setItem(LS_FILES_KEY, JSON.stringify(selectionsToLoad));
     }
+
+    const health: DataHealthSummary = {
+      totalTopics: Object.keys(newKnowledgeBase).length,
+      selectedFiles: newSelectedFiles.length,
+      invalidFiles: Object.keys(fileErrors).length,
+      invalidTopics,
+      fileErrors,
+    };
+    setDataHealth(health);
+    fileCacheRef.current = newFileCache;
+    overrideFileCacheRef.current = newOverrideFileCache;
+    setTopicSources(newTopicSources);
+    setOverridesByFile(newOverridesByFile);
+
+    Object.entries(fileErrors).forEach(([fileName, messages]) => {
+      toast.warning(`${fileName}: ${messages.length} issue${messages.length === 1 ? '' : 's'} detected`);
+    });
+
     setIsLoading(false);
 
     return { added: filesToAdd, removed: filesToRemove };
@@ -217,13 +329,99 @@ export function useKnowledgeBase() {
     return await loadFilesFromSource(directoryContext, newSelections);
   }, [fileSelections, directoryContext, loadFilesFromSource]);
 
+  const mergedKnowledgeBase = useMemo(() => ({ ...knowledgeBase, ...overrides }), [knowledgeBase, overrides]);
+
+  const persistTopic = useCallback(async (topic: Topic) => {
+    if (!topic?.id) {
+      throw new Error('Cannot persist a topic without an ID.');
+    }
+    const sourceFile = topicSources[topic.id];
+    if (!sourceFile) {
+      throw new Error('Unable to determine which file owns this topic.');
+    }
+    if (!directoryContext || directoryContext.mode !== 'tauri') {
+      throw new Error('Saving to disk requires the desktop app.');
+    }
+    
+    // Load current overrides for this file
+    const currentOverrides = overrideFileCacheRef.current[sourceFile] ?? {};
+    
+    // Write the full topic to override (Phase 1: full topic, Phase 2: partial diff)
+    currentOverrides[topic.id] = { ...topic } as Record<string, unknown>;
+    
+    const overridePath = getOverridePath(directoryContext.path, sourceFile);
+    await writeTextFile(overridePath, JSON.stringify(currentOverrides, null, 2));
+    
+    // Update in-memory cache
+    overrideFileCacheRef.current[sourceFile] = currentOverrides;
+    setOverridesByFile(prev => ({
+      ...prev,
+      [sourceFile]: currentOverrides as Record<string, Partial<Topic & { _deleted?: boolean }>>
+    }));
+    
+    // Update merged knowledge base
+    setKnowledgeBase(prev => ({ ...prev, [topic.id]: topic }));
+    setOverrides(prev => {
+      if (!(topic.id in prev)) return prev;
+      const { [topic.id]: _discarded, ...rest } = prev;
+      return rest;
+    });
+  }, [topicSources, directoryContext]);
+
+  const resetTopicOverride = useCallback(async (topicId: string) => {
+    const sourceFile = topicSources[topicId];
+    if (!sourceFile) {
+      throw new Error('Unable to determine which file owns this topic.');
+    }
+    if (!directoryContext || directoryContext.mode !== 'tauri') {
+      throw new Error('Resetting requires the desktop app.');
+    }
+    
+    const currentOverrides = overrideFileCacheRef.current[sourceFile] ?? {};
+    delete currentOverrides[topicId];
+    
+    const overridePath = getOverridePath(directoryContext.path, sourceFile);
+    await writeTextFile(overridePath, JSON.stringify(currentOverrides, null, 2));
+    
+    overrideFileCacheRef.current[sourceFile] = currentOverrides;
+    setOverridesByFile(prev => ({
+      ...prev,
+      [sourceFile]: currentOverrides as Record<string, Partial<Topic & { _deleted?: boolean }>>
+    }));
+    
+    // Remove from in-memory overrides
+    setOverrides(prev => {
+      const next = { ...prev };
+      delete next[topicId];
+      return next;
+    });
+  }, [topicSources, directoryContext]);
+
+  const hasOverride = useCallback((topicId: string): boolean => {
+    const sourceFile = topicSources[topicId];
+    if (!sourceFile) return false;
+    return Boolean(overridesByFile[sourceFile]?.[topicId]);
+  }, [topicSources, overridesByFile]);
+
+  const getTopicSource = useCallback((topicId: string) => topicSources[topicId] ?? null, [topicSources]);
+  const canPersistTopics = Boolean(directoryContext && directoryContext.mode === 'tauri');
+
   return {
-    knowledgeBase,
+    knowledgeBase: mergedKnowledgeBase,
     fileSelections,
     directoryName,
     isLoading,
     error,
+    dataHealth,
     selectDirectory,
     toggleFileSelection,
+    applyTopicOverride: (topic: Topic) => {
+      setOverrides(prev => ({ ...prev, [topic.id]: topic }));
+    },
+    persistTopic,
+    resetTopicOverride,
+    hasOverride,
+    canPersistTopics,
+    getTopicSource,
   };
 }

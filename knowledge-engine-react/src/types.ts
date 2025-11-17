@@ -35,3 +35,11 @@ export interface ToastNotification {
   message: string;
   type: 'info' | 'success' | 'error';
 }
+
+export interface DataHealthSummary {
+  totalTopics: number;
+  selectedFiles: number;
+  invalidFiles: number;
+  invalidTopics: number;
+  fileErrors: Record<string, string[]>;
+}

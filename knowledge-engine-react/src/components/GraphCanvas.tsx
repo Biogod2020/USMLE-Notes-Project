@@ -46,8 +46,8 @@ function GraphCanvasView({ knowledgeBase, centerNodeId, onNodeClick }: GraphCanv
     setActiveEdgeFilters(new Set());
   }, [centerNodeId]);
 
-  const [nodes, setNodes, onNodesChange] = useNodesState([]);
-  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
   const { fitView } = useReactFlow();
 
   const resolveCssVar = useCallback((cssVar: string): string => {

@@ -57,7 +57,7 @@ const TYPE_KEYS = ['disease', 'structure', 'process', 'substance', 'finding', 'c
 function resolveGroupColors(theme: 'light' | 'dark') {
   if (typeof document === 'undefined') return {};
   const css = getComputedStyle(document.documentElement);
-  const entries = TYPE_KEYS.map(type => {
+  const entries: Array<[string, { color: { background: string; border: string } }]> = TYPE_KEYS.map(type => {
     const bg = css.getPropertyValue(`--c-${type}-bg-${theme}`).trim() || '#ffffff';
     const border = css.getPropertyValue(`--c-${type}-${theme}`).trim() || '#333333';
     return [type, { color: { background: bg, border } }];
@@ -119,7 +119,7 @@ export function VisNetworkCanvas({ knowledgeBase, centerNodeId, onNodeClick }: V
     }
 
     networkRef.current = new Network(containerRef.current, data, options);
-    networkRef.current.once('stabilized', () => networkRef.current?.fit({ animation: { duration: 400, easing: 'easeInOutQuad' } }));
+    networkRef.current.once('stabilized', () => networkRef.current?.fit({ animation: { duration: 400, easingFunction: 'easeInOutQuad' } }));
     networkRef.current.on('selectNode', params => {
       if (params.nodes.length > 0) {
         onNodeClick(params.nodes[0]);

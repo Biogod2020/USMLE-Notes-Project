@@ -6,6 +6,7 @@ import { NavPanel } from './components/NavPanel';
 import { TopicView } from './components/TopicView';
 import { ConnectionsPanel } from './components/ConnectionsPanel';
 import { GraphModal } from './components/GraphModal';
+import { TopicEditor } from './components/TopicEditor';
 import { Popover } from './components/Popover';
 import { ToastContainer } from './components/Toast';
 import { useResizablePanels } from './hooks/useResizablePanels';
@@ -67,6 +68,7 @@ export default function App() {
   const [isConnectionsOpen, setIsConnectionsOpen] = useState(false);
   const [navFilterPath, setNavFilterPath] = useState<string[] | null>(null);
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
+  const [editorTopicId, setEditorTopicId] = useState<string | null>(null);
 
   const {
     knowledgeBase,
@@ -74,8 +76,15 @@ export default function App() {
     directoryName,
     isLoading,
     error,
+    dataHealth,
     selectDirectory,
     toggleFileSelection,
+    applyTopicOverride,
+    persistTopic,
+    resetTopicOverride,
+    hasOverride,
+    canPersistTopics,
+    getTopicSource,
   } = useKnowledgeBase();
 
   const addToast = (message: string, type: ToastNotification['type'] = 'info') => {
@@ -196,6 +205,12 @@ export default function App() {
     localStorage.setItem('theme', next);
   };
 
+  const openEditorFor = (id: string) => {
+    setEditorTopicId(id);
+  };
+
+  const closeEditor = () => setEditorTopicId(null);
+
   const handleTopicSelect = (id: string) => {
     if (activeTopicId !== id) {
       setActiveTopicId(id);
@@ -225,11 +240,50 @@ export default function App() {
     }
   };
 
-  const activeTopic = activeTopicId ? knowledgeBase[activeTopicId] ?? null : null;
+  const getTopic = (id: string | null): Topic | null => {
+    if (!id) return null;
+    return knowledgeBase[id] ?? null;
+  };
+
+  const activeTopic = getTopic(activeTopicId);
+  const editorTopic = getTopic(editorTopicId);
+  const editorTopicSource = editorTopic?.id ? getTopicSource(editorTopic.id) : null;
   const closeAllDrawers = () => {
     setIsNavOpen(false);
     setIsConnectionsOpen(false);
   }
+
+  const handleEditorSaveDraft = (nextTopic: Topic) => {
+    applyTopicOverride(nextTopic);
+    setEditorTopicId(nextTopic.id);
+    addToast('Draft saved locally. Persist to disk when ready.', 'success');
+  };
+
+  const handleEditorPersist = async (nextTopic: Topic) => {
+    applyTopicOverride(nextTopic);
+    setEditorTopicId(nextTopic.id);
+    try {
+      await persistTopic(nextTopic);
+      const source = getTopicSource(nextTopic.id) ?? 'unknown';
+      addToast(`Saved to override file (${source})`, 'success');
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to save topic to disk.';
+      addToast(message, 'error');
+      throw err;
+    }
+  };
+
+  const handleResetOverride = async () => {
+    if (!editorTopicId) return;
+    try {
+      await resetTopicOverride(editorTopicId);
+      addToast('Reset to original version', 'success');
+      setEditorTopicId(null);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to reset';
+      addToast(message, 'error');
+    }
+  };
 
   return (
     <>
@@ -264,6 +318,7 @@ export default function App() {
             onSelectDirectory={handleSelectDirectory}
             onToggleFileSelection={handleToggleFile}
             isLoading={isLoading}
+            dataHealth={dataHealth}
           />
         </aside>
 
@@ -286,6 +341,7 @@ export default function App() {
               onGraphViewClick={() => setIsGraphModalOpen(true)}
               onOpenNav={() => setIsNavOpen(true)}
               onBreadcrumbClick={handleBreadcrumbClick}
+              onEditTopic={openEditorFor}
             />
           </div>
         </main>
@@ -322,6 +378,17 @@ export default function App() {
       <Popover data={popoverData} />
       <ToastContainer toasts={toasts} onDismiss={removeToast} />
       <Toaster richColors /> 
+      <TopicEditor
+        topic={editorTopic}
+        isOpen={Boolean(editorTopicId)}
+        onClose={closeEditor}
+        onSave={handleEditorSaveDraft}
+        onPersist={canPersistTopics ? handleEditorPersist : undefined}
+        onResetOverride={canPersistTopics && editorTopicId && hasOverride(editorTopicId) ? handleResetOverride : undefined}
+        canPersist={canPersistTopics}
+        hasOverride={editorTopicId ? hasOverride(editorTopicId) : false}
+        sourceFile={editorTopicSource}
+      />
     </>
   );
 }

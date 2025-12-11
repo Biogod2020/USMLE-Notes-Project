@@ -1,0 +1,1118 @@
+{
+  "dd11dde6": {
+    "title": "Abducens Nerve (CN VI)",
+    "primaryType": "anatomy",
+    "tags": [
+      "Neurology",
+      "Cranial Nerves",
+      "Ophthalmology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Anatomy and Physiology",
+      "Cranial Nerves"
+    ],
+    "content": {
+      "definition": "<p>The <b>Abducens Nerve (CN VI)</b> is a somatic <i>motor cranial nerve</i> that originates from the pontomedullary junction and <u>exclusively innervates</u> the [[f7b5ee5d|Lateral Rectus muscle]], which is responsible for abduction of the eye (looking laterally).</p>",
+      "atAGlance": "<ul><li><b>Function:</b> Motor innervation to the ipsilateral [[f7b5ee5d|lateral rectus muscle]], enabling abduction (lateral eye movement).</li><li><b>Pathway:</b> Exits the brainstem at the pontomedullary junction, traverses the subarachnoid space, passes through the [[c260efc8|cavernous sinus]] near the internal carotid artery, and enters the orbit via the superior orbital fissure.</li><li><b>Palsy Presentation:</b> Damage results in an inability to abduct the affected eye, leading to a medially directed strabismus at rest and horizontal [[9914d433|diplopia]] that worsens on attempted lateral gaze toward the side of the lesion.</li><li><b>Vulnerability:</b> Its long intracranial course makes it highly susceptible to downward traction from <mark>increased intracranial pressure</mark> ([[7c4e7c74|idiopathic intracranial hypertension]], tumors, hydrocephalus).</li><li><b>USMLE Tip:</b> An isolated CN VI palsy is often a <mark>\"false localizing sign\"</mark> of elevated ICP rather than a direct brainstem lesion. It is the most commonly affected cranial nerve in [[c260efc8|cavernous sinus syndrome]].</li></ul>",
+      "takeAway": "<p>The <b>Abducens Nerve</b> has the longest intracranial course of all cranial nerves, making it uniquely vulnerable to stretching and compression from <u>increased intracranial pressure</u>, often presenting as a nonlocalizing palsy that signals a generalized brain pressure problem rather than a specific brainstem lesion.</p>",
+      "mermaid": "graph LR; A[PPRF] --> B[CN VI Nucleus]; B --> C[Ipsilateral Lateral Rectus]; B --> D[Contralateral MLF]; D --> E[Contralateral CN III Nucleus]; E --> F[Contralateral Medial Rectus];"
+    },
+    "connections": [
+      {
+        "type": "innervates",
+        "to": "f7b5ee5d"
+      },
+      {
+        "type": "is_vulnerable_to",
+        "to": "7c4e7c74"
+      },
+      {
+        "type": "palsy_causes",
+        "to": "9914d433"
+      },
+      {
+        "type": "is_affected_in",
+        "to": "9a089fd7"
+      }
+    ]
+  },
+  "c0b7a1ca": {
+    "title": "Abnormal Motor Posturing",
+    "primaryType": "finding",
+    "tags": [
+      "Neurology",
+      "Pathology",
+      "Coma",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Brain Lesions"
+    ],
+    "content": {
+      "definition": "<p><b>Abnormal motor posturing</b> refers to involuntary flexion or extension of the arms and legs, indicating <i>severe brain injury</i>. It occurs in patients who are comatose and reflects damage to motor pathways between the cerebral cortex and the brainstem.</p>",
+      "atAGlance": "<ul><li><b>Decorticate (Flexor) Posturing:</b> Characterized by flexion of the arms, wrists, and fingers with adduction of the upper extremities, alongside extension, internal rotation, and plantar flexion of the lower extremities. Mnemonic: Hands are near the '<b>cor</b>' (heart).</li><li><b>Decorticate Lesion Level:</b> Indicates damage <u>above the red nucleus</u> in the midbrain, such as in the cerebral hemispheres or internal capsule. The rubrospinal tract (flexor tone) is intact and overrides the vestibulospinal tract.</li><li><b>Decerebrate (Extensor) Posturing:</b> Characterized by extension, adduction, and internal rotation of the arms with extension of the legs.</li><li><b>Decerebrate Lesion Level:</b> Indicates damage <u>at or below the red nucleus</u> (e.g., midbrain tegmentum, pons). The loss of the rubrospinal tract leads to unopposed extension tone from the vestibulospinal tract.</li><li><b>USMLE Tip:</b> Decerebrate posturing generally indicates a more severe brain injury and carries a <u>worse prognosis</u> than decorticate posturing.</li></ul>",
+      "takeAway": "<p>The type of abnormal posturing provides a crucial clue to the anatomical level of severe brain injury; <b>decorticate</b> posturing implies a lesion above the red nucleus preserving flexor pathways, whereas <b>decerebrate</b> posturing signifies a more caudal lesion below the red nucleus, leaving only extensor pathways unopposed.</p>",
+      "mermaid": "graph TD; A[Cerebral Cortex] --> B[Red Nucleus]; B --> C[Rubrospinal Tract Flexion]; A --> D[Vestibular Nuclei]; D --> E[Vestibulospinal Tract Extension]; F(Lesion Above Red Nucleus) --> G{Decorticate}; B --x F; H(Lesion Below Red Nucleus) --> I{Decerebrate}; C --x H;"
+    },
+    "connections": [
+      {
+        "type": "is_a_sign_of",
+        "to": "e9a47751"
+      },
+      {
+        "type": "differentiates_lesion_level_in",
+        "to": "a584135d"
+      }
+    ]
+  },
+  "a0c128f4": {
+    "title": "Absence Seizures (Petit Mal)",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Pediatrics",
+      "Epilepsy",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Seizures"
+    ],
+    "content": {
+      "definition": "<p><b>Absence seizures</b>, formerly known as <i>petit mal seizures</i>, are a type of generalized seizure characterized by a sudden, brief lapse of consciousness without loss of postural tone, typically lasting for seconds. They are most common in childhood and are often mistaken for daydreaming or inattentiveness.</p>",
+      "atAGlance": "<ul><li><b>Clinical Presentation:</b> Sudden cessation of activity with a blank stare, lasting about 10 seconds. May be accompanied by subtle automatisms like eyelid fluttering or lip smacking. There is <u>no postictal confusion</u>; the patient immediately returns to baseline.</li><li><b>EEG Hallmark:</b> The pathognomonic finding is a <mark>generalized 3 Hz spike-and-wave discharge</mark> on EEG.</li><li><b>Provocation:</b> Seizures can often be triggered by <mark>hyperventilation</mark>.</li><li><b>Treatment:</b> <u>First-line</u> treatment is [[ethosuximide]]. [[valproic_acid|Valproic acid]] is also effective and used if tonic-clonic seizures are also present.</li><li><b>USMLE Tip:</b> A classic vignette describes a child whose teacher complains of 'daydreaming' or 'not paying attention' in class. The diagnosis is confirmed by a 3 Hz spike-and-wave pattern on EEG, often induced by having the child hyperventilate.</li></ul>",
+      "takeAway": "<p><b>Absence seizures</b> are unique among generalized seizures for their brief, non-convulsive nature, lack of postictal confusion, and a pathognomonic <mark>3 Hz spike-and-wave</mark> EEG pattern, making [[ethosuximide]] the specific and preferred treatment.</p>",
+      "mermaid": "graph TD; A[Thalamic T-type Ca2+ Channels] -- Overactivity --> B(Absence Seizure); C(Ethosuximide) -- Blocks --> A;"
+    },
+    "connections": [
+      {
+        "type": "is_a_type_of",
+        "to": "64c08e92"
+      },
+      {
+        "type": "treated_by",
+        "to": "a90f6fb4"
+      },
+      {
+        "type": "presents_with_eeg_finding",
+        "to": "eeg_3hz_spike_wave"
+      }
+    ]
+  },
+  "e62961a0": {
+    "title": "Absence Seizure Anticonvulsants",
+    "primaryType": "concept",
+    "tags": [
+      "Neurology",
+      "Pharmacology",
+      "Epilepsy",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pharmacology",
+      "Anticonvulsants"
+    ],
+    "content": {
+      "definition": "<p><b>Absence seizure anticonvulsants</b> are medications specifically effective in treating [[a0c128f4|absence seizures]], primarily by targeting the T-type calcium channels in thalamic neurons, which are implicated in the generation of the characteristic <mark>3 Hz spike-and-wave</mark> discharges.</p>",
+      "atAGlance": "<ul><li><b>First-Line Agent:</b> [[a90f6fb4|Ethosuximide]] is the <u>first-line</u> and most specific drug for treating isolated absence seizures.</li><li><b>Mechanism of Ethosuximide:</b> Blocks T-type Ca<sup>2+</sup> channels in thalamic neurons, disrupting the oscillatory rhythm between the thalamus and cortex that generates absence seizures.</li><li><b>Alternative Agent:</b> [[valproic_acid|Valproic acid]] is also effective and is preferred if the patient has concomitant generalized tonic-clonic seizures. It works by blocking T-type Ca<sup>2+</sup> channels and increasing [[5aa5cb91|GABA]] levels.</li><li><b>Contraindicated Agents:</b> Certain anticonvulsants, such as [[eddd2bc5|carbamazepine]] and [[5aea213f|phenytoin]], can <u>worsen</u> absence seizures.</li><li><b>USMLE Tip:</b> For a child with staring spells and a 3 Hz spike-and-wave EEG, the answer for treatment is almost always [[a90f6fb4|Ethosuximide]]. If tonic-clonic seizures are also mentioned, consider [[valproic_acid|Valproic acid]].</li></ul>",
+      "takeAway": "<p>The treatment of [[a0c128f4|absence seizures]] is highly specific, with [[a90f6fb4|Ethosuximide]] being the drug of choice due to its targeted blockade of thalamic T-type calcium channels, while other common anticonvulsants like carbamazepine are paradoxically contraindicated.</p>",
+      "mermaid": ""
+    },
+    "connections": [
+      {
+        "type": "treats",
+        "to": "a0c128f4"
+      },
+      {
+        "type": "includes",
+        "to": "a90f6fb4"
+      },
+      {
+        "type": "includes",
+        "to": "valproic_acid"
+      }
+    ]
+  },
+  "8558c64b": {
+    "title": "Acalculia",
+    "primaryType": "finding",
+    "tags": [
+      "Neurology",
+      "Cognitive Deficit",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Brain Lesions"
+    ],
+    "content": {
+      "definition": "<p><b>Acalculia</b> is an acquired neurological deficit characterized by the <i>inability to perform simple mathematical calculations</i>, resulting from damage to specific brain regions, most notably the dominant (usually left) parietal lobe.</p>",
+      "atAGlance": "<ul><li><b>Localization:</b> Acalculia is a key localizing sign for a lesion in the <mark>dominant angular gyrus</mark> of the parietal lobe.</li><li><b>Associated Syndrome:</b> It is one of the four classic components of [[38f3ed1f|Gerstmann syndrome]].</li><li><b>Gerstmann Syndrome Tetrad:</b> The full syndrome includes <b>Acalculia</b>, <b>Agraphia</b> (inability to write), <b>Finger Agnosia</b> (inability to distinguish fingers), and <b>Left-Right Disorientation</b>.</li><li><b>Vascular Territory:</b> These symptoms often result from a stroke in the territory of the [[143bb23d|Middle Cerebral Artery (MCA)]] that supplies the dominant parietal lobe.</li><li><b>USMLE Tip:</b> When a patient presents with difficulty with calculations along with any of the other components of Gerstmann syndrome, immediately suspect a lesion in the dominant parietal lobe.</li></ul>",
+      "takeAway": "<p><b>Acalculia</b> is more than just 'bad at math'; it is a specific neurological sign that strongly points to a lesion in the dominant angular gyrus, often as part of the clinically distinct [[38f3ed1f|Gerstmann syndrome]].</p>",
+      "mermaid": ""
+    },
+    "connections": [
+      {
+        "type": "is_a_component_of",
+        "to": "38f3ed1f"
+      },
+      {
+        "type": "is_caused_by_lesion_in",
+        "to": "26efa771"
+      },
+      {
+        "type": "is_caused_by_stroke_in",
+        "to": "143bb23d"
+      }
+    ]
+  },
+  "f218aebf": {
+    "title": "Accessory Nerve (CN XI)",
+    "primaryType": "anatomy",
+    "tags": [
+      "Neurology",
+      "Cranial Nerves",
+      "Anatomy",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Anatomy and Physiology",
+      "Cranial Nerves"
+    ],
+    "content": {
+      "definition": "<p>The <b>Accessory Nerve (CN XI)</b> is a <i>motor cranial nerve</i> that provides innervation to the <u>sternocleidomastoid (SCM)</u> and <u>trapezius</u> muscles, which are crucial for head turning and shoulder shrugging, respectively.</p>",
+      "atAGlance": "<ul><li><b>Function:</b> Innervates the ipsilateral <b>Sternocleidomastoid (SCM)</b> muscle, which turns the head to the contralateral side, and the ipsilateral <b>Trapezius</b> muscle, which elevates and stabilizes the scapula (shoulder shrug).</li><li><b>Pathway:</b> Uniquely arises from both the brainstem (medulla) and the spinal cord (C1-C5). The spinal root ascends through the foramen magnum to join the cranial root, and the combined nerve then exits the skull via the [[jugular_foramen|jugular foramen]].</li><li><b>Lesion Presentation (SCM):</b> Weakness in turning the head <u>away</u> from the side of the lesion. (e.g., Left CN XI lesion causes weakness turning head to the right).</li><li><b>Lesion Presentation (Trapezius):</b> <mark>Shoulder droop</mark>, weakness in shrugging the shoulder on the ipsilateral side, and winging of the scapula.</li><li><b>USMLE Tip:</b> A common iatrogenic cause of an isolated CN XI lesion is injury during procedures in the <mark>posterior triangle of the neck</mark>, such as lymph node biopsy.</li></ul>",
+      "takeAway": "<p>The <b>Accessory Nerve (CN XI)</b> is unique in its dual origin from both the medulla and cervical spinal cord, and a lesion presents with the distinct combination of weakness turning the head to the contralateral side and an ipsilateral shoulder droop.</p>",
+      "mermaid": "graph TD; A[CN XI Nuclei Medulla & C1-C5] --> B(CN XI); B --> C[Exits via Jugular Foramen]; C --> D[Innervates SCM]; C --> E[Innervates Trapezius];"
+    },
+    "connections": [
+      {
+        "type": "innervates",
+        "to": "sternocleidomastoid_muscle"
+      },
+      {
+        "type": "innervates",
+        "to": "trapezius_muscle"
+      },
+      {
+        "type": "exits_skull_via",
+        "to": "jugular_foramen"
+      }
+    ]
+  },
+  "81b5f5fe": {
+    "title": "Accommodation (Eye)",
+    "primaryType": "physiology",
+    "tags": [
+      "Ophthalmology",
+      "Neurology",
+      "Physiology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Ophthalmology",
+      "Physiology"
+    ],
+    "content": {
+      "definition": "<p><b>Accommodation</b> is a reflex action of the eye in response to focusing on a near object, involving a coordinated triad of changes: <i>ciliary muscle contraction</i>, <i>pupillary constriction (miosis)</i>, and <i>convergence of the eyes</i> to maintain a clear image on the retina.</p>",
+      "atAGlance": "<ul><li><b>Mechanism:</b> It is a parasympathetic response mediated by the [[68c66997|oculomotor nerve (CN III)]].</li><li><b>Ciliary Muscle Contraction:</b> Contraction of the ciliary muscle relaxes the zonular fibers, allowing the lens to become more convex (rounder), which increases its refractive power for near vision.</li><li><b>Pupillary Constriction (Miosis):</b> The sphincter pupillae muscle contracts, narrowing the pupil to increase the depth of field.</li><li><b>Convergence:</b> The medial rectus muscles contract to direct both eyes medially toward the near object.</li><li><b>USMLE Tip:</b> Loss of accommodation with age is called [[presbyopia]]. A pupil that accommodates but does not react to light is an [[08cb577f|Argyll Robertson pupil]], a classic sign of neurosyphilis.</li></ul>",
+      "takeAway": "<p>The <b>accommodation reflex</b> is a parasympathetically driven process via [[68c66997|CN III]] that allows for clear near vision by increasing the lens's refractive power through ciliary muscle contraction, a mechanism that becomes less effective with age, leading to presbyopia.</p>",
+      "mermaid": "graph TD; A[Focus on Near Object] --> B[Visual Cortex]; B --> C[CN III Nucleus Edinger-Westphal]; C --> D[Ciliary Ganglion]; D --> E[Ciliary Muscle Contraction -> Lens rounds]; D --> F[Sphincter Pupillae Contraction -> Miosis]; B --> G[CN III Motor Nucleus]; G --> H[Medial Rectus Contraction -> Convergence];"
+    },
+    "connections": [
+      {
+        "type": "is_mediated_by",
+        "to": "68c66997"
+      },
+      {
+        "type": "is_impaired_in",
+        "to": "presbyopia"
+      },
+      {
+        "type": "is_dissociated_from_light_reflex_in",
+        "to": "08cb577f"
+      }
+    ]
+  },
+  "1df262e8": {
+    "title": "Acetazolamide",
+    "primaryType": "drug",
+    "tags": [
+      "Pharmacology",
+      "Neurology",
+      "Ophthalmology",
+      "Renal",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pharmacology",
+      "Glaucoma Therapy"
+    ],
+    "content": {
+      "definition": "<p><b>Acetazolamide</b> is a <i>carbonic anhydrase inhibitor</i> used as a diuretic and to reduce pressure in the eye and brain by decreasing the formation of aqueous humor and cerebrospinal fluid, respectively.</p>",
+      "atAGlance": "<ul><li><b>Mechanism of Action:</b> Inhibits the enzyme carbonic anhydrase in the ciliary body epithelium and choroid plexus, which reduces the formation of bicarbonate ions (HCO<sub>3</sub><sup>-</sup>) and subsequently decreases fluid secretion (aqueous humor and CSF).</li><li><b>Clinical Use (Ophthalmology):</b> Treats [[3ce6c035|glaucoma]] (both open-angle and acute angle-closure) by <mark>decreasing aqueous humor synthesis</mark>.</li><li><b>Clinical Use (Neurology):</b> Treats [[7c4e7c74|idiopathic intracranial hypertension]] (pseudotumor cerebri) by decreasing CSF production. Also used for altitude sickness.</li><li><b>Adverse Effects:</b> Causes a <mark>hyperchloremic metabolic acidosis</mark> (non-anion gap), paresthesias, ammonia toxicity in liver disease, and promotes calcium phosphate kidney stones (due to alkalinization of urine). It is a sulfa drug, so watch for sulfa allergies.</li><li><b>USMLE Tip:</b> Remember the mnemonic 'ACID-azolamide' to recall that it causes a metabolic <b>ACID</b>osis.</li></ul>",
+      "takeAway": "<p><b>Acetazolamide</b>'s therapeutic effect in both [[3ce6c035|glaucoma]] and [[7c4e7c74|idiopathic intracranial hypertension]] stems from the same core mechanism: inhibiting carbonic anhydrase to reduce the production of bicarbonate-driven fluids, namely aqueous humor and cerebrospinal fluid.</p>",
+      "mermaid": "graph TD; A[Acetazolamide] --|Inhibits|--> B(Carbonic Anhydrase); B --|Blocks|--> C(H2O + CO2 <--> H2CO3 <--> H+ + HCO3-); C --|Leads to|--> D[Decreased Aqueous Humor/CSF Production];"
+    },
+    "connections": [
+      {
+        "type": "treats",
+        "to": "3ce6c035"
+      },
+      {
+        "type": "treats",
+        "to": "7c4e7c74"
+      },
+      {
+        "type": "causes_adverse_effect",
+        "to": "metabolic_acidosis"
+      },
+      {
+        "type": "is_a_type_of",
+        "to": "carbonic_anhydrase_inhibitor"
+      }
+    ]
+  },
+  "6a005559": {
+    "title": "Acetylcholine (ACh)",
+    "primaryType": "molecule",
+    "tags": [
+      "Neuroscience",
+      "Pharmacology",
+      "Physiology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Anatomy and Physiology",
+      "Neurotransmitters"
+    ],
+    "content": {
+      "definition": "<p><b>Acetylcholine (ACh)</b> is a major <i>excitatory neurotransmitter</i> synthesized from choline and acetyl-CoA that functions at the neuromuscular junction, in all autonomic ganglia, at parasympathetic postganglionic nerve endings, and at various sites within the central nervous system.</p>",
+      "atAGlance": "<ul><li><b>Synthesis:</b> Synthesized by Choline Acetyltransferase (ChAT) from choline and acetyl-CoA.</li><li><b>Degradation:</b> Rapidly broken down in the synaptic cleft by Acetylcholinesterase (AChE) into choline and acetate.</li><li><b>CNS Role:</b> Crucial for memory and cognition. Levels are significantly decreased in [[77ae6148|Alzheimer disease]] due to degeneration of neurons in the [[361438f2|Basal nucleus of Meynert]]. Levels are also decreased in [[ffd7e743|Huntington disease]].</li><li><b>PNS Role:</b> Neurotransmitter at all preganglionic autonomic synapses (nicotinic), all parasympathetic postganglionic synapses (muscarinic), sympathetic postganglionic synapses to sweat glands (muscarinic), and the neuromuscular junction (nicotinic).</li><li><b>USMLE Tip:</b> Diseases affecting ACh are high-yield. [[77ae6148|Alzheimer's]] (↓ CNS ACh), Myasthenia Gravis (antibodies to ACh receptors), Lambert-Eaton (↓ presynaptic ACh release). Drugs targeting AChE (e.g., [[47d0372e|donepezil]]) are used to treat Alzheimer's.</li></ul>",
+      "takeAway": "<p><b>Acetylcholine</b> is a versatile neurotransmitter whose function is critically dependent on its location; its depletion in the [[361438f2|Basal nucleus of Meynert]] leads to cognitive decline in [[77ae6148|Alzheimer disease]], while its blockade at the neuromuscular junction causes paralysis.</p>",
+      "mermaid": "graph TD; A[Choline + Acetyl-CoA] --ChAT--> B(Acetylcholine); B --AChE--> C[Choline + Acetate]; B --> D{Receptors}; D --> D1[Nicotinic]; D --> D2[Muscarinic];"
+    },
+    "connections": [
+      {
+        "type": "is_decreased_in",
+        "to": "77ae6148"
+      },
+      {
+        "type": "is_decreased_in",
+        "to": "ffd7e743"
+      },
+      {
+        "type": "is_involved_in_pathophysiology_of",
+        "to": "myasthenia_gravis"
+      },
+      {
+        "type": "is_involved_in_pathophysiology_of",
+        "to": "lambert_eaton_syndrome"
+      },
+      {
+        "type": "is_synthesized_in",
+        "to": "361438f2"
+      }
+    ]
+  },
+  "87d19a70": {
+    "title": "Achilles Reflex",
+    "primaryType": "physiology",
+    "tags": [
+      "Neurology",
+      "Physical Exam",
+      "Physiology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Anatomy and Physiology",
+      "Spinal Cord"
+    ],
+    "content": {
+      "definition": "<p>The <b>Achilles reflex</b>, also known as the ankle jerk reflex, is a deep tendon reflex that involves plantar flexion of the foot in response to tapping the Achilles tendon, testing the integrity of the <mark>S1 and S2</mark> spinal nerve roots.</p>",
+      "atAGlance": "<ul><li><b>Nerve Roots:</b> Primarily tests the <b>S1</b> nerve root, with contribution from S2. Mnemonic: S<b>1</b>, 2, buckle my shoe.</li><li><b>Pathway:</b> Tapping the tendon stretches the gastrocnemius muscle, activating stretch receptors. The afferent signal travels via the tibial nerve to the S1/S2 spinal cord segments, synapses, and an efferent motor signal returns via the tibial nerve to cause plantar flexion.</li><li><b>Diminished/Absent Reflex:</b> Suggests a lower motor neuron lesion, such as a herniated disc compressing the S1 root, or peripheral neuropathy.</li><li><b>Exaggerated Reflex (Hyperreflexia):</b> Suggests an upper motor neuron lesion, such as a stroke or spinal cord injury above the S1/S2 level.</li><li><b>USMLE Tip:</b> An absent Achilles reflex is a classic finding in [[71daebd6|Tabes Dorsalis]] and [[lumbosacral_radiculopathy|S1 radiculopathy]].</li></ul>",
+      "takeAway": "<p>The <b>Achilles reflex</b> is a simple yet powerful clinical tool that specifically assesses the integrity of the S1 spinal nerve root; its absence or exaggeration can help differentiate between lower and upper motor neuron pathologies.</p>",
+      "mermaid": "graph TD; A[Tap Achilles Tendon] --> B(Stretch Gastrocnemius); B --> C(Afferent Signal via Tibial N.); C --> D[S1/S2 Spinal Cord]; D --> E(Efferent Signal via Tibial N.); E --> F(Plantar Flexion);"
+    },
+    "connections": [
+      {
+        "type": "tests_nerve_root",
+        "to": "s1_nerve_root"
+      },
+      {
+        "type": "is_absent_in",
+        "to": "71daebd6"
+      },
+      {
+        "type": "is_a_type_of",
+        "to": "deep_tendon_reflex"
+      }
+    ]
+  },
+  "fcedc59f": {
+    "title": "Neuron Action Potential",
+    "primaryType": "physiology",
+    "tags": [
+      "Neuroscience",
+      "Physiology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Anatomy and Physiology",
+      "Neurons"
+    ],
+    "content": {
+      "definition": "<p>A <b>neuron action potential</b> is a rapid, all-or-none electrical signal that propagates down an axon, caused by the sequential opening and closing of <i>voltage-gated ion channels</i>, which temporarily reverses the membrane potential and allows for long-distance communication in the nervous system.</p>",
+      "atAGlance": "<ul><li><b>Resting Potential (~-70 mV):</b> Maintained by the Na<sup>+</sup>/K<sup>+</sup> pump and high resting permeability to K<sup>+</sup> (K<sup>+</sup> leak channels).</li><li><b>Depolarization:</b> A stimulus reaching threshold potential (~-55 mV) triggers the rapid opening of voltage-gated <mark>Na<sup>+</sup> channels</mark>, causing a massive influx of Na<sup>+</sup> and a sharp rise in membrane potential.</li><li><b>Repolarization:</b> Voltage-gated Na<sup>+</sup> channels inactivate, and voltage-gated <mark>K<sup>+</sup> channels</mark> open, leading to an efflux of K<sup>+</sup> that brings the membrane potential back down.</li><li><b>Hyperpolarization:</b> K<sup>+</sup> channels are slow to close, causing the membrane potential to briefly dip below the resting potential.</li><li><b>USMLE Tip:</b> Many neurotoxins and drugs target these channels. [[tetrodotoxin|Tetrodotoxin]] (pufferfish) and [[lidocaine|local anesthetics]] block voltage-gated Na<sup>+</sup> channels, preventing action potential propagation.</li></ul>",
+      "takeAway": "<p>The neuron action potential is fundamentally a precisely orchestrated sequence of ionic movements: a rapid influx of <b>Na<sup>+</sup></b> causes the rising phase (depolarization), and a subsequent efflux of <b>K<sup>+</sup></b> causes the falling phase (repolarization), enabling high-speed signal transmission.</p>",
+      "mermaid": "graph TD; A(Resting State) --Stimulus--> B(Threshold); B --Na+ Influx--> C(Depolarization); C --Na+ Inactivation & K+ Efflux--> D(Repolarization); D --Slow K+ Channel Closing--> E(Hyperpolarization); E --> A;"
+    },
+    "connections": [
+      {
+        "type": "is_blocked_by",
+        "to": "tetrodotoxin"
+      },
+      {
+        "type": "is_blocked_by",
+        "to": "local_anesthetics"
+      },
+      {
+        "type": "is_fundamental_to",
+        "to": "synaptic_transmission"
+      }
+    ]
+  },
+  "67e83e3b": {
+    "title": "Acute Disseminated Encephalomyelitis (ADEM)",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Immunology",
+      "Pathology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Demyelinating Disorders"
+    ],
+    "content": {
+      "definition": "<p><b>Acute Disseminated Encephalomyelitis (ADEM)</b> is a rare, acute, <i>immune-mediated inflammatory and demyelinating disorder</i> of the central nervous system that typically occurs following a viral infection or, less commonly, a vaccination.</p>",
+      "atAGlance": "<ul><li><b>Pathophysiology:</b> Believed to be caused by <mark>molecular mimicry</mark>, where an immune response against an infectious agent cross-reacts with myelin antigens (e.g., myelin basic protein).</li><li><b>Clinical Presentation:</b> Rapid onset of multifocal neurological symptoms, including encephalopathy (altered mental status, confusion, coma), which is a key feature distinguishing it from a typical [[45dd6d19|Multiple Sclerosis]] flare. Other symptoms include fever, headache, seizures, and focal deficits.</li><li><b>Timing:</b> Symptoms typically appear 1-2 weeks after an antecedent infection (e.g., measles, varicella) or vaccination.</li><li><b>Imaging:</b> MRI shows multiple, bilateral, asymmetric, poorly demarcated white matter lesions of similar age, often involving both the brain and spinal cord.</li><li><b>USMLE Tip:</b> Differentiate ADEM from [[45dd6d19|MS]]: ADEM is <u>monophasic</u> and presents with encephalopathy, whereas MS is typically relapsing-remitting and rarely presents with encephalopathy in its initial flare.</li></ul>",
+      "takeAway": "<p><b>Acute Disseminated Encephalomyelitis</b> is a post-infectious autoimmune attack on CNS myelin, distinguished from [[45dd6d19|Multiple Sclerosis]] by its <u>monophasic</u> course and the prominent presence of encephalopathy alongside multifocal neurological deficits.</p>",
+      "mermaid": "graph TD; A[Viral Infection/Vaccination] --> B(Immune Response); B --Molecular Mimicry--> C[Attack on Myelin]; C --> D[Perivenous Inflammation & Demyelination]; D --> E[Multifocal Neurologic Deficits + Encephalopathy];"
+    },
+    "connections": [
+      {
+        "type": "is_a_type_of",
+        "to": "demyelinating_disorder"
+      },
+      {
+        "type": "differentiated_from",
+        "to": "45dd6d19"
+      },
+      {
+        "type": "is_triggered_by",
+        "to": "viral_infection"
+      }
+    ]
+  },
+  "ed52e40b": {
+    "title": "Acute Inflammatory Demyelinating Polyneuropathy (AIDP)",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Immunology",
+      "Pathology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Peripheral Neuropathies"
+    ],
+    "content": {
+      "definition": "<p><b>Acute Inflammatory Demyelinating Polyneuropathy (AIDP)</b> is the most common subtype of <i>Guillain-Barré Syndrome</i>, an autoimmune condition characterized by the rapid onset of symmetric, ascending muscle weakness or paralysis and destruction of myelin sheaths of peripheral nerves by Schwann cells.</p>",
+      "atAGlance": "<ul><li><b>Pathophysiology:</b> Often triggered by an antecedent infection (classically <mark>Campylobacter jejuni</mark>, also CMV, EBV, Zika). It is thought to be due to <mark>molecular mimicry</mark> between microbial antigens and peripheral nerve myelin or axons.</li><li><b>Clinical Presentation:</b> Rapidly progressive, symmetric <mark>ascending weakness/paralysis</mark> starting in the lower extremities. Patients often have absent or depressed deep tendon reflexes.</li><li><b>Key Complications:</b> Respiratory failure due to diaphragmatic weakness is a life-threatening complication. Autonomic dysfunction (tachycardia, arrhythmias, BP instability) is also common.</li><li><b>Diagnosis:</b> CSF analysis shows <mark>albuminocytologic dissociation</mark> (high protein with a normal cell count). Nerve conduction studies show slowed nerve conduction velocity.</li><li><b>USMLE Tip:</b> The combination of recent diarrheal illness (*C. jejuni*) followed by ascending paralysis and high protein in the CSF with normal cell count is a classic vignette for Guillain-Barré Syndrome.</li></ul>",
+      "takeAway": "<p><b>AIDP (Guillain-Barré Syndrome)</b> is an acute, post-infectious autoimmune attack on peripheral nerve myelin, leading to a characteristic ascending paralysis; the hallmark diagnostic finding is <mark>albuminocytologic dissociation</mark> in the CSF, reflecting widespread inflammation of nerve roots without direct infection.</p>",
+      "mermaid": "graph TD; A[Antecedent Infection e.g., C. jejuni] --> B(Molecular Mimicry); B --> C[Immune Attack on Schwann Cells/Myelin]; C --> D[Peripheral Nerve Demyelination]; D --> E[Ascending Paralysis & Areflexia];"
+    },
+    "connections": [
+      {
+        "type": "is_a_subtype_of",
+        "to": "e8720ceb"
+      },
+      {
+        "type": "is_associated_with",
+        "to": "campylobacter_jejuni"
+      },
+      {
+        "type": "presents_with",
+        "to": "a0f3ce4c"
+      },
+      {
+        "type": "damages",
+        "to": "schwann_cells"
+      }
+    ]
+  },
+  "d268ace0": {
+    "title": "Opioid-Induced Acute Pulmonary Edema",
+    "primaryType": "finding",
+    "tags": [
+      "Pharmacology",
+      "Toxicology",
+      "Pulmonology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Respiratory",
+      "Pathology",
+      "Acute Respiratory Distress Syndrome"
+    ],
+    "content": {
+      "definition": "<p><b>Opioid-induced acute pulmonary edema</b> is a form of <i>non-cardiogenic pulmonary edema</i> that can occur as a life-threatening complication of opioid overdose, characterized by increased pulmonary vascular permeability and subsequent alveolar flooding.</p>",
+      "atAGlance": "<ul><li><b>Pathophysiology:</b> The exact mechanism is multifactorial but is thought to involve direct toxic effects on the pulmonary capillary endothelium, hypoxia-induced vascular injury, and a massive sympathetic surge following transient hypoxia, all leading to <mark>increased vascular permeability</mark>.</li><li><b>Clinical Presentation:</b> Occurs shortly after an opioid overdose. Patients present with severe dyspnea, hypoxia, frothy pink sputum, and diffuse crackles on auscultation, often after being resuscitated with [[naloxone]].</li><li><b>Radiology:</b> Chest X-ray shows bilateral diffuse alveolar infiltrates, consistent with pulmonary edema, but with a normal cardiac silhouette (distinguishing it from cardiogenic pulmonary edema).</li><li><b>Treatment:</b> Management is supportive and includes supplemental oxygen, non-invasive or mechanical ventilation, and addressing the underlying opioid overdose. Diuretics are <u>not effective</u> as the cause is permeability, not fluid overload.</li><li><b>USMLE Tip:</b> Be aware of the patient who is treated for an opioid overdose with [[naloxone]] and subsequently develops severe respiratory distress; this points towards non-cardiogenic pulmonary edema rather than a cardiac cause.</li></ul>",
+      "takeAway": "<p>Unlike cardiogenic pulmonary edema which is caused by high hydrostatic pressure, <b>opioid-induced pulmonary edema</b> is a permeability problem where opioid toxicity and hypoxia damage the alveolar-capillary barrier, leading to leaky vessels and flooded lungs that do not respond to diuretics.</p>",
+      "mermaid": "graph TD; A[Opioid Overdose] --> B(Hypoxia & Direct Toxicity); B --> C[Pulmonary Capillary Endothelial Damage]; C --> D[Increased Vascular Permeability]; D --> E[Alveolar Flooding]; E --> F[Non-Cardiogenic Pulmonary Edema];"
+    },
+    "connections": [
+      {
+        "type": "is_caused_by",
+        "to": "opioid_analgesics"
+      },
+      {
+        "type": "is_a_type_of",
+        "to": "acute_respiratory_distress_syndrome"
+      },
+      {
+        "type": "is_treated_with",
+        "to": "naloxone"
+      }
+    ]
+  },
+  "76ba7f2e": {
+    "title": "Adenohypophysis (Anterior Pituitary)",
+    "primaryType": "anatomy",
+    "tags": [
+      "Endocrinology",
+      "Anatomy",
+      "Physiology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Endocrine",
+      "Anatomy",
+      "Pituitary Gland"
+    ],
+    "content": {
+      "definition": "<p>The <b>Adenohypophysis</b>, or anterior pituitary, is the anterior lobe of the pituitary gland, an endocrine gland of ectodermal origin (from <i>Rathke's pouch</i>) that synthesizes and secretes six major peptide hormones in response to releasing and inhibiting hormones from the [[89e86633|hypothalamus]].</p>",
+      "atAGlance": "<ul><li><b>Embryology:</b> Arises from an upward evagination of the oral ectoderm called <mark>Rathke's pouch</mark>. Remnants can form a [[7048db1e|craniopharyngioma]].</li><li><b>Hormones Secreted:</b> The anterior pituitary hormones can be remembered with the mnemonic <b>FLAT PiG</b>: <b>F</b>SH, <b>L</b>H, <b>A</b>CTH, <b>T</b>SH (Tropic hormones), and <b>P</b>rolactin, <b>i</b>(ignore), <b>G</b>H (Direct hormones).</li><li><b>Cell Types:</b> Somatotrophs (GH), Lactotrophs (Prolactin), Corticotrophs (ACTH), Thyrotrophs (TSH), and Gonadotrophs (FSH/LH).</li><li><b>Vascular Supply:</b> Receives blood from the superior hypophyseal artery, which forms a portal system (hypothalamic-hypophyseal portal system) that transports hypothalamic releasing/inhibiting hormones directly to the anterior pituitary.</li><li><b>USMLE Tip:</b> The most common tumor of the pituitary is a [[5f3188bd|pituitary adenoma]], which is most frequently a prolactinoma. Its connection to the [[89e86633|hypothalamus]] is vascular, in contrast to the posterior pituitary's neural connection.</li></ul>",
+      "takeAway": "<p>The <b>Adenohypophysis</b> is the hormonal powerhouse of the pituitary, controlled by the [[89e86633|hypothalamus]] via a unique portal venous system, and its diverse cell populations are responsible for regulating growth, stress, reproduction, and metabolism throughout the body.</p>",
+      "mermaid": "graph TD; A[Hypothalamus] --Releasing/Inhibiting Hormones--> B(Hypophyseal Portal System); B --> C(Adenohypophysis); C --> D[FSH, LH]; C --> E[ACTH]; C --> F[TSH]; C --> G[Prolactin]; C --> H[GH];"
+    },
+    "connections": [
+      {
+        "type": "is_part_of",
+        "to": "pituitary_gland"
+      },
+      {
+        "type": "is_regulated_by",
+        "to": "89e86633"
+      },
+      {
+        "type": "secretes",
+        "to": "growth_hormone"
+      },
+      {
+        "type": "secretes",
+        "to": "prolactin"
+      },
+      {
+        "type": "can_develop",
+        "to": "5f3188bd"
+      }
+    ]
+  },
+  "69962905": {
+    "title": "Haemophilus influenzae (Neurological)",
+    "primaryType": "microbe",
+    "tags": [
+      "Neurology",
+      "Infectious Disease",
+      "Microbiology",
+      "Pediatrics",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Infections"
+    ],
+    "content": {
+      "definition": "<p><b>Haemophilus influenzae</b> is a small, pleomorphic, gram-negative coccobacillus that is a significant cause of bacterial meningitis, epiglottitis, and <i>otitis media</i>, particularly in unvaccinated children. The encapsulated type b (Hib) strain is the most invasive and historically was the leading cause of pediatric meningitis.</p>",
+      "atAGlance": "<ul><li><b>Microbiology:</b> Gram-negative coccobacillus. Requires both <mark>factor X (hematin)</mark> and <mark>factor V (NAD+)</mark> for growth, which are present in chocolate agar.</li><li><b>Neurological Infections:</b> A common cause of bacterial [[meningitis]] in children (age 6 months to 5 years) before the Hib vaccine. Also a major cause of [[a03641af|otitis media]], sinusitis, and epiglottitis.</li><li><b>Virulence:</b> The type b strain has a polyribosylribitol phosphate (PRP) polysaccharide capsule, which is antiphagocytic and is the target of the Hib conjugate vaccine.</li><li><b>Vaccination:</b> The Hib conjugate vaccine, which conjugates the PRP capsule to a protein carrier (like tetanus toxoid), has dramatically reduced the incidence of invasive H. influenzae disease.</li><li><b>USMLE Tip:</b> In a vignette about an unvaccinated child with meningitis, fever, and a stiff neck, <i>H. influenzae</i> type b should be a top differential. Remember it grows on <mark>chocolate agar</mark> but not blood agar.</li></ul>",
+      "takeAway": "<p>While vaccination has made invasive <b>Haemophilus influenzae</b> type b disease rare, non-typeable (unencapsulated) strains remain a leading cause of mucosal infections like [[a03641af|otitis media]] and sinusitis in children by colonizing the nasopharynx.</p>",
+      "mermaid": ""
+    },
+    "connections": [
+      {
+        "type": "causes",
+        "to": "meningitis"
+      },
+      {
+        "type": "causes",
+        "to": "a03641af"
+      },
+      {
+        "type": "causes",
+        "to": "epiglottitis"
+      },
+      {
+        "type": "is_prevented_by",
+        "to": "hib_vaccine"
+      }
+    ]
+  },
+  "3a58904e": {
+    "title": "Hamartin",
+    "primaryType": "molecule",
+    "tags": [
+      "Neurology",
+      "Genetics",
+      "Oncology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Neurocutaneous Disorders"
+    ],
+    "content": {
+      "definition": "<p><b>Hamartin</b> is a <i>tumor suppressor protein</i> encoded by the <b>TSC1 gene</b> on chromosome 9. It forms a complex with the protein tuberin (from the TSC2 gene) to regulate cell growth and proliferation by inhibiting the mTOR pathway.</p>",
+      "atAGlance": "<ul><li><b>Gene:</b> Encoded by the <i>TSC1</i> gene.</li><li><b>Function:</b> Forms a heterodimer with tuberin (TSC2 protein). This complex acts as a GTPase-activating protein (GAP) for the small G protein Rheb.</li><li><b>Pathway:</b> By inactivating Rheb, the hamartin-tuberin complex <u>inhibits</u> <mark>mTOR (mechanistic target of rapamycin) complex 1</mark>, a key regulator of cell growth, proliferation, and protein synthesis.</li><li><b>Pathology:</b> A loss-of-function mutation in the <i>TSC1</i> gene leads to a non-functional hamartin protein, resulting in unchecked mTOR activity and the formation of hamartomas characteristic of [[83302339|Tuberous Sclerosis Complex]].</li><li><b>USMLE Tip:</b> Remember the association: <b>TSC1</b> mutation → defective <b>Hamartin</b> → [[83302339|Tuberous Sclerosis]]. The clinical findings of Tuberous Sclerosis (hamartomas, angiofibromas, ash-leaf spots) are a direct result of mTOR pathway disinhibition.</li></ul>",
+      "takeAway": "<p><b>Hamartin</b> acts as a crucial brake on the mTOR cell growth pathway; its inactivation through a TSC1 mutation releases this brake, leading to the widespread, multi-organ hamartoma formation seen in [[83302339|Tuberous Sclerosis]].</p>",
+      "mermaid": "graph TD; A[TSC1 gene] --> B(Hamartin); C[TSC2 gene] --> D(Tuberin); B + D --> E(Hamartin-Tuberin Complex); E --|Inhibits|--> F(Rheb); F --|Activates|--> G(mTORC1); G --> H(Cell Growth & Proliferation);"
+    },
+    "connections": [
+      {
+        "type": "is_encoded_by",
+        "to": "tsc1_gene"
+      },
+      {
+        "type": "mutation_causes",
+        "to": "83302339"
+      },
+      {
+        "type": "inhibits",
+        "to": "mtor_pathway"
+      },
+      {
+        "type": "forms_complex_with",
+        "to": "tuberin"
+      }
+    ]
+  },
+  "26661e34": {
+    "title": "Headaches",
+    "primaryType": "finding",
+    "tags": [
+      "Neurology",
+      "Pathology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Headaches"
+    ],
+    "content": {
+      "definition": "<p><b>Headache</b> is the symptom of pain anywhere in the region of the head or neck, which can be classified as a <i>primary disorder</i> (e.g., migraine, tension, cluster) or as a <i>secondary symptom</i> of an underlying pathology (e.g., hemorrhage, tumor, infection).</p>",
+      "atAGlance": "<ul><li><b>Tension Headache:</b> Most common type. Bilateral, 'band-like' pressure. Lasts >30 min. No photophobia/phonophobia or nausea. Treated with NSAIDs.</li><li><b>Migraine Headache:</b> Unilateral, pulsating pain lasting 4-72 hours. Associated with nausea, photophobia, and/or phonophobia. May have an aura. Treated with triptans, NSAIDs.</li><li><b>Cluster Headache:</b> Excruciating, unilateral periorbital pain lasting 15-180 min. Accompanied by autonomic symptoms (lacrimation, rhinorrhea). Treated with 100% O<sub>2</sub>, sumatriptan.</li><li><b>Red Flag Headaches:</b> A <mark>\"thunderclap headache\"</mark> (sudden, severe onset) is classic for [[63f8b05f|subarachnoid hemorrhage]]. The <mark>\"worst headache of my life\"</mark> is also highly suggestive of SAH. Headaches that are worse with lying down, awaken a patient from sleep, or are associated with focal neurologic deficits suggest increased intracranial pressure.</li><li><b>USMLE Tip:</b> Differentiating primary headaches is key. Tension = bilateral, band-like. Migraine = unilateral, pulsating, with aura/nausea. Cluster = unilateral, periorbital, with autonomic signs.</li></ul>",
+      "takeAway": "<p>While most headaches are benign primary disorders, the sudden onset of a <b>\"thunderclap headache\"</b> or the <b>\"worst headache of my life\"</b> is a neurological emergency that requires immediate investigation to rule out a life-threatening [[63f8b05f|subarachnoid hemorrhage]].</p>",
+      "mermaid": ""
+    },
+    "connections": [
+      {
+        "type": "is_a_symptom_of",
+        "to": "63f8b05f"
+      },
+      {
+        "type": "is_a_symptom_of",
+        "to": "meningitis"
+      },
+      {
+        "type": "is_a_symptom_of",
+        "to": "7c4e7c74"
+      },
+      {
+        "type": "is_classified_as",
+        "to": "migraine_headache"
+      },
+      {
+        "type": "is_classified_as",
+        "to": "cluster_headache"
+      },
+      {
+        "type": "is_classified_as",
+        "to": "tension_headache"
+      }
+    ]
+  },
+  "88e6f77e": {
+    "title": "Hearing Loss",
+    "primaryType": "finding",
+    "tags": [
+      "Otology",
+      "Neurology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Otology",
+      "Pathology"
+    ],
+    "content": {
+      "definition": "<p><b>Hearing loss</b> is a partial or total inability to hear, classified as either <i>conductive</i>, involving problems with the outer or middle ear, or <i>sensorineural</i>, involving damage to the inner ear (cochlea) or the auditory nerve pathway to the brain.</p>",
+      "atAGlance": "<ul><li><b>Conductive Hearing Loss:</b> Occurs when sound waves are not conducted efficiently to the inner ear. Causes include cerumen impaction, [[a03641af|otitis media]], otosclerosis, or tympanic membrane perforation.</li><li><b>Sensorineural Hearing Loss:</b> Caused by damage to the hair cells in the cochlea or the vestibulocochlear nerve (CN VIII). Causes include <mark>presbycusis</mark> (age-related), noise-induced damage, ototoxic drugs (e.g., aminoglycosides, cisplatin, loop diuretics), and acoustic neuromas ([[03ecb69e|schwannomas]]).</li><li><b>Diagnosis (Weber Test):</b> Tuning fork on vertex of skull. Conductive loss: lateralizes to the affected ear. Sensorineural loss: lateralizes to the unaffected ear.</li><li><b>Diagnosis (Rinne Test):</b> Compares air conduction (AC) to bone conduction (BC). Normal/Sensorineural: AC > BC. Conductive: <mark>BC > AC</mark>.</li><li><b>USMLE Tip:</b> Remember the diagnostic pattern. In conductive loss, the Weber test lateralizes <i>towards</i> the bad ear because it masks ambient noise, making bone conduction seem louder.</li></ul>",
+      "takeAway": "<p>The differentiation between <b>conductive</b> and <b>sensorineural</b> hearing loss is critical for diagnosis; conductive loss is a mechanical problem of sound transmission (BC > AC on Rinne), while sensorineural loss is a nerve problem of sound transduction (AC > BC, but both are reduced).</p>",
+      "mermaid": "graph TD; A[Sound] --> B{Outer/Middle Ear}; B --Conductive Loss--> X[Blocked]; B --> C{Inner Ear/Nerve}; C --Sensorineural Loss--> Y[Damaged]; C --> D[Brain];"
+    },
+    "connections": [
+      {
+        "type": "is_classified_as",
+        "to": "conductive_hearing_loss"
+      },
+      {
+        "type": "is_classified_as",
+        "to": "sensorineural_hearing_loss"
+      },
+      {
+        "type": "is_diagnosed_using",
+        "to": "weber_test"
+      },
+      {
+        "type": "is_diagnosed_using",
+        "to": "rinne_test"
+      },
+      {
+        "type": "is_a_symptom_of",
+        "to": "presbycusis"
+      }
+    ]
+  },
+  "25ffec56": {
+    "title": "Heat Stroke",
+    "primaryType": "disease",
+    "tags": [
+      "Emergency Medicine",
+      "Physiology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Temperature Regulation"
+    ],
+    "content": {
+      "definition": "<p><b>Heat stroke</b> is a life-threatening medical emergency characterized by a core body temperature above 40°C (104°F) and central nervous system dysfunction, resulting from the failure of the body's thermoregulatory mechanisms.</p>",
+      "atAGlance": "<ul><li><b>Pathophysiology:</b> Occurs when heat generation exceeds the body's ability to dissipate heat. This leads to systemic inflammation, multiorgan dysfunction, and CNS abnormalities. Unlike fever, the hypothalamic set-point is <u>not</u> elevated.</li><li><b>Types:</b> <b>Exertional</b> (occurs in healthy individuals during strenuous physical activity in hot/humid conditions) and <b>Non-exertional/Classic</b> (affects sedentary individuals, elderly, or chronically ill during heat waves).</li><li><b>Clinical Presentation:</b> Core temperature >40°C, <mark>altered mental status</mark> (confusion, delirium, coma, seizures), and often, but not always, anhidrosis (absence of sweating), particularly in non-exertional heat stroke.</li><li><b>Management:</b> <u>Immediate rapid cooling</u> is the cornerstone of treatment (e.g., ice water immersion). Antipyretics like acetaminophen or NSAIDs are <u>ineffective</u> because the hypothalamic set-point is not altered.</li><li><b>USMLE Tip:</b> Differentiate from fever: in heat stroke, the cause is external heat load overwhelming thermoregulation, and antipyretics do not work. In fever, the cause is an elevated hypothalamic set-point due to pyrogens, and antipyretics are effective.</li></ul>",
+      "takeAway": "<p><b>Heat stroke</b> is a failure of thermoregulation, not a change in the hypothalamic set-point. Therefore, the critical intervention is rapid physical cooling, as antipyretics that target the hypothalamus are completely ineffective.</p>",
+      "mermaid": "graph TD; A[Heat Load > Heat Dissipation] --> B(Failure of Thermoregulation); B --> C[Core Temp > 40°C]; C --> D[CNS Dysfunction]; C --> E[Multiorgan Damage];"
+    },
+    "connections": [
+      {
+        "type": "differentiated_from",
+        "to": "fever"
+      },
+      {
+        "type": "presents_with",
+        "to": "hyperthermia"
+      },
+      {
+        "type": "presents_with",
+        "to": "altered_mental_status"
+      }
+    ]
+  },
+  "73c63548": {
+    "title": "Hemangioblastoma",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Oncology",
+      "Pathology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Brain Tumors"
+    ],
+    "content": {
+      "definition": "<p>A <b>Hemangioblastoma</b> is a benign, highly vascular tumor of the central nervous system, typically arising in the cerebellum, brainstem, or spinal cord, and is strongly associated with <i>von Hippel-Lindau disease</i>.</p>",
+      "atAGlance": "<ul><li><b>Location:</b> Most often found in the <mark>cerebellum</mark>.</li><li><b>Imaging:</b> Appears as a well-circumscribed, cystic lesion with a brightly enhancing <mark>mural nodule</mark>.</li><li><b>Histology:</b> Composed of closely arranged, thin-walled capillaries with intervening stromal cells that have clear, lipid-rich cytoplasm.</li><li><b>Paraneoplastic Syndrome:</b> The tumor can ectopically produce <mark>erythropoietin (EPO)</mark>, leading to secondary polycythemia.</li><li><b>Genetic Association:</b> A hallmark of [[274cb033|von Hippel-Lindau (VHL) disease]], an autosomal dominant disorder. The presence of a hemangioblastoma should prompt investigation for other VHL-associated tumors (e.g., renal cell carcinoma, pheochromocytoma).</li><li><b>USMLE Tip:</b> A patient with cerebellar symptoms (ataxia, dysmetria) and polycythemia should make you think of a hemangioblastoma. If there's a family history of similar tumors or renal cancer, suspect VHL.</li></ul>",
+      "takeAway": "<p><b>Hemangioblastoma</b> is a unique CNS tumor that acts as both a space-occupying lesion causing cerebellar signs and an endocrine factory ectopically producing erythropoietin, making the combination of ataxia and polycythemia a highly specific clinical picture.</p>",
+      "mermaid": "graph TD; A[VHL Gene Mutation] --> B(Hemangioblastoma); B --> C[Cerebellar Symptoms]; B --Ectopic EPO Production--> D[Secondary Polycythemia];"
+    },
+    "connections": [
+      {
+        "type": "is_associated_with",
+        "to": "274cb033"
+      },
+      {
+        "type": "can_cause",
+        "to": "polycythemia"
+      },
+      {
+        "type": "produces",
+        "to": "erythropoietin"
+      },
+      {
+        "type": "is_a_type_of",
+        "to": "be057cfc"
+      }
+    ]
+  },
+  "c9c8eefb": {
+    "title": "Hemianopia",
+    "primaryType": "finding",
+    "tags": [
+      "Neurology",
+      "Ophthalmology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Ophthalmology",
+      "Visual Field Defects"
+    ],
+    "content": {
+      "definition": "<p><b>Hemianopia</b> (or hemianopsia) is a visual field defect characterized by the loss of vision in <i>half of the visual field</i> of one or both eyes. The pattern of vision loss is critical for localizing lesions along the visual pathway.</p>",
+      "atAGlance": "<ul><li><b>Bitemporal Hemianopia:</b> Loss of the outer (temporal) half of the visual field in both eyes. Caused by a lesion compressing the <mark>optic chiasm</mark> (e.g., [[5f3188bd|pituitary adenoma]], [[7048db1e|craniopharyngioma]], ACom aneurysm).</li><li><b>Homonymous Hemianopia:</b> Loss of the same half (e.g., both right halves or both left halves) of the visual field in both eyes. Caused by a lesion <u>posterior</u> to the optic chiasm (e.g., optic tract, lateral geniculate nucleus, optic radiations, or visual cortex).</li><li><b>Macular Sparing:</b> In homonymous hemianopia caused by a [[b6a2cc31|Posterior Cerebral Artery (PCA)]] stroke, central vision may be spared due to dual blood supply to the occipital pole from the [[143bb23d|Middle Cerebral Artery (MCA)]].</li><li><b>Quadrantanopia:</b> Loss of one quadrant of the visual field. A lesion in the temporal lobe (Meyer's loop) causes a contralateral superior quadrantanopia (\"pie in the sky\"). A lesion in the parietal lobe (Dorsal optic radiation) causes a contralateral inferior quadrantanopia (\"pie on the floor\").</li><li><b>USMLE Tip:</b> Remember the crossing pattern: fibers from the nasal retina (representing the temporal visual field) cross at the chiasm. Therefore, a midline chiasmal lesion affects both temporal fields.</li></ul>",
+      "takeAway": "<p>The pattern of <b>hemianopia</b> is a precise roadmap to the location of a neurological lesion: a bitemporal defect points directly to the optic chiasm, while a homonymous defect indicates a lesion anywhere from the optic tract back to the visual cortex.</p>",
+      "mermaid": "graph TD; A[Optic Chiasm Lesion] --> B(Bitemporal Hemianopia); C[Post-Chiasmal Lesion] --> D(Homonymous Hemianopia);"
+    },
+    "connections": [
+      {
+        "type": "is_a_type_of",
+        "to": "ff289b3a"
+      },
+      {
+        "type": "is_caused_by",
+        "to": "5f3188bd"
+      },
+      {
+        "type": "is_caused_by",
+        "to": "stroke"
+      }
+    ]
+  },
+  "004e0bd6": {
+    "title": "Hemiballismus",
+    "primaryType": "finding",
+    "tags": [
+      "Neurology",
+      "Movement Disorders",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Movement Disorders"
+    ],
+    "content": {
+      "definition": "<p><b>Hemiballismus</b> is a rare hyperkinetic movement disorder characterized by <i>wild, flinging, large-amplitude movements</i> of the proximal arm and leg on one side of the body, resulting from a lesion in the contralateral subthalamic nucleus.</p>",
+      "atAGlance": "<ul><li><b>Pathophysiology:</b> A lesion in the <mark>contralateral subthalamic nucleus (STN)</mark> disrupts the indirect pathway of the [[ed462927|basal ganglia]]. This leads to decreased inhibition of the thalamus, resulting in excessive, uncontrolled movements.</li><li><b>Etiology:</b> Most commonly caused by a <mark>lacunar stroke</mark> affecting the small penetrating arteries that supply the STN. Other causes include hemorrhage, tumors, or hyperglycemia.</li><li><b>Clinical Presentation:</b> Sudden onset of violent, involuntary, flinging movements of one arm and/or leg. Mnemonic: In <b>hemi</b>ballismus, <b>half</b> of the body is going <b>ballistic</b>.</li><li><b>Treatment:</b> Often self-limiting, resolving over weeks to months. Symptomatic treatment can include dopamine antagonists (e.g., haloperidol) to reduce the hyperkinetic movements.</li><li><b>USMLE Tip:</b> A sudden onset of wild, unilateral flinging movements in an elderly patient with a history of hypertension strongly suggests a lacunar stroke in the contralateral subthalamic nucleus.</li></ul>",
+      "takeAway": "<p><b>Hemiballismus</b> is a dramatic clinical sign that precisely localizes a lesion to the contralateral subthalamic nucleus, demonstrating the critical role of the basal ganglia's indirect pathway in suppressing unwanted movements.</p>",
+      "mermaid": "graph TD; A[Contralateral Subthalamic Nucleus Lesion] --Lacunar Stroke--> B(Disinhibition of Indirect Pathway); B --> C[Decreased Inhibition of Thalamus]; C --> D[Excessive Cortical Motor Output]; D --> E(Hemiballismus);"
+    },
+    "connections": [
+      {
+        "type": "is_caused_by_lesion_in",
+        "to": "subthalamic_nucleus"
+      },
+      {
+        "type": "is_a_type_of",
+        "to": "dyskinesia"
+      },
+      {
+        "type": "is_often_caused_by",
+        "to": "b56349b2"
+      }
+    ]
+  },
+  "134828d8": {
+    "title": "Hemineglect Syndrome",
+    "primaryType": "finding",
+    "tags": [
+      "Neurology",
+      "Cognitive Deficit",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Brain Lesions"
+    ],
+    "content": {
+      "definition": "<p><b>Hemineglect Syndrome</b>, also known as hemispatial neglect, is a neuropsychological condition in which a patient is unaware of and fails to respond to stimuli on the side of space <i>contralateral</i> to a brain lesion, despite having intact sensory and motor function. This is a deficit of attention, not sensation.</p>",
+      "atAGlance": "<ul><li><b>Localization:</b> Most commonly caused by a lesion in the <mark>non-dominant (usually right) parietal lobe</mark>, specifically the angular gyrus.</li><li><b>Etiology:</b> Often results from a stroke in the territory of the right [[143bb23d|Middle Cerebral Artery (MCA)]].</li><li><b>Clinical Presentation:</b> Patients may ignore food on the left side of their plate, only shave or apply makeup to the right side of their face, or bump into objects on their left. When asked to draw a clock, they may cram all the numbers onto the right side.</li><li><b>Distinction:</b> It is an <b>attention</b> deficit, not a primary visual field defect like hemianopia. Patients with pure hemianopia are aware of their deficit, whereas patients with neglect are often unaware (anosognosia).</li><li><b>USMLE Tip:</b> A patient who has had a stroke and now ignores one side of their body or environment (e.g., only draws the right half of a house) is the classic presentation. The lesion is in the contralateral parietal lobe.</li></ul>",
+      "takeAway": "<p><b>Hemineglect Syndrome</b> is a profound deficit of attention, not vision, that localizes a lesion to the non-dominant parietal lobe. The patient's brain effectively 'deletes' one half of their universe, a concept distinct from simply being unable to see it.</p>",
+      "mermaid": ""
+    },
+    "connections": [
+      {
+        "type": "is_caused_by_lesion_in",
+        "to": "parietal_lobe"
+      },
+      {
+        "type": "is_caused_by_stroke_in",
+        "to": "143bb23d"
+      },
+      {
+        "type": "differentiated_from",
+        "to": "c9c8eefb"
+      }
+    ]
+  },
+  "bc46aebd": {
+    "title": "Hemiparesis from Saccular Aneurysm",
+    "primaryType": "finding",
+    "tags": [
+      "Neurology",
+      "Neurosurgery",
+      "Vascular",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Cerebrovascular Disease"
+    ],
+    "content": {
+      "definition": "<p><b>Hemiparesis</b> (weakness on one side of the body) can be a devastating consequence of a ruptured <i>saccular (berry) aneurysm</i>, typically resulting from ischemic damage to motor pathways secondary to vasospasm or direct parenchymal hemorrhage.</p>",
+      "atAGlance": "<ul><li><b>Mechanism 1 (Vasospasm):</b> After a [[63f8b05f|subarachnoid hemorrhage (SAH)]] from a ruptured aneurysm, breakdown products of blood can irritate cerebral arteries, causing severe vasoconstriction (vasospasm) days later. This can lead to an ischemic stroke.</li><li><b>Mechanism 2 (Intraparenchymal Extension):</b> A rupturing aneurysm can bleed directly into the brain parenchyma, causing a hemorrhagic stroke and direct damage to motor tracts.</li><li><b>Localization (ACom Aneurysm):</b> Rupture of an <mark>Anterior Communicating Artery</mark> aneurysm can cause vasospasm of the [[830c856c|Anterior Cerebral Artery (ACA)]], leading to contralateral leg-predominant hemiparesis.</li><li><b>Localization (MCA Aneurysm):</b> Rupture of a <mark>Middle Cerebral Artery</mark> aneurysm can cause vasospasm or direct hemorrhage into the MCA territory, leading to contralateral face and arm-predominant hemiparesis.</li><li><b>USMLE Tip:</b> If a patient presents with a \"thunderclap headache\" and then develops focal weakness a few days later, think vasospasm secondary to a ruptured saccular aneurysm.</li></ul>",
+      "takeAway": "<p>Hemiparesis following a saccular aneurysm rupture is often not from the initial bleed itself, but rather a delayed ischemic stroke caused by severe vasospasm, a dangerous secondary complication of subarachnoid blood.</p>",
+      "mermaid": "graph TD; A[Saccular Aneurysm Rupture] --> B(Subarachnoid Hemorrhage); B --> C(Cerebral Vasospasm); C --> D(Ischemic Stroke); D --> E(Hemiparesis);"
+    },
+    "connections": [
+      {
+        "type": "is_a_complication_of",
+        "to": "a1647fb2"
+      },
+      {
+        "type": "is_caused_by",
+        "to": "cerebral_vasospasm"
+      },
+      {
+        "type": "presents_as",
+        "to": "hemiparesis"
+      }
+    ]
+  },
+  "646b7336": {
+    "title": "Spinal Cord Hemisection (Brown-Séquard Syndrome)",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Trauma",
+      "Pathology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Spinal Cord Lesions"
+    ],
+    "content": {
+      "definition": "<p><b>Spinal Cord Hemisection</b>, clinically known as <b>Brown-Séquard Syndrome</b>, is a neurological condition resulting from damage to one half of the spinal cord, leading to a classic pattern of <i>ipsilateral motor and proprioceptive loss</i> and <i>contralateral pain and temperature loss</i> below the level of the lesion.</p>",
+      "atAGlance": "<ul><li><b>Etiology:</b> Most commonly caused by penetrating trauma (e.g., stab wound, gunshot), but can also result from tumors, ischemia, or infection.</li><li><b>Ipsilateral Deficits (at and below lesion):</b> Loss of all sensation at the level of the lesion. Below the lesion: UMN signs (spastic paralysis from corticospinal tract damage) and loss of proprioception, vibration, and fine touch (from [[e7f5cbbe|dorsal column]] damage).</li><li><b>Contralateral Deficits (below lesion):</b> Loss of pain and temperature sensation (from spinothalamic tract damage). This begins 1-2 segments below the lesion because the spinothalamic tract fibers cross in the anterior white commissure over several segments.</li><li><b>At the Level of the Lesion:</b> Ipsilateral LMN signs (flaccid paralysis from anterior horn damage) and complete loss of sensation in the affected dermatome.</li><li><b>USMLE Tip:</b> The key to identifying Brown-Séquard is the dissociated sensory loss: loss of proprioception/vibration on the same side as the weakness, and loss of pain/temperature on the opposite side.</li></ul>",
+      "takeAway": "<p><b>Brown-Séquard Syndrome</b> is the quintessential example of how spinal cord anatomy dictates clinical findings; the ipsilateral deficits are due to tracts that have not yet crossed (corticospinal, dorsal columns), while the contralateral deficit is due to the spinothalamic tract which has already crossed at the spinal level.</p>",
+      "mermaid": "graph TD; A[Spinal Cord Hemisection at T10]; A --> B(Ipsilateral Deficits at T10); B --> B1[LMN Paralysis]; B --> B2[Loss of All Sensation]; A --> C(Ipsilateral Deficits below T10); C --> C1[UMN Paralysis - Corticospinal Tract]; C --> C2[Loss of Proprioception/Vibration - Dorsal Columns]; A --> D(Contralateral Deficits below T10); D --> D1[Loss of Pain/Temp - Spinothalamic Tract];"
+    },
+    "connections": [
+      {
+        "type": "is_also_known_as",
+        "to": "4792bc68"
+      },
+      {
+        "type": "damages",
+        "to": "corticospinal_tract"
+      },
+      {
+        "type": "damages",
+        "to": "e7f5cbbe"
+      },
+      {
+        "type": "damages",
+        "to": "07eecef1"
+      }
+    ]
+  },
+  "dc54f7a6": {
+    "title": "Hemispatial Neglect Syndrome",
+    "primaryType": "finding",
+    "tags": [
+      "Neurology",
+      "Cognitive Deficit",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Brain Lesions"
+    ],
+    "content": {
+      "definition": "<p><b>Hemispatial Neglect Syndrome</b>, also known as hemineglect, is a neuropsychological condition in which a patient is unaware of and fails to respond to stimuli on the side of space <i>contralateral</i> to a brain lesion, despite having intact sensory and motor function. This is a deficit of attention, not sensation.</p>",
+      "atAGlance": "<ul><li><b>Localization:</b> Most commonly caused by a lesion in the <mark>non-dominant (usually right) parietal lobe</mark>, specifically the angular gyrus.</li><li><b>Etiology:</b> Often results from a stroke in the territory of the right [[143bb23d|Middle Cerebral Artery (MCA)]].</li><li><b>Clinical Presentation:</b> Patients may ignore food on the left side of their plate, only shave or apply makeup to the right side of their face, or bump into objects on their left. When asked to draw a clock, they may cram all the numbers onto the right side.</li><li><b>Distinction:</b> It is an <b>attention</b> deficit, not a primary visual field defect like hemianopia. Patients with pure hemianopia are aware of their deficit, whereas patients with neglect are often unaware (anosognosia).</li><li><b>USMLE Tip:</b> A patient who has had a stroke and now ignores one side of their body or environment (e.g., only draws the right half of a house) is the classic presentation. The lesion is in the contralateral parietal lobe.</li></ul>",
+      "takeAway": "<p><b>Hemispatial Neglect Syndrome</b> is a profound deficit of attention, not vision, that localizes a lesion to the non-dominant parietal lobe. The patient's brain effectively 'deletes' one half of their universe, a concept distinct from simply being unable to see it.</p>",
+      "mermaid": ""
+    },
+    "connections": [
+      {
+        "type": "is_caused_by_lesion_in",
+        "to": "parietal_lobe"
+      },
+      {
+        "type": "is_caused_by_stroke_in",
+        "to": "143bb23d"
+      },
+      {
+        "type": "differentiated_from",
+        "to": "c9c8eefb"
+      }
+    ]
+  },
+  "dcfdcc1d": {
+    "title": "Intracranial Hemorrhage",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Neurosurgery",
+      "Vascular",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Cerebrovascular Disease"
+    ],
+    "content": {
+      "definition": "<p><b>Intracranial Hemorrhage</b> is bleeding within the cranial vault, which can be classified based on its location into <i>epidural</i>, <i>subdural</i>, <i>subarachnoid</i>, and <i>intraparenchymal</i> types. It is a neurological emergency that can lead to increased intracranial pressure and brain herniation.</p>",
+      "atAGlance": "<ul><li><b>Epidural Hematoma:</b> Arterial bleed (middle meningeal artery) between dura and skull. <mark>Lens-shaped (biconvex)</mark> on CT, does not cross suture lines. Often associated with temporal bone fracture and a 'lucid interval.'</li><li><b>Subdural Hematoma:</b> Venous bleed (bridging veins) between dura and arachnoid. <mark>Crescent-shaped</mark> on CT, crosses suture lines. Seen in elderly, alcoholics, and shaken babies.</li><li><b>Subarachnoid Hemorrhage:</b> Bleeding into the CSF space between arachnoid and pia. Presents with \"worst headache of my life.\" Caused by ruptured [[a1647fb2|saccular aneurysm]] or trauma. Blood seen in sulci and cisterns on CT.</li><li><b>Intraparenchymal Hemorrhage:</b> Bleeding within the brain parenchyma. Commonly caused by systemic hypertension (affecting basal ganglia, thalamus, pons), amyloid angiopathy, or tumors.</li><li><b>USMLE Tip:</b> The shape on non-contrast CT is key for differentiation: Epidural = <b>L</b>ens-shaped (<b>L</b>ucid interval). Subdural = <b>C</b>rescent-shaped (<b>C</b>hronic/<b>C</b>rosses sutures).</li></ul>",
+      "takeAway": "<p>The anatomical location of an <b>intracranial hemorrhage</b> dictates its characteristic appearance on CT and its clinical course; arterial epidural hematomas expand rapidly and are highly lethal, whereas venous subdural hematomas can be acute or chronic with a more variable presentation.</p>",
+      "mermaid": ""
+    },
+    "connections": [
+      {
+        "type": "is_a_type_of",
+        "to": "epidural_hematoma"
+      },
+      {
+        "type": "is_a_type_of",
+        "to": "subdural_hematoma"
+      },
+      {
+        "type": "is_a_type_of",
+        "to": "63f8b05f"
+      },
+      {
+        "type": "is_a_type_of",
+        "to": "intraparenchymal_hemorrhage"
+      }
+    ]
+  },
+  "2b10e164": {
+    "title": "Hepatotoxicity of Anticonvulsants",
+    "primaryType": "finding",
+    "tags": [
+      "Pharmacology",
+      "Toxicology",
+      "Neurology",
+      "Gastroenterology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pharmacology",
+      "Adverse Effects"
+    ],
+    "content": {
+      "definition": "<p><b>Hepatotoxicity</b> is a significant adverse effect of several <i>anticonvulsant drugs</i>, ranging from asymptomatic elevation of liver enzymes to acute liver failure, necessitating careful monitoring and drug selection.</p>",
+      "atAGlance": "<ul><li><b>Valproic Acid:</b> The most notorious for hepatotoxicity. Can cause a rare but fatal <mark>microvesicular steatosis</mark> and hepatic failure, especially in children <2 years old and those on multiple anticonvulsants. Requires regular LFT monitoring.</li><li><b>Carbamazepine:</b> Can cause a spectrum of liver injury, including cholestatic or hepatocellular patterns. Agranulocytosis and aplastic anemia are other major concerns.</li><li><b>Phenytoin:</b> Can cause a hypersensitivity reaction known as DRESS syndrome, which may include hepatitis. Can also cause a dose-dependent elevation in liver enzymes.</li><li><b>Phenobarbital:</b> Induces cytochrome P450 enzymes, which can alter the metabolism of other drugs and potentially produce toxic metabolites, though direct hepatotoxicity is less common than with valproate.</li><li><b>USMLE Tip:</b> For a patient on an anticonvulsant who develops jaundice, nausea, and markedly elevated AST/ALT, [[valproic_acid|Valproic acid]]-induced hepatotoxicity should be at the top of the differential, especially in a young child.</li></ul>",
+      "takeAway": "<p>While several anticonvulsants can affect the liver, <b>valproic acid</b> stands out for its potential to cause fatal hepatotoxicity through mitochondrial injury and impaired fatty acid metabolism, a risk that is highest in young children with metabolic disorders.</p>",
+      "mermaid": ""
+    },
+    "connections": [
+      {
+        "type": "is_an_adverse_effect_of",
+        "to": "0d37e045"
+      },
+      {
+        "type": "is_an_adverse_effect_of",
+        "to": "eddd2bc5"
+      },
+      {
+        "type": "is_an_adverse_effect_of",
+        "to": "5aea213f"
+      },
+      {
+        "type": "is_an_adverse_effect_of",
+        "to": "e1d92dbf"
+      }
+    ]
+  },
+  "bdfcf456": {
+    "title": "Hereditary Motor and Sensory Neuropathy (HMSN)",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Genetics",
+      "Pathology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology and Special Senses",
+      "Pathology",
+      "Peripheral Neuropathies"
+    ],
+    "content": {
+      "definition": "<p><b>Hereditary Motor and Sensory Neuropathy (HMSN)</b>, more commonly known as <b>Charcot-Marie-Tooth (CMT) disease</b>, is a group of inherited disorders affecting the <i>peripheral nerves</i>, leading to progressive muscle weakness, atrophy, and sensory loss, predominantly in the distal extremities.</p>",
+      "atAGlance": "<ul><li><b>Genetics:</b> Genetically heterogeneous, with autosomal dominant inheritance being most common. The most frequent type, CMT1A, is caused by a <mark>duplication of the PMP22 gene</mark>.</li><li><b>Pathophysiology:</b> Involves defective production of proteins involved in the structure and function of either peripheral nerve axons or their myelin sheath. CMT1 is a demyelinating form, while CMT2 is an axonal form.</li><li><b>Clinical Presentation:</b> Classic findings include distal leg weakness leading to <mark>foot drop</mark> and a 'steppage gait.' Over time, muscle atrophy in the lower legs creates an <mark>\"inverted champagne bottle\"</mark> or \"stork leg\" appearance. Foot deformities like <i>pes cavus</i> (high arches) and hammer toes are common.</li><li><b>Sensory Loss:</b> Patients typically experience loss of proprioception and vibration sense in the distal extremities.</li><li><b>USMLE Tip:</b> A young patient presenting with progressive distal weakness, foot drop, high-arched feet (pes cavus), and a family history of similar symptoms is the classic vignette for Charcot-Marie-Tooth disease.</li></ul>",
+      "takeAway": "<p><b>Charcot-Marie-Tooth disease</b> is the most common inherited peripheral neuropathy, characterized by a length-dependent degeneration of peripheral nerves that manifests clinically as a classic 'stork leg' deformity due to profound distal muscle atrophy.</p>",
+      "mermaid": "graph TD; A[PMP22 Gene Duplication] --> B(Defective Myelin); B --> C(Demyelination of Peripheral Nerves); C --> D[Distal Muscle Weakness & Atrophy]; D --> E(Foot Drop & Pes Cavus);"
+    },
+    "connections": [
+      {
+        "type": "is_also_known_as",
+        "to": "c3f13d85"
+      },
+      {
+        "type": "is_caused_by_mutation_in",
+        "to": "pmp22_gene"
+      },
+      {
+        "type": "presents_with",
+        "to": "foot_drop"
+      },
+      {
+        "type": "presents_with",
+        "to": "pes_cavus"
+      }
+    ]
+  }
+}

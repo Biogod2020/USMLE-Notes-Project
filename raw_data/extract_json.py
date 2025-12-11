@@ -107,6 +107,17 @@ def extract_gemini_json(input_path, output_path):
     print(f"Success! Cleaned JSON saved to: {output_path}")
 
 if __name__ == "__main__":
-    input_file = "/Users/jay/LocalProjects/USMLE-Notes-Project/raw_data/aistudio_chat.json"
-    output_file = "/Users/jay/LocalProjects/USMLE-Notes-Project/raw_data/extracted_gemini_reply.json"
+    import sys
+    if len(sys.argv) < 2:
+        print("Usage: python extract_json.py <input_file> [output_file]")
+        sys.exit(1)
+        
+    input_file = sys.argv[1]
+    if len(sys.argv) >= 3:
+        output_file = sys.argv[2]
+    else:
+        # Default output filename based on input
+        base, ext = os.path.splitext(input_file)
+        output_file = f"{base}_extracted.json"
+        
     extract_gemini_json(input_file, output_file)

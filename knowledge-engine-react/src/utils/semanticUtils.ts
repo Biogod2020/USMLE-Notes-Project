@@ -2,9 +2,9 @@
 
 // 1. 定义语义族及其关联颜色
 export const SEMANTIC_FAMILIES = {
-  HIERARCHY: { name: 'Hierarchy', color: 'structure' }, // Blue-ish
+  HIERARCHY: { name: 'Hierarchy', color: 'anatomy' }, // Blue-ish
   CAUSALITY: { name: 'Causality', color: 'disease' },   // Purple-ish
-  ACTION: { name: 'Medical Action', color: 'substance' }, // Teal-ish
+  ACTION: { name: 'Medical Action', color: 'drug' }, // Red-ish/Orange-ish
   ASSOCIATION: { name: 'Association', color: 'concept' }, // Green-ish
   LOCATION: { name: 'Anatomy/Location', color: 'finding' }, // Cyan-ish
   DEFAULT: { name: 'Other', color: 'default' },

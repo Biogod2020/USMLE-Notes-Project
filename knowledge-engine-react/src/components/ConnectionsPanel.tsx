@@ -98,14 +98,19 @@ export function ConnectionsPanel({ knowledgeBase, activeTopic, onTopicSelect, is
           <ul>
             {outgoingConnections.length > 0 ? (
               outgoingConnections.map((c, i) => {
-                const target = knowledgeBase[c.to];
-                if (!target) return null;
+                let target = knowledgeBase[c.to];
+                let isUnresolved = false;
+                if (!target) {
+                    isUnresolved = true;
+                    // Create a dummy target for display
+                    target = { id: c.to, title: fallbackLabel(c.to), primaryType: 'concept', tags: [], content: {}, connections: [], classificationPath: [] };
+                }
                 const family = getFamilyForType(c.type);
                 return (
-                  <li key={`${c.to}-${i}`} className={`type-${family.color}-border`}>
+                  <li key={`${c.to}-${i}`} className={`type-${family.color}-border ${isUnresolved ? 'unresolved-link' : ''}`}>
                     <span className={`connection-label type-${family.color}`}>{fallbackLabel(c.type)} →</span>
                     <a href="#" className="internal-link" data-topic-id={target.id} onClick={(e) => { e.preventDefault(); onTopicSelect(target.id); }}>
-                      {target.title}
+                      {target.title} {isUnresolved && <span style={{fontSize: '0.8em', opacity: 0.6}}>(Empty)</span>}
                     </a>
                   </li>
                 );
@@ -121,13 +126,17 @@ export function ConnectionsPanel({ knowledgeBase, activeTopic, onTopicSelect, is
           <ul>
             {incomingConnections.length > 0 ? (
               incomingConnections.map((b, i) => {
-                const source = knowledgeBase[b.from];
-                if (!source) return null;
+                let source = knowledgeBase[b.from];
+                let isUnresolved = false;
+                if (!source) {
+                    isUnresolved = true;
+                    source = { id: b.from, title: fallbackLabel(b.from), primaryType: 'concept', tags: [], content: {}, connections: [], classificationPath: [] };
+                }
                 const family = getFamilyForType(b.type);
                 return (
-                  <li key={`${b.from}-${i}`} className={`type-${family.color}-border`}>
+                  <li key={`${b.from}-${i}`} className={`type-${family.color}-border ${isUnresolved ? 'unresolved-link' : ''}`}>
                      <a href="#" className="internal-link" data-topic-id={source.id} onClick={(e) => { e.preventDefault(); onTopicSelect(source.id); }}>
-                      {source.title}
+                      {source.title} {isUnresolved && <span style={{fontSize: '0.8em', opacity: 0.6}}>(Empty)</span>}
                     </a>
                     {/* MODIFICATION: Improved readability */}
                     <span style={{ margin: '0 0.5ch' }}>→</span> 

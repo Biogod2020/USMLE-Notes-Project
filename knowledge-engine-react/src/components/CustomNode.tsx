@@ -2,12 +2,7 @@
 import { memo } from 'react';
 import type { KeyboardEvent as ReactKeyboardEvent } from 'react';
 import { type NodeProps, Handle, Position, type Node } from '@xyflow/react';
-
-const EMOJI_MAP: Record<string, string> = {
-  disease: '🦠', structure: '🏛️', process: '⚙️',
-  substance: '🧪', finding: '❗', concept: '💡',
-};
-const getEmoji = (type: string) => EMOJI_MAP[type] || '📄';
+import { getEmoji } from '../constants';
 
 // FIX 1: 定义 data 对象的具体类型
 type CustomNodeData = {

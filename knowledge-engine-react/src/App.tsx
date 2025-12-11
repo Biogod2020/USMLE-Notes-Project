@@ -11,9 +11,13 @@ import { Popover } from './components/Popover';
 import { ToastContainer } from './components/Toast';
 import { useResizablePanels } from './hooks/useResizablePanels';
 import { useKnowledgeBase } from './hooks/useKnowledgeBase';
-import Fuse, { type FuseResult } from 'fuse.js';
+import { Document } from 'flexsearch';
 
-export type SearchResult = FuseResult<SearchItem>;
+export type SearchResult = {
+  item: SearchItem;
+  score: number;
+  matches?: any[];
+};
 
 type SearchItem = {
   id: string;
@@ -67,7 +71,7 @@ export default function App() {
     fileSelections,
     directoryName,
     isLoading,
-    error,
+    error: kbError,
     dataHealth,
     selectDirectory,
     toggleFileSelection,
@@ -78,6 +82,9 @@ export default function App() {
     canPersistTopics,
     getTopicSource,
   } = useKnowledgeBase();
+
+  // Rename error to kbError to avoid conflict with potential local error state if needed
+  const error = kbError; 
 
   const addToast = (message: string, type: ToastNotification['type'] = 'info') => {
     const id = Date.now();
@@ -91,7 +98,7 @@ export default function App() {
   const handleSelectDirectory = async () => {
     const result = await selectDirectory();
     if (result) {
-        // Initial load, don't show toast unless there's an error from the hook
+        // Initial load
     }
   };
 
@@ -119,36 +126,104 @@ export default function App() {
 
   const { sizes, startDragging, isCollapsed, toggleCollapse } = useResizablePanels(panelConfig);
 
-  const fuse = useMemo(() => {
-    const data: SearchItem[] = Object.values(knowledgeBase)
-      .filter((t): t is Topic => !!t && typeof t.id === 'string' && !t.id.startsWith('zzz_'))
-      .map((t) => ({
-        id: t.id,
-        title: t.title,
-        acronym: generateAcronym(t.title),
-        primaryType: t.primaryType,
-        tags: t.tags ?? [],
-        fullContent: Object.values(t.content ?? {}).map((v) => stripHtml(String(v ?? ''))).join(' '),
-      }));
-
-    return new Fuse<SearchItem>(data, {
-      keys: [
-        { name: 'title', weight: 1.0 },
-        { name: 'acronym', weight: 0.9 },
-        { name: 'tags', weight: 0.7 },
-        { name: 'fullContent', weight: 0.2 },
-      ],
-      includeScore: true,
-      threshold: 0.4,
-      minMatchCharLength: 2,
-      ignoreLocation: true,
+  const searchIndex = useMemo(() => {
+    const index = new Document({
+      document: {
+        id: 'id',
+        index: [
+          { field: 'title', tokenize: 'full', resolution: 9 }, // 'full' allows matching parts of words
+          { field: 'acronym', tokenize: 'strict', resolution: 9 },
+          { field: 'tags', tokenize: 'forward', resolution: 5 },
+          { field: 'fullContent', tokenize: 'forward', resolution: 1 }, // 'forward' is faster than full for long text
+        ],
+      },
+      cache: true,
+      worker: false, // Ensure synchronous execution
     });
+
+    Object.values(knowledgeBase)
+      .filter((t): t is Topic => !!t && typeof t.id === 'string' && !t.id.startsWith('zzz_'))
+      .forEach((t) => {
+        index.add({
+          id: t.id,
+          title: t.title,
+          acronym: generateAcronym(t.title),
+          primaryType: t.primaryType,
+          tags: t.tags ?? [],
+          fullContent: Object.values(t.content ?? {}).map((v) => stripHtml(String(v ?? ''))).join(' '),
+        });
+      });
+
+    return index;
   }, [knowledgeBase]);
 
   const searchResults: SearchResult[] | null = useMemo(() => {
     if (!searchTerm.trim()) return null;
-    return fuse.search(searchTerm.trim());
-  }, [fuse, searchTerm]);
+    
+    // Search all fields. FlexSearch with Document returns structured results grouped by field.
+    // We apply fuzzy tolerance and limit.
+    const results = searchIndex.search(searchTerm.trim(), {
+      limit: 100, // Get more candidates for ranking
+      suggest: true, // Enable suggestions for "fuzzy-like" behavior
+    });
+
+    // Weighted Scoring System
+    // We will accumulate scores for each item based on which field matched and its position (rank) in that field's results.
+    const scores = new Map<string, number>();
+    const fieldWeights: Record<string, number> = {
+        title: 10,       // Highest priority
+        acronym: 8,      // High priority
+        tags: 5,         // Medium priority
+        fullContent: 1   // Low priority, but provides context
+    };
+
+    (results as any[]).forEach((fieldResult) => {
+        const fieldName = fieldResult.field as string;
+        if (!fieldName) return;
+        const weight = fieldWeights[fieldName] ?? 1;
+        const matches = fieldResult.result; // Array of IDs ordered by score (internal FlexSearch rank)
+        
+        matches.forEach((id: string | number, index: number) => {
+            const strId = String(id);
+            // Rank Decay: First result gets full weight, subsequent results get slightly less.
+            // Score = Weight * (1 / (1 + index * 0.1)) -> Simple decay
+            // Or simple linear subtraction? Let's use multiplicative decay.
+            const rankScore = weight * (1 - (index / matches.length) * 0.5); 
+            
+            const currentScore = scores.get(strId) ?? 0;
+            scores.set(strId, currentScore + rankScore);
+        });
+    });
+
+    // Convert to SearchResult array and sort by Score Descending
+    const mergedResults: SearchResult[] = [];
+    
+    // Sort IDs by score
+    const sortedIds = Array.from(scores.entries()).sort((a, b) => b[1] - a[1]);
+
+    // Top 20 results
+    const topResults = sortedIds.slice(0, 20);
+    const maxScore = topResults[0]?.[1] ?? 1; // Avoid divide by zero
+
+    topResults.forEach(([id, score]) => {
+         const topic = knowledgeBase[id];
+         if (topic) {
+             mergedResults.push({
+                 item: {
+                     id: topic.id,
+                     title: topic.title,
+                     acronym: generateAcronym(topic.title),
+                     primaryType: topic.primaryType,
+                     tags: topic.tags ?? [],
+                     fullContent: '', 
+                 },
+                 score: score / maxScore, // Normalize to 0-1 (1 is best)
+             });
+         }
+    });
+
+    return mergedResults;
+  }, [searchIndex, searchTerm, knowledgeBase]);
 
   useEffect(() => {
     const sys = window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -204,6 +279,10 @@ export default function App() {
   const closeEditor = () => setEditorTopicId(null);
 
   const handleTopicSelect = (id: string) => {
+    if (!knowledgeBase[id]) {
+        addToast(`Concept "${id}" is currently empty (waiting for supplement).`, 'info');
+        return;
+    }
     if (activeTopicId !== id) {
       setActiveTopicId(id);
     }

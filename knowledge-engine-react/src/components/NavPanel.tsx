@@ -207,7 +207,7 @@ export function NavPanel({
                                 <span className={`emoji type-${res.item.primaryType}`}>{getIcon(res.item.primaryType)}</span>
                                 <Highlight text={res.item.title} highlight={searchTerm} />
                             </span>
-                            <span className="relevance-score" title="Relevance">{Math.round((1 - (res.score ?? 0)) * 100)}%</span>
+                            <span className="relevance-score" title="Relevance">{Math.round((res.score ?? 0) * 100)}%</span>
                             </a>
                         </li>
                     ))

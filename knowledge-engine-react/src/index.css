@@ -43,21 +43,21 @@
 /* Dark Theme Colors */
 html[data-theme="dark"] {
   --c-disease-dark: #e879f9;
-  --c-disease-bg-dark: #2e103c;
+  --c-disease-bg-dark: #4a1d61; /* Lightened from #2e103c */
   --c-drug-dark: #f87171;
-  --c-drug-bg-dark: #450a0a;
+  --c-drug-bg-dark: #661e1e; /* Lightened from #450a0a */
   --c-anatomy-dark: #a5b4fc;
-  --c-anatomy-bg-dark: #222c64;
+  --c-anatomy-bg-dark: #313c7a; /* Lightened from #222c64 */
   --c-microbe-dark: #34d399;
-  --c-microbe-bg-dark: #064e3b;
+  --c-microbe-bg-dark: #065f46; /* Lightened from #064e3b */
   --c-molecule-dark: #5eead4;
-  --c-molecule-bg-dark: #0f3c3a;
+  --c-molecule-bg-dark: #134e4a; /* Lightened from #0f3c3a */
   --c-physiology-dark: #fb923c;
-  --c-physiology-bg-dark: #432008;
+  --c-physiology-bg-dark: #632d0b; /* Lightened from #432008 */
   --c-finding-dark: #7dd3fc;
-  --c-finding-bg-dark: #0f3c5a;
+  --c-finding-bg-dark: #0c4a6e; /* Lightened from #0f3c5a - actually using slate-900ish blue */
   --c-concept-dark: #bef264;
-  --c-concept-bg-dark: #2e440c;
+  --c-concept-bg-dark: #3f6212; /* Lightened from #2e440c */
 
   --text-dark: #e5e7eb;
   --bg-dark: #111827;

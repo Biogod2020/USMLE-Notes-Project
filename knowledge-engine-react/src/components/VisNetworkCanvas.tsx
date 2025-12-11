@@ -2,14 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Network, DataSet, type Options, type Node as VisNode, type Edge as VisEdge } from 'vis-network/standalone';
 import type { KnowledgeBase } from '../types';
 
-const EMOJI_MAP: Record<string, string> = {
-  disease: '🦠',
-  structure: '🔬',
-  process: '⚙️',
-  substance: '💊',
-  finding: '🩺',
-  concept: '🧠',
-};
+import { getEmoji } from '../constants';
 
 export interface VisNetworkCanvasProps {
   knowledgeBase: KnowledgeBase;
@@ -34,7 +27,7 @@ function buildVisData(knowledgeBase: KnowledgeBase, centerNodeId: string | null)
     .filter(id => knowledgeBase[id])
     .map(id => ({
       id,
-      label: `${EMOJI_MAP[knowledgeBase[id].primaryType] || '💡'} ${knowledgeBase[id].title}`,
+      label: `${getEmoji(knowledgeBase[id].primaryType)} ${knowledgeBase[id].title}`,
       group: knowledgeBase[id].primaryType,
     }));
 
@@ -52,18 +45,27 @@ function buildVisData(knowledgeBase: KnowledgeBase, centerNodeId: string | null)
   return { nodes, edges };
 }
 
-const TYPE_KEYS = ['disease', 'structure', 'process', 'substance', 'finding', 'concept'] as const;
+const TYPE_KEYS = ['disease', 'drug', 'anatomy', 'microbe', 'molecule', 'physiology', 'finding', 'concept'] as const;
 
 function resolveGroupColors(theme: 'light' | 'dark') {
   if (typeof document === 'undefined') return {};
   const css = getComputedStyle(document.documentElement);
-  const entries: Array<[string, { color: { background: string; border: string } }]> = TYPE_KEYS.map(type => {
+  // Use 'any' or less strict type to avoid complexity with tuple mapping
+  const entries = TYPE_KEYS.map(type => {
     const bg = css.getPropertyValue(`--c-${type}-bg-${theme}`).trim() || '#ffffff';
     const border = css.getPropertyValue(`--c-${type}-${theme}`).trim() || '#333333';
-    return [type, { color: { background: bg, border } }];
+    // Add highlight colors (slightly brighter)
+    return [type, { 
+        color: { background: bg, border },
+        highlight: { background: border, border: bg }
+    }] as const;
   });
-  entries.push(['default', { color: { background: '#ffffff', border: '#333333' } }]);
-  return Object.fromEntries(entries);
+  const defaultEntry = ['default', { 
+      color: { background: '#ffffff', border: '#333333' },
+      highlight: { background: '#cccccc', border: '#000000' }
+  }] as const;
+  
+  return Object.fromEntries([...entries, defaultEntry]);
 }
 
 export function VisNetworkCanvas({ knowledgeBase, centerNodeId, onNodeClick }: VisNetworkCanvasProps) {
@@ -95,18 +97,32 @@ export function VisNetworkCanvas({ knowledgeBase, centerNodeId, onNodeClick }: V
       nodes: {
         shape: 'box',
         borderWidth: 2,
-        font: { size: 14, color: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim() || '#1f2937' },
-        margin: { top: 10, right: 15, bottom: 10, left: 15 },
+        font: {
+            size: 14,
+            color: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim() || '#1f2937',
+            face: 'Inter, system-ui, sans-serif'
+        },
+        margin: { top: 12, right: 20, bottom: 12, left: 20 },
+        shadow: true,
       },
       edges: {
         width: 2,
-        smooth: true,
+        smooth: { enabled: true, type: 'continuous', roundness: 0.5 },
         font: { size: 10, align: 'horizontal', color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#6b7280', strokeWidth: 0 },
+        color: { inherit: 'from', opacity: 0.8 },
+        arrows: { to: { enabled: true, scaleFactor: 0.8 } }
       },
       physics: {
         solver: 'forceAtlas2Based',
-        forceAtlas2Based: { gravitationalConstant: -100, springLength: 150, centralGravity: 0.01 },
-        stabilization: { iterations: 500, fit: true },
+        forceAtlas2Based: { 
+            gravitationalConstant: -200, // Stronger repulsion (was -100)
+            springLength: 250, // Longer springs (was 150)
+            centralGravity: 0.005, // Lower central gravity to let it expand (was 0.01)
+            damping: 0.4
+        },
+        stabilization: { iterations: 1000, fit: true }, // More iterations to stabilize
+        maxVelocity: 50,
+        minVelocity: 0.1,
       },
       interaction: { hover: true },
       groups: resolveGroupColors(theme),

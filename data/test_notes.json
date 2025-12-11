@@ -1,0 +1,337 @@
+{
+    "albuminocytologic_dissociation": {
+        "title": "Albuminocytologic Dissociation",
+        "primaryType": "finding",
+        "tags": [
+            "Neurology",
+            "Pathology",
+            "USMLE"
+        ],
+        "classificationPath": [
+            "Neurology",
+            "Diagnostics",
+            "CSF Findings"
+        ],
+        "content": {
+            "definition": "<p><b>Albuminocytologic Dissociation</b> is a specific cerebrospinal fluid (CSF) finding characterized by an <u>elevation in protein levels</u> (albumin) with a <i>normal cell count</i> (cytologic), classically associated with immune-mediated demyelinating neuropathies.</p>",
+            "atAGlance": "<ul><li><b>Mechanism:</b> increased permeability of the blood-nerve barrier at the nerve roots allows protein leakage into the CSF without significant cellular infiltration.</li><li><b>Key Association:</b> Pathognomonic for [[guillain_barre_syndrome|Guillain-Barré Syndrome]] (Acute Inflammatory Demyelinating Polyneuropathy).</li><li><b>Diagnostics:</b> Identified via [[lumbar_puncture]].</li><li><b>USMLE Tip:</b> If a vignette describes ascending paralysis and asks for CSF findings, look for 'Elevated protein, normal WBC count'.</li></ul>",
+            "takeAway": "<p>This dissociation reflects inflammation at the nerve roots (radiculitis) that increases protein without a corresponding pleocytosis, distinguishing [[guillain_barre_syndrome]] from infectious etiologies like viral meningitis.</p>",
+            "mermaid": ""
+        },
+        "connections": [
+            {
+                "type": "is_characteristic_finding_of",
+                "to": "guillain_barre_syndrome"
+            },
+            {
+                "type": "distinguishes_from",
+                "to": "viral_meningitis"
+            }
+        ]
+    },
+    "vesicular_monoamine_transporter": {
+        "title": "Vesicular Monoamine Transporter (VMAT)",
+        "primaryType": "structure",
+        "tags": [
+            "Neurology",
+            "Pharmacology",
+            "Neurotransmission"
+        ],
+        "classificationPath": [
+            "Neurology",
+            "Neuropharmacology",
+            "Transporters"
+        ],
+        "content": {
+            "definition": "<p><b>Vesicular Monoamine Transporter (VMAT)</b> is an integral membrane protein responsible for the <u>transport and sequestration</u> of monoamine neurotransmitters (such as [[dopamine]], [[norepinephrine]], and [[serotonin]]) into synaptic vesicles, protecting them from degradation by [[monoamine_oxidase]].</p>",
+            "atAGlance": "<ul><li><b>Function:</b> Packages monoamines into vesicles for release at the synapse.</li><li><b>Clinical Relevance:</b> Target for drugs treating hyperkinetic movement disorders.</li><li><b>Pharmacology:</b> Inhibited by drugs like <b>Reserpine</b> (historical antihypertensive) and <b>Tetrabenazine/Deutetrabenazine</b>.</li><li><b>Disease Association:</b> Inhibition leads to depletion of monoamines; used in [[huntington_disease]] to manage chorea.</li><li><b>USMLE Tip:</b> Remember <b>Tetrabenazine</b> inhibits VMAT to reduce dopamine packaging, thereby treating [[chorea]] and [[tardive_dyskinesia]].</li></ul>",
+            "takeAway": "<p>By sequestering neurotransmitters into vesicles, <b>VMAT</b> ensures a pool of releasable monoamines; its inhibition depletes this pool, reducing dopaminergic signaling, which is therapeutic in hyperkinetic states but can cause depression or parkinsonism.</p>",
+            "mermaid": "graph LR; Cytoplasm_Dopamine -->|VMAT| Synaptic_Vesicle; Synaptic_Vesicle -->|Exocytosis| Synaptic_Cleft;"
+        },
+        "connections": [
+            {
+                "type": "inhibited_by",
+                "to": "tetrabenazine"
+            },
+            {
+                "type": "transports",
+                "to": "dopamine"
+            },
+            {
+                "type": "transports",
+                "to": "norepinephrine"
+            }
+        ]
+    },
+    "lateral_geniculate_nucleus": {
+        "title": "Lateral Geniculate Nucleus (LGN)",
+        "primaryType": "structure",
+        "tags": [
+            "Neurology",
+            "Neuroanatomy",
+            "Visual System"
+        ],
+        "classificationPath": [
+            "Neurology",
+            "Neuroanatomy",
+            "Thalamus"
+        ],
+        "content": {
+            "definition": "<p>The <b>Lateral Geniculate Nucleus (LGN)</b> is a specific relay center within the [[thalamus]] that receives visual information from the [[retina]] via the [[optic_tract]] and projects it to the <u>primary visual cortex</u> (V1) in the [[occipital_lobe]].</p>",
+            "atAGlance": "<ul><li><b>Input:</b> Retinal ganglion cells via the [[optic_tract]].</li><li><b>Output:</b> Sends projections (optic radiations) to the calcarine sulcus.</li><li><b>Pathways:</b> <ul><li><b>Meyer's Loop:</b> Travels through the [[temporal_lobe]] (superior visual field).</li><li><b>Baum's Loop:</b> Travels through the [[parietal_lobe]] (inferior visual field).</li></ul></li><li><b>USMLE Tip:</b> Remember <b>L</b> is for <b>L</b>ight (Lateral Geniculate = Vision) vs. <b>M</b> for <b>M</b>usic (Medial Geniculate = Hearing).</li></ul>",
+            "takeAway": "<p>The <b>LGN</b> acts as the primary processing gateway for visual information before it reaches the cortex, maintaining the segregation of information from the left and right eyes and specific visual fields.</p>",
+            "mermaid": "graph LR; Retina --> Optic_Nerve; Optic_Nerve --> Optic_Chiasm; Optic_Chiasm --> Optic_Tract; Optic_Tract --> Lateral_Geniculate_Nucleus; Lateral_Geniculate_Nucleus --> Visual_Cortex;"
+        },
+        "connections": [
+            {
+                "type": "projects_to",
+                "to": "visual_cortex"
+            },
+            {
+                "type": "receives_input_from",
+                "to": "optic_tract"
+            },
+            {
+                "type": "is_part_of",
+                "to": "thalamus"
+            }
+        ]
+    },
+    "medial_geniculate_nucleus": {
+        "title": "Medial Geniculate Nucleus (MGN)",
+        "primaryType": "structure",
+        "tags": [
+            "Neurology",
+            "Neuroanatomy",
+            "Auditory System"
+        ],
+        "classificationPath": [
+            "Neurology",
+            "Neuroanatomy",
+            "Thalamus"
+        ],
+        "content": {
+            "definition": "<p>The <b>Medial Geniculate Nucleus (MGN)</b> is the specific auditory relay nucleus within the [[thalamus]] that receives auditory information from the [[inferior_colliculus]] and projects it to the <u>primary auditory cortex</u> in the [[temporal_lobe]].</p>",
+            "atAGlance": "<ul><li><b>Input:</b> Auditory information from the <b>Inferior Colliculus</b>.</li><li><b>Output:</b> Auditory Radiations to the Transverse Temporal Gyri (Heschl's gyri) in the temporal lobe.</li><li><b>Function:</b> Processing and relaying hearing/sound information.</li><li><b>USMLE Tip:</b> <b>M</b>edial is for <b>M</b>usic (Hearing). <b>L</b>ateral is for <b>L</b>ight (Vision).</li></ul>",
+            "takeAway": "<p>Serving as the thalamic gateway for hearing, the <b>MGN</b> integrates auditory data before it is consciously perceived in the temporal cortex.</p>",
+            "mermaid": "graph LR; Cochlea --> Inferior_Colliculus; Inferior_Colliculus --> Medial_Geniculate_Nucleus; Medial_Geniculate_Nucleus --> Auditory_Cortex;"
+        },
+        "connections": [
+            {
+                "type": "projects_to",
+                "to": "auditory_cortex"
+            },
+            {
+                "type": "receives_input_from",
+                "to": "inferior_colliculus"
+            },
+            {
+                "type": "is_part_of",
+                "to": "thalamus"
+            }
+        ]
+    },
+    "ventral_posterolateral_nucleus": {
+        "title": "Ventral Posterolateral Nucleus (VPL)",
+        "primaryType": "structure",
+        "tags": [
+            "Neurology",
+            "Neuroanatomy",
+            "Sensory System"
+        ],
+        "classificationPath": [
+            "Neurology",
+            "Neuroanatomy",
+            "Thalamus"
+        ],
+        "content": {
+            "definition": "<p>The <b>Ventral Posterolateral Nucleus (VPL)</b> is a major sensory relay nucleus in the [[thalamus]] responsible for transmitting somatosensory information (vibration, pain, pressure, temperature, joint position) from the <u>body</u> (neck and below) to the primary somatosensory cortex.</p>",
+            "atAGlance": "<ul><li><b>Inputs:</b> <ul><li><b>Spinothalamic Tract:</b> Pain and temperature from the body.</li><li><b>Dorsal Column-Medial Lemniscus:</b> Pressure, vibration, touch, proprioception from the body.</li></ul></li><li><b>Output:</b> Primary Somatosensory Cortex ([[parietal_lobe]]).</li><li><b>USMLE Tip:</b> V<b>PL</b> receives input from the <b>L</b>egs/body (Spinothalamic/DCML). V<b>PM</b> receives from the <b>M</b>akeup (Face/Trigeminal).</li></ul>",
+            "takeAway": "<p>The <b>VPL</b> is the critical thalamic integration point for all somatic sensation originating from the body before it reaches conscious perception in the cortex.</p>",
+            "mermaid": "graph TD; Spinothalamic_Tract --> VPL; Medial_Lemniscus --> VPL; VPL --> Somatosensory_Cortex;"
+        },
+        "connections": [
+            {
+                "type": "receives_input_from",
+                "to": "spinothalamic_tract"
+            },
+            {
+                "type": "receives_input_from",
+                "to": "dorsal_column_medial_lemniscus"
+            },
+            {
+                "type": "projects_to",
+                "to": "primary_somatosensory_cortex"
+            }
+        ]
+    },
+    "ventral_posteromedial_nucleus": {
+        "title": "Ventral Posteromedial Nucleus (VPM)",
+        "primaryType": "structure",
+        "tags": [
+            "Neurology",
+            "Neuroanatomy",
+            "Sensory System"
+        ],
+        "classificationPath": [
+            "Neurology",
+            "Neuroanatomy",
+            "Thalamus"
+        ],
+        "content": {
+            "definition": "<p>The <b>Ventral Posteromedial Nucleus (VPM)</b> is a sensory relay nucleus within the [[thalamus]] that processes somatosensory information (facial sensation) and taste from the <u>face and head</u>.</p>",
+            "atAGlance": "<ul><li><b>Inputs:</b> <ul><li><b>Trigeminal Nerve (CN V):</b> Facial sensation (pain, temperature, touch).</li><li><b>Gustatory Pathway:</b> Taste sensation.</li></ul></li><li><b>Output:</b> Primary Somatosensory Cortex ([[parietal_lobe]]).</li><li><b>USMLE Tip:</b> V<b>P</b>M receives from the <b>M</b>akeup (Face). V<b>P</b>L receives from the <b>L</b>egs (Body).</li></ul>",
+            "takeAway": "<p>The <b>VPM</b> serves as the dedicated thalamic relay for all sensory input from the head, including the complex processing of facial touch and gustatory signals.</p>",
+            "mermaid": "graph TD; Trigeminal_Pathway --> VPM; Gustatory_Pathway --> VPM; VPM --> Somatosensory_Cortex;"
+        },
+        "connections": [
+            {
+                "type": "receives_input_from",
+                "to": "trigeminal_nerve"
+            },
+            {
+                "type": "projects_to",
+                "to": "primary_somatosensory_cortex"
+            },
+            {
+                "type": "is_part_of",
+                "to": "thalamus"
+            }
+        ]
+    },
+    "charcot_bouchard_microaneurysm": {
+        "title": "Charcot-Bouchard Microaneurysm",
+        "primaryType": "disease",
+        "tags": [
+            "Neurology",
+            "Pathology",
+            "Vascular Disease"
+        ],
+        "classificationPath": [
+            "Neurology",
+            "Cerebrovascular Disease",
+            "Hemorrhage"
+        ],
+        "content": {
+            "definition": "<p><b>Charcot-Bouchard Microaneurysms</b> are minute aneurysms that occur in small penetrating vessels (specifically the [[lenticulostriate_arteries]]) of the brain, caused by <u>chronic hypertension</u>, leading to susceptibility for rupture and hemorrhagic stroke.</p>",
+            "atAGlance": "<ul><li><b>Pathophysiology:</b> Chronic hypertension leads to lipohyalinosis and fibrinoid necrosis of small vessel walls, weakening them.</li><li><b>Location:</b> Deep brain structures: [[basal_ganglia]] (putamen, globus pallidus), [[thalamus]], internal capsule.</li><li><b>Complication:</b> Rupture causes <b>Intraparenchymal Hemorrhage</b> (Hypertensive Hemorrhage).</li><li><b>USMLE Tip:</b> Contrast with [[saccular_aneurysm]] (Berry): Charcot-Bouchard = <b>Micro</b>/Chronic HTN/Intraparenchymal bleed. Berry = <b>Macro</b>/Circle of Willis/Subarachnoid bleed.</li></ul>",
+            "takeAway": "<p>These microaneurysms are the direct pathological link between long-standing, uncontrolled hypertension and deep brain hemorrhages, typically affecting the basal ganglia and thalamus.</p>",
+            "mermaid": "graph TD; Chronic_Hypertension --> Lipohyalinosis; Lipohyalinosis --> Weak_Vessel_Wall; Weak_Vessel_Wall --> Charcot_Bouchard_Aneurysm; Charcot_Bouchard_Aneurysm --> Rupture; Rupture --> Intraparenchymal_Hemorrhage;"
+        },
+        "connections": [
+            {
+                "type": "caused_by",
+                "to": "chronic_hypertension"
+            },
+            {
+                "type": "causes",
+                "to": "intraparenchymal_hemorrhage"
+            },
+            {
+                "type": "affects",
+                "to": "lenticulostriate_arteries"
+            }
+        ]
+    },
+    "noncommunicating_hydrocephalus": {
+        "title": "Noncommunicating Hydrocephalus",
+        "primaryType": "disease",
+        "tags": [
+            "Neurology",
+            "Pathology",
+            "Pediatrics"
+        ],
+        "classificationPath": [
+            "Neurology",
+            "Hydrocephalus"
+        ],
+        "content": {
+            "definition": "<p><b>Noncommunicating Hydrocephalus</b> (Obstructive Hydrocephalus) is a type of hydrocephalus caused by a <u>structural blockage</u> of cerebrospinal fluid (CSF) flow <i>within</i> the ventricular system, preventing it from communicating with the subarachnoid space.</p>",
+            "atAGlance": "<ul><li><b>Mechanism:</b> Physical obstruction of CSF flow.</li><li><b>Common Sites:</b> [[cerebral_aqueduct]] (stenosis), Foramen of Monro (colloid cyst), Fourth Ventricle (tumor).</li><li><b>Imaging:</b> Ventricles <i>upstream</i> of the blockage are dilated; downstream ventricles are normal.</li><li><b>Etiologies:</b> Aqueductal stenosis, [[chiari_malformation]], Dandy-Walker malformation, tumors.</li><li><b>USMLE Tip:</b> Differentiate from [[communicating_hydrocephalus]] where there is <b>no</b> obstruction within the ventricles (problem is absorption).</li></ul>",
+            "takeAway": "<p>This condition creates a pressure gradient across the obstruction, leading to rapid dilation of the proximal ventricles and increased intracranial pressure, often requiring surgical shunting or endoscopic third ventriculostomy.</p>",
+            "mermaid": "graph TD; CSF_Production --> Ventricles; Obstruction --> No_Flow_to_Subarachnoid; Accumulation --> Dilation; Dilation --> Increased_ICP;"
+        },
+        "connections": [
+            {
+                "type": "caused_by",
+                "to": "aqueductal_stenosis"
+            },
+            {
+                "type": "caused_by",
+                "to": "chiari_malformation"
+            },
+            {
+                "type": "distinguished_from",
+                "to": "communicating_hydrocephalus"
+            }
+        ]
+    },
+    "subacute_combined_degeneration": {
+        "title": "Subacute Combined Degeneration",
+        "primaryType": "disease",
+        "tags": [
+            "Neurology",
+            "Nutrition",
+            "Pathology"
+        ],
+        "classificationPath": [
+            "Neurology",
+            "Spinal Cord Disorders",
+            "Nutritional Deficiencies"
+        ],
+        "content": {
+            "definition": "<p><b>Subacute Combined Degeneration</b> is a progressive degeneration of the spinal cord caused by [[vitamin_b12_deficiency]], characterized by demyelination of the <u>dorsal columns</u> (sensory) and <u>lateral corticospinal tracts</u> (motor).</p>",
+            "atAGlance": "<ul><li><b>Pathophysiology:</b> Vitamin B12 deficiency leads to accumulation of methylmalonic acid, causing myelin synthesis defects.</li><li><b>Affected Tracts:</b> <ul><li><b>Dorsal Columns:</b> Loss of vibration and proprioception, sensory ataxia.</li><li><b>Lateral Corticospinal Tracts:</b> Spasticity, weakness, hyperreflexia.</li><li><b>Spinocerebellar Tracts:</b> Ataxia.</li></ul></li><li><b>Symptoms:</b> Paresthesias, ataxia, weakness, +Romberg sign, +Babinski.</li><li><b>USMLE Tip:</b> <b>SCD</b> = <b>S</b>pinocerebellar, <b>C</b>orticospinal, <b>D</b>orsal columns. Look for megaloblastic anemia + neuro symptoms.</li></ul>",
+            "takeAway": "<p>The 'combined' nature refers to the simultaneous involvement of both sensory (ascending) and motor (descending) pathways, resulting in a distinct clinical picture of ataxia, spasticity, and sensory loss.</p>",
+            "mermaid": ""
+        },
+        "connections": [
+            {
+                "type": "caused_by",
+                "to": "vitamin_b12_deficiency"
+            },
+            {
+                "type": "affects",
+                "to": "dorsal_column_medial_lemniscus"
+            },
+            {
+                "type": "affects",
+                "to": "corticospinal_tract"
+            }
+        ]
+    },
+    "abducens_nerve": {
+        "title": "Abducens Nerve (CN VI)",
+        "primaryType": "structure",
+        "tags": [
+            "Neurology",
+            "Neuroanatomy",
+            "Cranial Nerves"
+        ],
+        "classificationPath": [
+            "Neurology",
+            "Neuroanatomy",
+            "Cranial Nerves"
+        ],
+        "content": {
+            "definition": "<p>The <b>Abducens Nerve (CN VI)</b> is a somatic motor cranial nerve that originates in the [[pons]] and strictly innervates the <u>Lateral Rectus muscle</u>, responsible for eye <b>abduction</b> (moving the eye laterally).</p>",
+            "atAGlance": "<ul><li><b>Function:</b> Motor innervation to Lateral Rectus (LR).</li><li><b>Action:</b> Abducts the eye.</li><li><b>Pathway:</b> Exits brainstem at pontomedullary junction, travels through cavernous sinus, enters orbit via superior orbital fissure.</li><li><b>Lesion:</b> Medial strabismus (esotropia) at rest; inability to abduct eye laterally; horizontal diplopia.</li><li><b>USMLE Tip:</b> Highly susceptible to injury from high intracranial pressure (false localizing sign) due to its long intracranial course. Associated with <b>LR6</b>SO4R3 mnemonic.</li></ul>",
+            "takeAway": "<p>Damage to the Abducens nerve results in a specific horizontal gaze palsy where the affected eye cannot look outward, often causing the patient to turn their head towards the side of the lesion to compensate for double vision.</p>",
+            "mermaid": ""
+        },
+        "connections": [
+            {
+                "type": "innervates",
+                "to": "lateral_rectus"
+            },
+            {
+                "type": "originates_in",
+                "to": "pons"
+            },
+            {
+                "type": "passes_through",
+                "to": "cavernous_sinus"
+            }
+        ]
+    }
+}

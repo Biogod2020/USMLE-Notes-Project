@@ -1,0 +1,200 @@
+{
+  "syringomyelia": {
+    "title": "Syringomyelia",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Pathology",
+      "Spinal Cord",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology",
+      "Spinal Cord Disorders",
+      "Syringomyelia"
+    ],
+    "content": {
+      "definition": "<p><b>Syringomyelia</b> is a chronic, progressive <i>degenerative disorder</i> of the spinal cord characterized by the formation of a fluid-filled, gliosis-lined cavity (syrinx) within the central canal, which expands to <u>compress the anterior white commissure</u>, leading to a dissociated sensory loss.</p>",
+      "atAGlance": "<ul><li><b>Pathophysiology:</b> Expansion of the syrinx damages the decussating fibers of the [[spinothalamic_tract]] in the anterior white commissure first; may expand to anterior horns ([[lower_motor_neuron]] signs) or lateral horns ([[horner_syndrome]]).</li><li><b>Clinical Presentation:</b> Classic <mark>\"cape-like\"</mark> bilateral loss of pain and temperature sensation in the upper extremities (usually C8-T1); fine touch and proprioception are preserved (dorsal columns spared).</li><li><b>Associations:</b> Strongly associated with [[chiari_i_malformation]] (>90% of cases); also trauma, tumors, or idiopathic.</li><li><b>Diagnosis:</b> MRI of the spine is the gold standard, revealing the cystic cavity.</li><li><b>USMLE Tip:</b> Look for a patient with burns on their hands they didn't feel; often associated with cerebellar tonsillar ectopia.</li></ul>",
+      "takeAway": "<p>The hallmark of <b>Syringomyelia</b> is the <mark>dissociated sensory loss</mark> (loss of pain/temp with preserved touch) in a cape-like distribution, caused by the specific destruction of crossing spinothalamic fibers in the anterior white commissure.</p>",
+      "mermaid": "graph TD; A[Chiari I Malformation] --> B[CSF Obstruction]; B --> C[Central Canal Dilation]; C --> D[Syrinx Formation]; D --> E[Compression of Ant. White Commissure]; E --> F[Bilateral Loss of Pain/Temp];"
+    },
+    "connections": [
+      {
+        "type": "is_associated_with",
+        "to": "chiari_i_malformation"
+      },
+      {
+        "type": "damages_structure",
+        "to": "anterior_white_commissure"
+      },
+      {
+        "type": "disrupts_pathway",
+        "to": "spinothalamic_tract"
+      },
+      {
+        "type": "can_cause",
+        "to": "horner_syndrome"
+      }
+    ]
+  },
+  "epidural_hematoma": {
+    "title": "Epidural Hematoma",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Trauma",
+      "Radiology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology",
+      "Traumatic Brain Injury",
+      "Intracranial Hemorrhage",
+      "Epidural Hematoma"
+    ],
+    "content": {
+      "definition": "<p><b>Epidural hematoma</b> is a life-threatening collection of blood between the <u>inner table of the skull and the dura mater</u>, typically caused by traumatic rupture of the [[middle_meningeal_artery]] at the pterion, resulting in a rapidly expanding mass that can cause transtentorial herniation.</p>",
+      "atAGlance": "<ul><li><b>Pathophysiology:</b> Blunt trauma to the temporal bone (pterion) ruptures the high-pressure [[middle_meningeal_artery]]; blood peels the dura off the skull.</li><li><b>Clinical Presentation:</b> Classic <mark>\"lucid interval\"</mark> (loss of consciousness &rarr; recovery &rarr; rapid deterioration/coma); signs of [[increased_intracranial_pressure]], contralateral hemiparesis, and ipsilateral [[cn_iii_palsy]] (\"down and out\" pupil) due to uncal herniation.</li><li><b>Imaging:</b> Non-contrast CT shows a <mark>biconvex (lentiform)</mark> hyperdensity that <u>does NOT cross suture lines</u> but CAN cross the midline (falx/tentorium).</li><li><b>Treatment:</b> Emergent neurosurgical decompression (craniotomy).</li><li><b>USMLE Tip:</b> Differentiate from [[subdural_hematoma]] (crescent shape, crosses sutures, bridging veins).</li></ul>",
+      "takeAway": "<p><b>Epidural hematoma</b> is an arterial bleed (Middle Meningeal) defined by a <mark>biconvex shape</mark> on CT that is bounded by suture lines, often presenting with a classic lucid interval before rapid decompensation.</p>",
+      "mermaid": "graph TD; A[Temporal Bone Fracture] --> B[Middle Meningeal Artery Rupture]; B --> C[Arterial Bleeding]; C --> D[Dura Stripped from Skull]; D --> E[Rapid ICP Increase]; E --> F[Uncal Herniation];"
+    },
+    "connections": [
+      {
+        "type": "is_caused_by_rupture_of",
+        "to": "middle_meningeal_artery"
+      },
+      {
+        "type": "is_contrasted_with",
+        "to": "subdural_hematoma"
+      },
+      {
+        "type": "causes",
+        "to": "uncal_herniation"
+      },
+      {
+        "type": "presents_with",
+        "to": "cn_iii_palsy"
+      }
+    ]
+  },
+  "glioblastoma": {
+    "title": "Glioblastoma",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Oncology",
+      "Pathology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology",
+      "Neuro-Oncology",
+      "Astrocytomas",
+      "Glioblastoma"
+    ],
+    "content": {
+      "definition": "<p><b>Glioblastoma</b> (formerly GBM) is the most common and most malignant <i>primary adult brain tumor</i> of astrocytic origin (WHO Grade IV), characterized by rapid, infiltrative growth across the corpus callosum and histopathological features of microvascular proliferation and necrosis.</p>",
+      "atAGlance": "<ul><li><b>Pathology:</b> Derived from [[astrocytes]] (GFAP positive); histology shows <mark>\"pseudopalisading\"</mark> pleomorphic tumor cells bordering central areas of necrosis and hemorrhage.</li><li><b>Imaging:</b> MRI shows a ring-enhancing mass with central necrosis and surrounding vasogenic edema; often crosses the midline via the corpus callosum (<mark>\"butterfly glioma\"</mark>).</li><li><b>Genetics:</b> Associated with <i>EGFR</i> amplification and <i>PTEN</i> loss.</li><li><b>Prognosis:</b> Extremely poor (median survival ~1 year).</li><li><b>USMLE Tip:</b> \"Pseudopalisading\" necrosis and \"butterfly\" distribution are the buzzwords.</li></ul>",
+      "takeAway": "<p><b>Glioblastoma</b> is the most aggressive primary brain tumor in adults, identified by its <mark>butterfly pattern</mark> on imaging and <mark>pseudopalisading necrosis</mark> on histology.</p>"
+      "mermaid": ""
+    },
+    "connections": [
+      {
+        "type": "originates_from",
+        "to": "astrocytes"
+      },
+      {
+        "type": "is_contrasted_with",
+        "to": "oligodendroglioma"
+      },
+      {
+        "type": "is_contrasted_with",
+        "to": "meningioma"
+      }
+    ]
+  },
+  "multiple_sclerosis": {
+    "title": "Multiple Sclerosis",
+    "primaryType": "disease",
+    "tags": [
+      "Neurology",
+      "Immunology",
+      "Pathology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology",
+      "Demyelinating Diseases",
+      "Multiple Sclerosis"
+    ],
+    "content": {
+      "definition": "<p><b>Multiple sclerosis (MS)</b> is a chronic <i>autoimmune inflammatory disorder</i> of the central nervous system characterized by T-cell and antibody-mediated <u>demyelination and axonal injury</u>, resulting in neurologic deficits disseminated in both <b>space</b> (anatomy) and <b>time</b>.</p>",
+      "atAGlance": "<ul><li><b>Pathophysiology:</b> Autoimmune destruction of [[oligodendrocytes]] and myelin sheaths; involves T<sub>H</sub>1 and T<sub>H</sub>17 cells, interferon-gamma, and macrophages.</li><li><b>Clinical Presentation:</b> Highly variable; classic signs include [[optic_neuritis]] (painful vision loss), [[internuclear_ophthalmoplegia]] (MLF lesion), scanning speech, intention tremor, nystagmus (Charcot triad), and hemiparesis.</li><li><b>Diagnosis:</b> MRI is gold standard (periventricular plaques/Dawson fingers); CSF shows <mark>oligoclonal IgG bands</mark> and elevated myelin basic protein.</li><li><b>Treatment:</b> Acute flares: IV steroids; Chronic: Disease-modifying agents (e.g., [[beta_interferon]], glatiramer, natalizumab).</li><li><b>USMLE Tip:</b> Bilateral [[internuclear_ophthalmoplegia]] (INO) in a young woman is virtually pathognomonic for MS. Symptoms often worsen with heat (Uhthoff phenomenon).</li></ul>",
+      "takeAway": "<p><b>Multiple Sclerosis</b> is defined by autoimmune CNS demyelination leading to neurologic deficits separated by <b>time and space</b>, with <mark>oligoclonal bands</mark> and <mark>periventricular plaques</mark> as key diagnostic features.</p>",
+      "mermaid": "graph TD; A[Autoimmune Activation] --> B[BBB Breakdown]; B --> C[T-cell Infiltration]; C --> D[Oligodendrocyte Destruction]; D --> E[Demyelination]; E --> F[Slowed Conduction/Axonal Loss];"
+    },
+    "connections": [
+      {
+        "type": "destroys_cell_type",
+        "to": "oligodendrocytes"
+      },
+      {
+        "type": "causes",
+        "to": "optic_neuritis"
+      },
+      {
+        "type": "causes",
+        "to": "internuclear_ophthalmoplegia"
+      },
+      {
+        "type": "treated_by",
+        "to": "beta_interferon"
+      }
+    ]
+  },
+  "horner_syndrome": {
+    "title": "Horner Syndrome",
+    "primaryType": "finding",
+    "tags": [
+      "Neurology",
+      "Ophthalmology",
+      "Pathology",
+      "USMLE"
+    ],
+    "classificationPath": [
+      "Neurology",
+      "Neuro-Ophthalmology",
+      "Autonomic Disorders",
+      "Horner Syndrome"
+    ],
+    "content": {
+      "definition": "<p><b>Horner syndrome</b> is a clinical triad of <b>ptosis</b>, <b>miosis</b>, and <b>anhidrosis</b> caused by the interruption of the <u>oculosympathetic pathway</u> anywhere along its three-neuron chain from the hypothalamus to the eye.</p>",
+      "atAGlance": "<ul><li><b>Pathophysiology:</b> Loss of sympathetic innervation to the superior tarsal muscle (ptosis), pupillary dilator (miosis), and facial sweat glands (anhidrosis).</li><li><b>Etiologies:</b><br> - <i>1st Neuron (Central):</i> Brainstem stroke (e.g., [[lateral_medullary_syndrome]]), syringomyelia.<br> - <i>2nd Neuron (Preganglionic):</i> [[pancoast_tumor]] (lung apex), cervical rib.<br> - <i>3rd Neuron (Postganglionic):</i> [[carotid_artery_dissection]] (painful, spares sweating), cavernous sinus pathology.</li><li><b>Diagnosis:</b> Cocaine drops (normal eye dilates, Horner eye does not) or Apraclonidine (reversal of anisocoria).</li><li><b>USMLE Tip:</b> If a patient has a Pancoast tumor (apical lung mass), look for ipsilateral Horner syndrome due to compression of the stellate ganglion.</li></ul>",
+      "takeAway": "<p><b>Horner syndrome</b> signifies a lesion in the sympathetic chain, presenting with the classic triad of <mark>ptosis, miosis, and anhidrosis</mark> ipsilateral to the lesion.</p>",
+      "mermaid": "graph TD; A[Hypothalamus] -->|1st Neuron| B[Ciliospinal Center C8-T2]; B -->|2nd Neuron| C[Superior Cervical Ganglion]; C -->|3rd Neuron| D[Pupil/Eyelid/Sweat Glands];"
+    },
+    "connections": [
+      {
+        "type": "is_caused_by",
+        "to": "pancoast_tumor"
+      },
+      {
+        "type": "is_caused_by",
+        "to": "carotid_artery_dissection"
+      },
+      {
+        "type": "is_caused_by",
+        "to": "lateral_medullary_syndrome"
+      },
+      {
+        "type": "manifests_as",
+        "to": "ptosis"
+      },
+      {
+        "type": "manifests_as",
+        "to": "miosis"
+      }
+    ]
+  }
+}

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState, type ReactNode } from 'react';
 import type { Topic } from '../types';
 import { useTopicDraft } from '../hooks/useTopicDraft';
+import { TYPE_EMOJI } from '../constants';
 
 interface Props {
   topic: Topic | null;
@@ -197,8 +198,19 @@ export function TopicEditor({ topic, isOpen, onClose, onSave, onPersist, onReset
                   <input type="text" value={draft.title} onChange={(e) => updateField('title', e.target.value)} />
                 </Field>
                 <div className="topic-editor-grid">
-                  <Field label="Primary type">
-                    <input type="text" value={draft.primaryType} onChange={(e) => updateField('primaryType', e.target.value)} />
+                <Field label="Primary type">
+                    <select 
+                      value={draft.primaryType} 
+                      onChange={(e) => updateField('primaryType', e.target.value)}
+                      style={{ width: '100%', padding: '.6rem .75rem', borderRadius: '8px', border: '1px solid var(--line-color)', backgroundColor: 'var(--bg-alt-color)', color: 'var(--text-color)', fontFamily: 'inherit', fontSize: '.95rem' }}
+                    >
+                      <option value="" disabled>Select a type...</option>
+                      {Object.entries(TYPE_EMOJI).map(([key, emoji]) => (
+                        <option key={key} value={key}>
+                          {key.charAt(0).toUpperCase() + key.slice(1)} ({emoji})
+                        </option>
+                      ))}
+                    </select>
                   </Field>
                   <Field label="Topic ID">
                     <input type="text" value={draft.id} onChange={(e) => updateField('id', e.target.value)} />

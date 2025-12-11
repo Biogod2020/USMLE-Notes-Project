@@ -19,7 +19,16 @@ export const TopicSchema = z
   .object({
     id: z.string().min(1, 'Topic id is required'),
     title: z.string().min(1, 'Topic title is required'),
-    primaryType: z.string().min(1, 'Topic primaryType is required'),
+    primaryType: z.enum([
+      'disease', 
+      'drug', 
+      'anatomy', 
+      'microbe', 
+      'molecule', 
+      'physiology', 
+      'finding', 
+      'concept'
+    ]),
     classificationPath: z.array(z.string().min(1)).optional(),
     tags: z.array(z.string().min(1)).optional(),
     content: ContentSchema,

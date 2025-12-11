@@ -1,0 +1,222 @@
+{
+    "dd11dde6": {
+        "title": "Abducens Nerve (CN VI)",
+        "primaryType": "structure",
+        "tags": [
+            "Neurology",
+            "Cranial Nerves",
+            "Ophthalmology"
+        ],
+        "classificationPath": [
+            "Neurology and Special Senses",
+            "Anatomy and Physiology",
+            "Cranial Nerves"
+        ],
+        "content": {
+            "definition": "<p>The <b>Abducens Nerve (CN VI)</b> is a somatic <i>motor cranial nerve</i> originating from the pontomedullary junction that <u>exclusively innervates</u> the [[f7b5ee5d|Lateral Rectus muscle]], enabling horizontal eye abduction (looking laterally away from the nose).</p>",
+            "atAGlance": "<ul><li><b>Function:</b> Motor innervation to the ipsilateral lateral rectus muscle (abduction).</li><li><b>Pathway:</b> Exits brainstem at pontomedullary junction &#8594; cavernous sinus &#8594; superior orbital fissure.</li><li><b>Lesion Presentation:</b> Medial strabismus (eye turns inward) and horizontal [[9914d433|diplopia]] that worsens when looking toward the affected side.</li><li><b>Clinical Association:</b> Highly susceptible to downward traction from <mark>increased intracranial pressure</mark> due to its long intracranial course.</li><li><b>USMLE Tip:</b> An isolated CN VI palsy is often a \"false localizing sign\" of elevated ICP (e.g., pseudotumor cerebri) rather than a direct brainstem lesion.</li></ul>",
+            "takeAway": "<p>The <b>Abducens Nerve</b> has the longest subarachnoid course of all cranial nerves, making it uniquely vulnerable to stretching from <u>increased intracranial pressure</u>, often presenting as a nonlocalizing palsy unrelated to direct trauma.</p>",
+            "mermaid": "graph LR; PPRF-->CN_VI_Nucleus; CN_VI_Nucleus-->Ipsilateral_Lateral_Rectus; CN_VI_Nucleus-->Contralateral_MLF-->Contralateral_CN_III;"
+        },
+        "connections": [
+            {
+                "type": "innervates",
+                "to": "f7b5ee5d"
+            },
+            {
+                "type": "is_vulnerable_to",
+                "to": "7c4e7c74"
+            },
+            {
+                "type": "causes",
+                "to": "1401b7aa"
+            }
+        ]
+    },
+    "77ae6148": {
+        "title": "Alzheimer Disease",
+        "primaryType": "disease",
+        "tags": [
+            "Neurology",
+            "Pathology",
+            "Geriatrics"
+        ],
+        "classificationPath": [
+            "Neurology and Special Senses",
+            "Pathology",
+            "Dementia"
+        ],
+        "content": {
+            "definition": "<p><b>Alzheimer Disease</b> is the most common <i>neurodegenerative cause of dementia</i> in older adults, characterized by the <u>extracellular accumulation</u> of amyloid-beta (A&#946;) plaques and intracellular accumulation of hyperphosphorylated tau tangles, leading to widespread cortical atrophy and cholinergic deficit.</p>",
+            "atAGlance": "<ul><li><b>Pathophysiology:</b> Accumulation of <mark>Senile plaques</mark> (A&#946; from Amyloid Precursor Protein) and <mark>Neurofibrillary tangles</mark> (hyperphosphorylated tau).</li><li><b>Genetics:</b> Early onset associated with <i>APP</i> (Chr 21), <i>Presenilin-1</i> (Chr 14), <i>Presenilin-2</i> (Chr 1). Late onset risk increased by <i>ApoE4</i> allele (Chr 19).</li><li><b>Clinical:</b> Insidious, progressive memory loss, visuospatial deficits, and personality changes.</li><li><b>Neurotransmitters:</b> Significant decrease in [[6a005559|Acetylcholine]] levels in the [[361438f2|Basal nucleus of Meynert]].</li><li><b>USMLE Tip:</b> Patients with <b>Down syndrome</b> (Trisomy 21) have an increased risk of early-onset Alzheimer's because the <i>APP</i> gene is located on Chromosome 21 (gene dosage effect).</li></ul>",
+            "takeAway": "<p>The hallmark pathology of <b>Alzheimer Disease</b> involves <u>extracellular</u> amyloid plaques and <u>intracellular</u> tau tangles, which precipitate a decline in cholinergic signaling, making [[0835ea01|AChE inhibitors]] (like [[47d0372e|Donepezil]]) the mainstay of symptomatic treatment.</p>",
+            "mermaid": "graph TD; APP_Gene-->Amyloid_Beta; Amyloid_Beta-->Senile_Plaques; Hyperphosphorylated_Tau-->Neurofibrillary_Tangles; Plaques_and_Tangles-->Neuronal_Death-->Dementia;"
+        },
+        "connections": [
+            {
+                "type": "associated_with",
+                "to": "e2f193dd"
+            },
+            {
+                "type": "treated_by",
+                "to": "47d0372e"
+            },
+            {
+                "type": "involves_deficiency_of",
+                "to": "6a005559"
+            }
+        ]
+    },
+    "e7f5cbbe": {
+        "title": "Dorsal Columns",
+        "primaryType": "structure",
+        "tags": [
+            "Neurology",
+            "Anatomy",
+            "Spinal Cord"
+        ],
+        "classificationPath": [
+            "Neurology and Special Senses",
+            "Anatomy and Physiology",
+            "Spinal Cord"
+        ],
+        "content": {
+            "definition": "<p>The <b>Dorsal Columns</b> are ascending <i>spinal cord tracts</i> composed of the fasciculus gracilis and fasciculus cuneatus that transmit <u>fine touch, vibration, and conscious proprioception</u> from the peripheral nerves to the brainstem nuclei.</p>",
+            "atAGlance": "<ul><li><b>Organization:</b> Fasciculus <mark>Gracilis</mark> (medial, lower body/legs), Fasciculus <mark>Cuneatus</mark> (lateral, upper body/arms) [Mnemonic: <b>G</b>racilis = <b>G</b>round, <b>C</b>uneatus = <b>C</b>eiling].</li><li><b>Pathway:</b> First-order neurons ascend ipsilaterally &#8594; synapse in medulla &#8594; decussate as internal arcuate fibers &#8594; ascend as [[f19bc454|Medial Lemniscus]].</li><li><b>Clinical Signs:</b> Loss of vibration/proprioception, positive [[47a0f3d1|Romberg sign]], sensory ataxia.</li><li><b>Associated Pathologies:</b> Damaged in [[71daebd6|Tabes Dorsalis]] (syphilis) and [[6f5bea90|Subacute Combined Degeneration]] (B12 deficiency).</li><li><b>USMLE Tip:</b> Remember that dorsal column lesions cause <b>ipsilateral</b> deficits below the lesion because decussation occurs in the <u>medulla</u>, not the spinal cord.</li></ul>",
+            "takeAway": "<p>The <b>Dorsal Columns</b> are unique among sensory tracts because they ascend <u>ipsilaterally</u> within the spinal cord and only decussate in the lower medulla to form the medial lemniscus; thus, spinal cord hemisections (Brown-Séquard) result in ipsilateral loss of vibration and proprioception.</p>",
+            "mermaid": "graph TD; Peripheral_Receptor-->DRG; DRG-->Dorsal_Column_Spinal_Cord; Dorsal_Column_Spinal_Cord-->Nucleus_Gracilis_Cuneatus_Medulla; Nucleus_Gracilis_Cuneatus_Medulla-->Decussation-->Medial_Lemniscus-->VPL_Thalamus;"
+        },
+        "connections": [
+            {
+                "type": "is_part_of",
+                "to": "8aa8156f"
+            },
+            {
+                "type": "is_damaged_in",
+                "to": "71daebd6"
+            },
+            {
+                "type": "is_damaged_in",
+                "to": "6f5bea90"
+            },
+            {
+                "type": "is_damaged_in",
+                "to": "4792bc68"
+            }
+        ]
+    },
+    "71daebd6": {
+        "title": "Tabes Dorsalis",
+        "primaryType": "disease",
+        "tags": [
+            "Neurology",
+            "Infectious Disease",
+            "Pathology"
+        ],
+        "classificationPath": [
+            "Neurology and Special Senses",
+            "Pathology",
+            "Spinal Cord Lesions"
+        ],
+        "content": {
+            "definition": "<p><b>Tabes Dorsalis</b> is a late-stage <i>neurosyphilis manifestation</i> characterized by the <u>demyelination and degeneration</u> of the dorsal columns and dorsal roots of the spinal cord, leading to progressive sensory ataxia and loss of reflexes.</p>",
+            "atAGlance": "<ul><li><b>Pathophysiology:</b> Caused by <i>Treponema pallidum</i> (Tertiary Syphilis) destroying the [[e7f5cbbe|Dorsal Columns]].</li><li><b>Clinical Triad:</b> Sensory ataxia (wide-based gait), sharp/shooting pains (\"lightning pains\"), and [[08cb577f|Argyll Robertson pupils]].</li><li><b>Physical Exam:</b> Positive [[47a0f3d1|Romberg sign]], absent DTRs (areflexia), and impaired vibration/proprioception.</li><li><b>Complications:</b> [[cfbd9f68|Charcot joints]] (neuropathic arthropathy) due to loss of pain sensation.</li><li><b>USMLE Tip:</b> Look for the <b>Argyll Robertson pupil</b> (pupils accommodate but do not react to light) as the classic hallmark of neurosyphilis associated with this condition.</li></ul>",
+            "takeAway": "<p><b>Tabes Dorsalis</b> specifically targets the dorsal roots and [[e7f5cbbe|Dorsal Columns]], disrupting the sensory limb of the stretch reflex arc (causing areflexia) and proprioceptive input (causing sensory ataxia and a positive Romberg sign).</p>",
+            "mermaid": "graph TD; Treponema_pallidum-->Dorsal_Root_Ganglion_Invasion; DRG_Damage-->Dorsal_Column_Degeneration; Dorsal_Column_Degeneration-->Loss_of_Proprioception-->Sensory_Ataxia_and_Romberg_Sign;"
+        },
+        "connections": [
+            {
+                "type": "damages",
+                "to": "e7f5cbbe"
+            },
+            {
+                "type": "presents_with",
+                "to": "08cb577f"
+            },
+            {
+                "type": "causes",
+                "to": "cfbd9f68"
+            },
+            {
+                "type": "is_caused_by",
+                "to": "248af9f9"
+            }
+        ]
+    },
+    "b6bbd0bc": {
+        "title": "Glioblastoma",
+        "primaryType": "disease",
+        "tags": [
+            "Neurology",
+            "Oncology",
+            "Pathology"
+        ],
+        "classificationPath": [
+            "Neurology and Special Senses",
+            "Pathology",
+            "Brain Tumors"
+        ],
+        "content": {
+            "definition": "<p><b>Glioblastoma</b> (formerly Glioblastoma Multiforme) is the most common and most aggressive <i>primary malignant brain tumor</i> in adults, arising from [[8192f595|Astrocytes]] and characterized by rapid growth, central necrosis, and the ability to cross the corpus callosum.</p>",
+            "atAGlance": "<ul><li><b>Histology:</b> \"Pseudopalisading\" tumor cells bordering central areas of <mark>necrosis</mark> and hemorrhage.</li><li><b>Imaging:</b> Ring-enhancing lesion on MRI; often crosses the corpus callosum (<b>\"Butterfly glioma\"</b>).</li><li><b>Markers:</b> Stains positive for [[fb50d450|GFAP]] (Glial Fibrillary Acidic Protein).</li><li><b>Prognosis:</b> Very poor (median survival ~1 year).</li><li><b>USMLE Tip:</b> Differentiate from brain abscess (also ring-enhancing) by looking for the <b>butterfly</b> distribution and histologic description of pseudopalisading cells.</li></ul>",
+            "takeAway": "<p>The defining histologic feature of <b>Glioblastoma</b> is <u>pseudopalisading necrosis</u>, where tumor cells crowd around edges of necrotic tissue, combined with microvascular proliferation and a tendency to cross the midline via the corpus callosum.</p>",
+            "mermaid": "graph TD; Astrocyte-->Mutation_EGFR/PTEN-->Uncontrolled_Proliferation-->Angiogenesis_and_Necrosis-->Glioblastoma;"
+        },
+        "connections": [
+            {
+                "type": "arises_from",
+                "to": "8192f595"
+            },
+            {
+                "type": "expresses",
+                "to": "fb50d450"
+            },
+            {
+                "type": "is_classified_as",
+                "to": "0d63a7e9"
+            }
+        ]
+    },
+    "45dd6d19": {
+        "title": "Multiple Sclerosis",
+        "primaryType": "disease",
+        "tags": [
+            "Neurology",
+            "Immunology",
+            "Pathology"
+        ],
+        "classificationPath": [
+            "Neurology and Special Senses",
+            "Pathology",
+            "Demyelinating Disorders"
+        ],
+        "content": {
+            "definition": "<p><b>Multiple Sclerosis</b> is an autoimmune <i>demyelinating disorder</i> of the central nervous system characterized by the destruction of [[a24f9747|Oligodendrocytes]] and myelin sheaths, leading to neurological deficits separated in <u>space and time</u>.</p>",
+            "atAGlance": "<ul><li><b>Classic Triad (Charcot):</b> <mark>Scanning speech</mark>, <mark>Intention tremor</mark>, and <mark>Nystagmus</mark> (<b>SIN</b>).</li><li><b>Key Findings:</b> [[58c684bd|Internuclear Ophthalmoplegia]] (MLF lesion), Optic Neuritis (painful vision loss), Lhermitte sign (shock sensation on neck flexion).</li><li><b>Diagnosis:</b> MRI shows [[d9286430|Periventricular plaques]]; CSF shows increased IgG and <b>Oligoclonal bands</b>.</li><li><b>Treatment:</b> Acute flares: IV Steroids. Disease modifying: [[00e48ea3|Beta-interferon]], [[88fffc48|Glatiramer]], [[ae20a0ce|Natalizumab]].</li><li><b>USMLE Tip:</b> Bilateral <b>Internuclear Ophthalmoplegia (INO)</b> in a young female is pathognomonic for MS.</li></ul>",
+            "takeAway": "<p>The relapsing-remitting nature of <b>Multiple Sclerosis</b> occurs because the CNS attempts to remyelinate damaged axons (using oligodendrocytes), but repeated autoimmune attacks eventually lead to permanent axonal loss and gliosis (plaques).</p>",
+            "mermaid": "graph TD; Autoimmune_Attack-->Oligodendrocyte_Damage-->Demyelination-->Slowed_Nerve_Conduction-->Neurological_Deficits;"
+        },
+        "connections": [
+            {
+                "type": "damages",
+                "to": "a24f9747"
+            },
+            {
+                "type": "causes",
+                "to": "58c684bd"
+            },
+            {
+                "type": "treated_by",
+                "to": "00e48ea3"
+            },
+            {
+                "type": "treated_by",
+                "to": "ae20a0ce"
+            },
+            {
+                "type": "causes",
+                "to": "98a63a59"
+            }
+        ]
+    }
+}

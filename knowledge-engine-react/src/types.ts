@@ -1,4 +1,12 @@
-// src/types.ts
+export type PrimaryType =
+  | "disease"
+  | "drug"
+  | "anatomy"
+  | "microbe"
+  | "molecule"
+  | "physiology"
+  | "finding"
+  | "concept";
 
 export interface Connection {
   type: string;
@@ -8,7 +16,7 @@ export interface Connection {
 export interface Topic {
   id: string;
   title: string;
-  primaryType: string;
+  primaryType: PrimaryType | string; // Allow string for backward compatibility or looser typing during migration, but prefer PrimaryType
   tags?: string[];
   classificationPath?: string[];
   content: {
@@ -33,7 +41,7 @@ export interface FileSelection {
 export interface ToastNotification {
   id: number;
   message: string;
-  type: 'info' | 'success' | 'error';
+  type: "info" | "success" | "error";
 }
 
 export interface DataHealthSummary {

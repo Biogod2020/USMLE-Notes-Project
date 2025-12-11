@@ -29,15 +29,7 @@ interface PopoverData {
   x: number;
   y: number;
 }
-const TYPE_EMOJI: Record<string, string> = {
-  disease: '🦠',
-  structure: '🏛️',
-  process: '⚙️',
-  substance: '🧪',
-  finding: '❗',
-  concept: '💡',
-};
-const getEmoji = (type: string) => TYPE_EMOJI[type] || '📄';
+import { getEmoji } from './constants';
 
 function stripHtml(html: string) {
   const doc = new DOMParser().parseFromString(html ?? '', 'text/html');

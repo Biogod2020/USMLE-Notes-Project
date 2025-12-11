@@ -2,15 +2,10 @@
 import React from 'react';
 import type { Topic } from '../types';
 import RichHtml from './RichHtml';
+import MermaidDiagram from './MermaidDiagram';
 
-const EMOJI: Record<string, string> = {
-  disease: '🦠', structure: '🏛️', process: '⚙️',
-  substance: '🧪', finding: '❗', concept: '💡',
-};
+import { getEmoji } from '../constants';
 
-function iconFor(type: string) {
-  return EMOJI[type] ?? '📄';
-}
 
 interface Props {
   topic: Topic | null;
@@ -42,7 +37,7 @@ export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, o
     <>
       <header className="topic-header">
         <div className="topic-header-main">
-          <div className="topic-icon">{iconFor(primaryType)}</div>
+          <div className="topic-icon">{getEmoji(primaryType)}</div>
           <div>
             {classificationPath && classificationPath.length > 0 && (
               <div className="breadcrumb">
@@ -90,9 +85,10 @@ export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, o
       )}
       
       {Object.entries(content)
-        .filter(([k]) => !['definition', 'atAGlance', 'takeAway'].includes(k))
+        .filter(([k]) => !['definition', 'atAGlance', 'takeAway', 'mermaid'].includes(k))
         .map(([k, v]) => {
           if (!v) return null;
+
           const human = k
             .replace(/_/g, ' ')
             .replace(/([A-Z])/g, ' $1')
@@ -109,6 +105,19 @@ export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, o
         <section style={{ background: 'var(--bg-alt-color)', padding: '1rem', borderRadius: 'var(--radius-md)', marginTop: '2rem' }}>
           <h4><span className="emoji">🎯</span>Key Take Away</h4>
           <RichHtml html={String(content.takeAway)} onTopicSelect={onTopicSelect} />
+        </section>
+      )}
+
+      {content.mermaid && (
+        <section style={{ marginTop: '2rem' }}>
+          <details>
+            <summary style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1em' }}>
+              <span className="emoji">📊</span> Mermaid Diagram
+            </summary>
+            <div style={{ marginTop: '1rem' }}>
+              <MermaidDiagram definition={String(content.mermaid)} />
+            </div>
+          </details>
         </section>
       )}
     </>

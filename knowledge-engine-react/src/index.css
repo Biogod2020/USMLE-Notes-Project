@@ -1451,3 +1451,12 @@ html[data-theme="dark"] .toast-error {
   padding: 0;
   line-height: 1;
 }
+
+/* 
+    Mobile Import Button Visibility
+*/
+@media (max-width: 768px) {
+    [data-show-mobile="true"] {
+        display: block !important;
+    }
+}

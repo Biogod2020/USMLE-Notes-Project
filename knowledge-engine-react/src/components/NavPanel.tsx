@@ -24,6 +24,7 @@ interface Props {
   onToggleFileSelection: (fileName: string) => void;
   isLoading: boolean;
   dataHealth: DataHealthSummary | null;
+  onImportFile?: () => void;
 }
 
 const Highlight = memo(({ text, highlight }: { text: string; highlight: string }) => {
@@ -99,7 +100,7 @@ export function NavPanel({
   knowledgeBase, activeTopicId, onTopicSelect, searchTerm, onSearchChange,
   searchResults, onToggleTheme, isCollapsed, onToggleCollapse, navFilterPath,
   onClearNavFilter, directoryName, fileSelections, onSelectDirectory,
-  onToggleFileSelection, isLoading, dataHealth
+  onToggleFileSelection, isLoading, dataHealth, onImportFile
 }: Props) {
   const { root: navTree, unclassified } = useMemo(() => buildTree(knowledgeBase), [knowledgeBase]);
   const openKeys = useMemo(() => {
@@ -158,6 +159,10 @@ export function NavPanel({
         <div className="file-manager">
             <button className="control-btn import-btn" onClick={onSelectDirectory} disabled={isLoading}>
                 {directoryName ? `📂 ${directoryName}`: '📂 Select Directory'}
+            </button>
+            {/* Mobile Import Button */}
+            <button className="control-btn import-btn" onClick={onImportFile} disabled={isLoading} style={{ marginTop: '0.5rem', display: 'none' }} data-show-mobile="true">
+                📄 Import File
             </button>
             {fileSelections.length > 0 && (
                 <ul className="file-selection-list">

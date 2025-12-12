@@ -1,9 +1,7 @@
-import { lazy, Suspense, useEffect, useLayoutEffect, useMemo, useRef, useState, type MouseEvent as ReactMouseEvent } from 'react';
+import { useLayoutEffect, useRef, type MouseEvent as ReactMouseEvent } from 'react';
 import type { KnowledgeBase } from '../types';
 import './graphModal.css';
 import { VisNetworkCanvas } from './VisNetworkCanvas';
-
-const GraphCanvas = lazy(() => import('./GraphCanvas'));
 
 interface Props {
   isOpen: boolean;
@@ -15,30 +13,9 @@ interface Props {
 
 const FOCUSABLE_SELECTORS = 'a[href], button:not([disabled]), textarea, input, select, [tabindex]:not([tabindex="-1"])';
 
-function GraphLoader() {
-  return (
-    <div className="graph-loader">
-      <div className="graph-loader__spinner" aria-hidden="true" />
-      <span>Loading graph…</span>
-    </div>
-  );
-}
-
 export function GraphModal({ isOpen, onClose, ...graphProps }: Props) {
   const modalRef = useRef<HTMLDivElement>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
-  const [view, setView] = useState<'classic' | 'modern'>(() => {
-    if (typeof window === 'undefined') return 'classic';
-    const stored = window.localStorage.getItem('graph-view-mode');
-    return stored === 'modern' ? 'modern' : 'classic';
-  });
-  const toggleLabel = useMemo(() => view === 'classic' ? 'Switch to modernized view' : 'Switch to classic view', [view]);
-  const viewDescription = useMemo(() => view === 'classic' ? 'Classic physics layout' : 'Modernized ReactFlow layout', [view]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem('graph-view-mode', view);
-  }, [view]);
 
   const handleOverlayClick = (e: ReactMouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
@@ -107,25 +84,10 @@ export function GraphModal({ isOpen, onClose, ...graphProps }: Props) {
             <button type="button" className="close-btn" onClick={onClose} aria-label="Close graph" data-autofocus>
               &times;
             </button>
-            <div className="view-hint" aria-live="polite">{viewDescription}</div>
-            <button
-              type="button"
-              className="view-toggle"
-              onClick={() => setView(prev => prev === 'classic' ? 'modern' : 'classic')}
-              aria-pressed={view === 'modern'}
-            >
-              {toggleLabel}
-            </button>
           </div>
         </div>
         <div style={{flexGrow: 1, position: 'relative', minHeight: '480px'}}>
-          {view === 'classic' ? (
-            <VisNetworkCanvas {...graphProps} />
-          ) : (
-            <Suspense fallback={<GraphLoader />}>
-              <GraphCanvas {...graphProps} />
-            </Suspense>
-          )}
+          <VisNetworkCanvas {...graphProps} />
         </div>
       </div>
     </div>

@@ -162,41 +162,40 @@ export default function MermaidDiagram({ definition }: Props) {
       
       // NOT in a node text capturing mode. Looking for start delimiters.
       
-      let pushed = false;
       
       // Check double openers first (Shape: Circle, Rhombus, etc)
       if (char === '(' && nextChar === '(') {
           stack.push('))');
           result += '((';
           contentStart = i + 2;
-          i += 2; pushed = true;
+          i += 2; 
       } else if (char === '{' && nextChar === '{') {
           stack.push('}}');
           result += '{{';
           contentStart = i + 2;
-          i += 2; pushed = true;
+          i += 2; 
       } else if (char === '[' && nextChar === '[') { 
           stack.push(']]');
           result += '[[';
           contentStart = i + 2;
-          i += 2; pushed = true;
+          i += 2; 
       } 
       // Single openers
       else if (char === '[') {
           stack.push(']');
           result += '[';
           contentStart = i + 1;
-          i += 1; pushed = true;
+          i += 1; 
       } else if (char === '(') {
           stack.push(')');
           result += '(';
           contentStart = i + 1;
-          i += 1; pushed = true;
+          i += 1; 
       } else if (char === '{') {
           stack.push('}');
           result += '{';
           contentStart = i + 1;
-          i += 1; pushed = true;
+          i += 1; 
       } else if (char === '>') {
           // Asymmetric shape id>label]
           // MUST NOT be arrow. Arrow check: check prev char.
@@ -205,13 +204,13 @@ export default function MermaidDiagram({ definition }: Props) {
           if (prev === '-' || prev === '=' || prev === '.') {
               // It's an arrow end, NOT a node start.
               result += char;
-              i++; pushed = false;
+              i++; 
           } else {
               // It's a node shape start
               stack.push(']'); // Asymmetric shape closes with ]
               result += '>';
               contentStart = i + 1;
-              i += 1; pushed = true;
+              i += 1; 
           }
       } else {
           // Normal char (e.g. node ID, arrow line, etc)

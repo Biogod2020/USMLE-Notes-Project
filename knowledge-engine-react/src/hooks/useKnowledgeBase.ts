@@ -41,6 +41,13 @@ function deepMerge<T extends Record<string, any>>(base: T, override: Partial<T>)
   return result;
 }
 
+// Mobile detection helper
+const isMobile = () => {
+    if (typeof window === 'undefined') return false;
+    // Simple User Agent check or Tauri's os type (if available via specific plugin)
+    return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+};
+
 export function useKnowledgeBase() {
   const [knowledgeBase, setKnowledgeBase] = useState<KnowledgeBase>({});
   const [fileSelections, setFileSelections] = useState<FileSelection[]>([]);
@@ -55,6 +62,69 @@ export function useKnowledgeBase() {
   
   const [directoryContext, setDirectoryContext] = useState<DirectoryContext | null>(null);
   const [directoryName, setDirectoryName] = useState<string | null>(null);
+
+  // [NEW] Default DB for Mobile
+  useEffect(() => {
+    const initMobile = async () => {
+         if (!isMobile()) return; 
+         
+         const savedFiles = localStorage.getItem(LS_FILES_KEY);
+         // If we have saved state, let the main useEffect handle it.
+         // BUT if we don't have saved state, load the default DB.
+         if (savedFiles) return;
+
+         try {
+             setIsLoading(true);
+             const response = await fetch('/really_use/neuro_nearly_all.json');
+             if (!response.ok) throw new Error('Failed to load default database');
+             const data = await response.json();
+             
+             // Simulating a file selection
+             const defaultFileName = 'neuro_nearly_all.json';
+             // const context: DirectoryContext = { mode: 'tauri', path: '/public/really_use' }; // Pseudo path - unused
+             
+             // Process the single file
+             const fileTopics: Record<string, Topic> = {};
+             let invalidTopics = 0;
+             const entries = Object.entries(data as Record<string, unknown>);
+             
+             for (const [idKey, rawTopic] of entries) {
+                if (!rawTopic || typeof idKey !== 'string' || idKey.startsWith('zzz_')) continue;
+                const normalized = normalizeTopic(idKey, rawTopic);
+                if (normalized.id.startsWith('zzz_')) continue;
+                
+                const validation = TopicSchema.safeParse(normalized);
+                if (validation.success) {
+                    fileTopics[validation.data.id] = validation.data;
+                } else {
+                    invalidTopics++;
+                }
+             }
+
+             setKnowledgeBase(fileTopics);
+             setFileSelections([{ name: defaultFileName, selected: true }]);
+             setDirectoryName('Default Database');
+             // Do NOT save to localStorage to avoid persisting this "fake" state permanently 
+             // unless we want to treat it as a real user selection.
+             // For now, let's just show it.
+             
+             setDataHealth({
+                 totalTopics: Object.keys(fileTopics).length,
+                 selectedFiles: 1,
+                 invalidFiles: 0,
+                 invalidTopics,
+                 fileErrors: {}
+             });
+
+         } catch (e) {
+             console.error("Failed to load default DB", e);
+             setError("Failed to load default database.");
+         } finally {
+             setIsLoading(false);
+         }
+    };
+    initMobile();
+  }, []);
 
   // Effect to load initial state from localStorage (remains the same)
   useEffect(() => {
@@ -315,6 +385,42 @@ export function useKnowledgeBase() {
     }
   }, [fileSelections, loadFilesFromSource]);
 
+  // [NEW] Single File Import (for Mobile/Fallback)
+  const importFile = useCallback(async () => {
+    try {
+        if (!isTauriEnv) {
+            toast.error("Import requires native app."); // Or implement pure web file picker
+            return;
+        }
+
+        const selectedPath = await open({
+             directory: false,
+             multiple: false,
+             filters: [{ name: 'JSON Database', extensions: ['json'] }]
+        });
+
+        if (typeof selectedPath !== 'string') return; // Cancelled
+
+        const fileName = selectedPath.split(/[/\\]/).pop() ?? 'imported.json';
+        const context: DirectoryContext = { mode: 'tauri', path: selectedPath.replace(fileName, '') }; 
+        
+        // We treat this as "Selecting a directory that happens to contain just this file" 
+        // OR we just append this file to current selection? 
+        // User requested "load from local DB".
+        // Let's replace the current view with this file.
+        
+        setDirectoryName(fileName);
+        setDirectoryContext(context);
+        
+        // Use existing logic
+        await loadFilesFromSource(context, [{ name: fileName, selected: true }]);
+
+    } catch (e) {
+        console.error("Import failed", e);
+        toast.error("Failed to import file");
+    }
+  }, [loadFilesFromSource]);
+
   const toggleFileSelection = useCallback(async (fileName: string) => {
     if (!directoryContext) {
       setError("Please select a directory first.");
@@ -423,5 +529,7 @@ export function useKnowledgeBase() {
     hasOverride,
     canPersistTopics,
     getTopicSource,
+    importFile, // Expose new function
+    isMobile: isMobile(), // Expose mobile status
   };
 }

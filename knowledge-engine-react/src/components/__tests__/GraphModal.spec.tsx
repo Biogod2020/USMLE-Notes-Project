@@ -1,23 +1,15 @@
-import { beforeEach, describe, expect, test, vi } from 'vitest';
+// @vitest-environment jsdom
+import { describe, expect, test, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { GraphModal } from '../GraphModal';
 import type { KnowledgeBase } from '../../types';
-
-vi.mock('../GraphCanvas', () => ({
-  __esModule: true,
-  default: () => <button data-testid="graph-body">Graph Body</button>,
-}));
 
 vi.mock('../VisNetworkCanvas', () => ({
   VisNetworkCanvas: () => <button data-testid="classic-view">Classic View</button>,
 }));
 
 const kb: KnowledgeBase = {};
-
-beforeEach(() => {
-  localStorage.clear();
-});
 
 describe('GraphModal', () => {
   test('traps focus inside dialog and restores focus after close', async () => {
@@ -39,7 +31,7 @@ describe('GraphModal', () => {
 
     const beforeButton = screen.getByTestId('before');
     beforeButton.focus();
-    expect(beforeButton).toHaveFocus();
+    expect(document.activeElement).toBe(beforeButton);
 
     rerender(
       <>
@@ -55,18 +47,14 @@ describe('GraphModal', () => {
     );
 
     const closeButton = screen.getByRole('button', { name: /close graph/i });
-    expect(closeButton).toHaveFocus();
-
-    await user.tab();
-    const toggleButton = screen.getByRole('button', { name: /switch to modernized view/i });
-    expect(toggleButton).toHaveFocus();
+    expect(document.activeElement).toBe(closeButton);
 
     await user.tab();
     const classicButton = screen.getByTestId('classic-view');
-    expect(classicButton).toHaveFocus();
+    expect(document.activeElement).toBe(classicButton);
 
     await user.tab();
-    expect(closeButton).toHaveFocus();
+    expect(document.activeElement).toBe(closeButton);
 
     await user.click(closeButton);
     expect(handleClose).toHaveBeenCalled();
@@ -88,12 +76,11 @@ describe('GraphModal', () => {
     );
 
     await vi.waitFor(() => {
-      expect(beforeButton).toHaveFocus();
+      expect(document.activeElement).toBe(beforeButton);
     });
   });
 
-  test('allows switching to modernized view', async () => {
-    const user = userEvent.setup();
+  test('renders classic view and no modern toggle', () => {
     render(
       <GraphModal
         isOpen
@@ -104,10 +91,7 @@ describe('GraphModal', () => {
       />,
     );
 
-    const toggleButton = screen.getByRole('button', { name: /switch to modernized view/i });
-    await user.click(toggleButton);
-
-    expect(screen.getByTestId('graph-body')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /switch to classic view/i })).toBeInTheDocument();
+    expect(screen.getByTestId('classic-view')).toBeTruthy();
+    expect(screen.queryByRole('button', { name: /modernized/i })).toBeNull();
   });
 });

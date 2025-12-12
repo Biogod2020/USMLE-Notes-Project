@@ -42,6 +42,21 @@ npm run build          # Vite build (outputs to dist/)
 npm run tauri build    # Desktop bundle (requires Rust toolchain)
 ```
 
+## Mobile Development
+
+### iOS
+
+To develop for iOS, you must start the Tauri development server before running the app in Xcode. This ensures the app can connect to the frontend dev server.
+
+1. Start the iOS development server:
+   ```bash
+   npm run tauri ios dev
+   ```
+2. This will automatically open Xcode.
+3. In Xcode, select your target simulator or device and click "Run".
+
+**Note:** If you see a "Connection refused" error in Xcode, it likely means the `tauri ios dev` server is not running or has stopped.
+
 ## Knowledge File Format
 
 Each `.json` file is a dictionary where the keys are stable topic IDs and the values describe a topic. A trimmed example:

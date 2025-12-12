@@ -90,75 +90,100 @@ export function VisNetworkCanvas({ knowledgeBase, centerNodeId, onNodeClick }: V
   useEffect(() => {
     if (!containerRef.current || !centerNodeId) return;
 
-    const { nodes, edges } = buildVisData(knowledgeBase, centerNodeId);
-    const data = { nodes: new DataSet(nodes), edges: new DataSet(edges) };
+    let rafId: number | null = null;
+    let cancelled = false;
 
-    const options: Options = {
-      nodes: {
-        shape: 'box',
-        borderWidth: 2,
-        font: {
-            size: 14,
-            color: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim() || '#1f2937',
-            face: 'Inter, system-ui, sans-serif'
+    const initialise = () => {
+      if (cancelled || !containerRef.current) return;
+      const { width, height } = containerRef.current.getBoundingClientRect();
+      if (width < 10 || height < 10) {
+        rafId = window.requestAnimationFrame(initialise);
+        return;
+      }
+
+      const { nodes, edges } = buildVisData(knowledgeBase, centerNodeId);
+      const data = { nodes: new DataSet(nodes), edges: new DataSet(edges) };
+
+      const options: Options = {
+        nodes: {
+          shape: 'box',
+          borderWidth: 2,
+          font: {
+              size: 14,
+              color: getComputedStyle(document.documentElement).getPropertyValue('--text-color').trim() || '#1f2937',
+              face: 'Inter, system-ui, sans-serif'
+          },
+          margin: { top: 12, right: 20, bottom: 12, left: 20 },
+          shadow: true,
         },
-        margin: { top: 12, right: 20, bottom: 12, left: 20 },
-        shadow: true,
-      },
-      edges: {
-        width: 2,
-        smooth: { enabled: true, type: 'continuous', roundness: 0.5 },
-        font: { size: 10, align: 'horizontal', color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#6b7280', strokeWidth: 0 },
-        color: { inherit: 'from', opacity: 0.8 },
-        arrows: { to: { enabled: true, scaleFactor: 0.8 } }
-      },
-      physics: {
-        solver: 'forceAtlas2Based',
-        forceAtlas2Based: { 
-            gravitationalConstant: -200, // Stronger repulsion (was -100)
-            springLength: 250, // Longer springs (was 150)
-            centralGravity: 0.005, // Lower central gravity to let it expand (was 0.01)
-            damping: 0.4
+        edges: {
+          width: 2,
+          smooth: { enabled: true, type: 'continuous', roundness: 0.5 },
+          font: { size: 10, align: 'horizontal', color: getComputedStyle(document.documentElement).getPropertyValue('--text-muted').trim() || '#6b7280', strokeWidth: 0 },
+          color: { inherit: 'from', opacity: 0.8 },
+          arrows: { to: { enabled: true, scaleFactor: 0.8 } }
         },
-        stabilization: { iterations: 1000, fit: true }, // More iterations to stabilize
-        maxVelocity: 50,
-        minVelocity: 0.1,
-      },
-      interaction: { hover: true },
-      groups: resolveGroupColors(theme),
-      autoResize: true,
+        physics: {
+          solver: 'forceAtlas2Based',
+          forceAtlas2Based: { 
+              gravitationalConstant: -200,
+              springLength: 250,
+              centralGravity: 0.005,
+              damping: 0.4
+          },
+          stabilization: { iterations: 1000, fit: true },
+          maxVelocity: 50,
+          minVelocity: 0.1,
+        },
+        interaction: { hover: true },
+        groups: resolveGroupColors(theme),
+        autoResize: true,
+      };
+
+      networkRef.current?.destroy();
+      networkRef.current = new Network(containerRef.current, data, options);
+      networkRef.current.once('stabilized', () => networkRef.current?.fit({ animation: { duration: 400, easingFunction: 'easeInOutQuad' } }));
+      networkRef.current.on('selectNode', params => {
+        if (params.nodes.length > 0) {
+          onNodeClick(params.nodes[0]);
+        }
+      });
+
+      const supportsResizeObserver = 'ResizeObserver' in window;
+
+      resizeObserverRef.current?.disconnect();
+      resizeObserverRef.current = null;
+      resizeCleanupRef.current?.();
+      resizeCleanupRef.current = null;
+
+      if (supportsResizeObserver) {
+        resizeObserverRef.current = new ResizeObserver(() => {
+          networkRef.current?.redraw();
+          networkRef.current?.fit();
+        });
+        resizeObserverRef.current.observe(containerRef.current);
+      } else {
+        const handleResize = () => {
+          networkRef.current?.redraw();
+          networkRef.current?.fit();
+        };
+        window.addEventListener('resize', handleResize);
+        resizeCleanupRef.current = () => window.removeEventListener('resize', handleResize);
+      }
+
+      window.requestAnimationFrame(() => {
+        networkRef.current?.redraw();
+        networkRef.current?.fit({ animation: false });
+      });
     };
 
-    if (networkRef.current) {
-      networkRef.current.destroy();
-      networkRef.current = null;
-    }
-
-    networkRef.current = new Network(containerRef.current, data, options);
-    networkRef.current.once('stabilized', () => networkRef.current?.fit({ animation: { duration: 400, easingFunction: 'easeInOutQuad' } }));
-    networkRef.current.on('selectNode', params => {
-      if (params.nodes.length > 0) {
-        onNodeClick(params.nodes[0]);
-      }
-    });
-
-    const supportsResizeObserver = typeof window !== 'undefined' && 'ResizeObserver' in window;
-
-    resizeObserverRef.current?.disconnect();
-    resizeObserverRef.current = null;
-    resizeCleanupRef.current?.();
-    resizeCleanupRef.current = null;
-
-    if (supportsResizeObserver && containerRef.current) {
-      resizeObserverRef.current = new ResizeObserver(() => networkRef.current?.fit());
-      resizeObserverRef.current.observe(containerRef.current);
-    } else if (typeof window !== 'undefined') {
-      const handleResize = () => networkRef.current?.fit();
-      window.addEventListener('resize', handleResize);
-      resizeCleanupRef.current = () => window.removeEventListener('resize', handleResize);
-    }
+    initialise();
 
     return () => {
+      cancelled = true;
+      if (rafId !== null) {
+        window.cancelAnimationFrame(rafId);
+      }
       resizeObserverRef.current?.disconnect();
       resizeObserverRef.current = null;
       resizeCleanupRef.current?.();

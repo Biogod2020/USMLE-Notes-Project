@@ -81,6 +81,7 @@ export default function App() {
     hasOverride,
     canPersistTopics,
     getTopicSource,
+    importFile,
   } = useKnowledgeBase();
 
   // Rename error to kbError to avoid conflict with potential local error state if needed
@@ -390,6 +391,8 @@ export default function App() {
             onToggleFileSelection={handleToggleFile}
             isLoading={isLoading}
             dataHealth={dataHealth}
+            onImportFile={importFile}
+            // isMobile state currently used for conditional logic inside hook or potentially passed here
           />
         </aside>
 

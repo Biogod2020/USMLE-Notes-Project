@@ -93,16 +93,38 @@
     npm run tauri dev
     ```
 
-### 构建生产版本
 
-要构建一个独立的、可分发的桌面应用程序：
+### 构建发布版本
 
-1.  确保您位于 `knowledge-engine-react` 目录下。
+本项目支持构建为**Web 单文件应用**或**原生桌面应用**。
+
+#### 1. Web 单文件 (Single HTML File)
+
+非常适合部署到静态服务器或离线分发。利用 `vite-plugin-singlefile`，我们将所有资源（JS, CSS, SVGs）内联到一个 HTML 文件中。
+
+1.  确保位于 `knowledge-engine-react` 目录：
+    ```bash
+    cd knowledge-engine-react
+    ```
 2.  运行构建命令：
+    ```bash
+    npm run build
+    ```
+3.  构建产物位于 `knowledge-engine-react/dist/index.html`。
+    > 这个文件是一个完整的独立网页，可以直接在任何浏览器中打开，无需服务器。
+
+#### 2. macOS 桌面应用 (Tauri)
+
+构建高性能的原生 macOS 应用程序 (`.app` 和 `.dmg`)。
+
+1.  运行构建命令：
     ```bash
     npm run tauri build
     ```
-3.  构建完成后，安装包将位于 `knowledge-engine-react/src-tauri/target/release/bundle/` 目录下。
+2.  构建成功后，安装包位于以下目录：
+    - **DMG 安装包**: `knowledge-engine-react/src-tauri/target/release/bundle/dmg/*.dmg`
+    - **应用程序**: `knowledge-engine-react/src-tauri/target/release/bundle/macos/*.app`
+
 
 ## 💾 知识库数据结构
 

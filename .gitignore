@@ -162,4 +162,4 @@ instance/
 
 # Scrapy
 .scrapy
-raw_data/
+/raw_data/

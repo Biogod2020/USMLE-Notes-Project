@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Local Data/Assets
+data/
+raw/
+raw_data/
+*.tmp
+

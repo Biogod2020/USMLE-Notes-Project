@@ -1,0 +1,627 @@
+/* Mobile Theme Overrides - Active when .mobile-mode is present on body/wrapper */
+
+.mobile-mode .container {
+    flex-direction: column;
+    height: auto; 
+    overflow: visible; /* Let body scroll naturally on mobile */
+}
+
+/* Mobile Link Sheet SOTA Styles */
+.mobile-link-sheet-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 2000;
+    display: flex;
+    align-items: flex-end;
+    animation: fade-in 0.2s ease-out;
+}
+
+.mobile-link-sheet {
+    background: var(--bg-color);
+    width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 1.5rem;
+    padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+    animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.sheet-handle {
+    width: 40px;
+    height: 5px;
+    background: var(--line-color);
+    border-radius: 3px;
+    margin: -0.5rem auto 0.5rem auto;
+    opacity: 0.5;
+}
+
+.sheet-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.sheet-emoji {
+    font-size: 2.5rem;
+    line-height: 1;
+    background: var(--bg-alt-color);
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.sheet-title-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.sheet-type {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-light);
+    font-weight: 600;
+}
+
+.sheet-title-group h3 {
+    margin: 0;
+    font-size: 1.25rem;
+    line-height: 1.2;
+}
+
+.sheet-content {
+    font-size: 0.95rem;
+    line-height: 1.5;
+    color: var(--text-color);
+    opacity: 0.9;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.sheet-action-btn {
+    background: var(--primary-color, #007AFF);
+    color: white;
+    border: none;
+    padding: 1rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    width: 100%;
+    margin-top: 0.5rem;
+}
+.sheet-action-btn:active {
+    transform: scale(0.98);
+    opacity: 0.9;
+}
+
+@keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes slide-up { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+/* Hide desktop panels by default in mobile mode */
+.mobile-mode .nav-panel,
+.mobile-mode .connections-panel,
+.mobile-mode .resizer-handle {
+    display: none; 
+}
+
+/* Re-enable panels as fixed overlays when they have 'open' class */
+/* Re-enable panels as fixed overlays when they have 'open' class */
+.mobile-mode .nav-panel.open {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 80%; /* Or fixed width */
+    height: 100vh;
+    z-index: 1010;
+    box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    /* Unified Scrolling Fix */
+    overflow-y: auto; 
+    overflow-x: hidden; /* Prevent horizontal scroll */
+    -webkit-overflow-scrolling: touch;
+    flex-direction: column;
+    /* Safe Area for bottom of list */
+    padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Reset internal scroll areas so the parent scrolls */
+.mobile-mode .nav-panel #nav-list {
+    overflow: visible !important;
+    height: auto !important;
+    flex: none !important; /* Don't expand to fill, just be natural height */
+    padding-bottom: 3rem; /* Bottom padding for safe area */
+}
+
+.mobile-mode .nav-panel .panel-header,
+.mobile-mode .nav-panel .panel-content,
+.mobile-mode .nav-panel .status-bar {
+    flex-shrink: 0; /* Keep them natural size */
+}
+
+/* Fix Status Bar Overlap in Sidebar */
+.mobile-mode .nav-panel .panel-header {
+    padding-top: calc(1rem + env(safe-area-inset-top));
+    padding-left: 1rem;
+    padding-right: 1rem;
+    padding-bottom: 1rem;
+    background: var(--bg-color); /* Ensure text doesn't blend if translucent */
+}
+
+.mobile-mode .connections-panel.open {
+    display: flex;
+    position: fixed;
+    top: 0;
+    right: 0;
+    width: 80%;
+    height: 100vh;
+    z-index: 1010;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.2);
+    /* Safe Area & Padding */
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    background: var(--bg-color); /* Ensure opaque background */
+}
+
+/* Main Panel Adjustments */
+.mobile-mode .main-panel {
+    width: 100%;
+    flex-grow: 1;
+    overflow: visible; /* Natural scroll */
+    position: static;
+}
+
+.mobile-mode .main-panel-content {
+    padding: 1rem 1rem 4rem 1rem; /* Reduced padding, extra bottom space */
+    max-width: 100%;
+}
+
+.mobile-mode .topic-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+}
+
+.mobile-mode .topic-header-main {
+    width: 100%;
+}
+
+.mobile-mode .topic-header h2 {
+    font-size: calc(1.75rem * var(--font-scale)); 
+    line-height: 1.25;
+}
+
+.mobile-mode .topic-header-actions {
+    width: 100%;
+    display: flex;
+    gap: 0.5rem;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+}
+
+/* Font Scaling */
+:root {
+  --font-scale: 1;
+}
+
+/* Typography Enhancements for Reading */
+.mobile-mode p, 
+.mobile-mode li {
+    font-size: calc(17px * var(--font-scale)); /* Scalable base font */
+    line-height: 1.65;
+}
+
+.mobile-mode h1,
+.mobile-mode h2,
+.mobile-mode h3,
+.mobile-mode h4 {
+    margin-top: 1.5em; /* More breathing room */
+}
+
+/* Mobile Header */
+.mobile-header {
+    display: none; /* Hidden on desktop */
+}
+
+.mobile-mode .mobile-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    /* Increase height to accommodate notch */
+    height: calc(var(--header-height) + env(safe-area-inset-top)); 
+    padding: env(safe-area-inset-top) 1rem 0 1rem; /* Pad top for notch */
+    background: var(--bg-color); /* Translucent effect */
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line-color);
+    position: fixed; /* Fixed for slide effect */
+    width: 100%;
+    top: 0;
+    z-index: 1000;
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-sizing: border-box; /* Prevent padding from adding to width */
+}
+
+.mobile-mode .mobile-header.hidden {
+    transform: translateY(-100%);
+}
+
+.mobile-mode .main-panel {
+    /* Push content down to account for fixed header + safe area */
+    padding-top: calc(var(--header-height) + env(safe-area-inset-top));
+}
+
+.mobile-mode .mobile-header-title-container {
+    flex-grow: 1;
+    overflow: hidden;
+    margin: 0 0.5rem;
+    display: flex;
+    justify-content: center; /* Center title like iOS */
+}
+
+.mobile-mode .mobile-header-title {
+    font-weight: 600;
+    font-size: 1rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.mobile-mode .mobile-header-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.mobile-header-btn {
+    background: transparent;
+    border: none;
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    color: var(--text-color);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-sm);
+    transition: background-color 0.2s;
+}
+
+.mobile-header-btn:active {
+    background-color: var(--bg-alt-color);
+}
+
+.mobile-header-btn.font-size-btn {
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.5rem 0.25rem;
+    letter-spacing: -0.5px;
+}
+
+/* Content Header Overrides - Modern & Aggressive */
+.mobile-mode .topic-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--line-color);
+    position: relative;
+    padding-right: 0; /* Let title take full width, button is absolute */
+}
+
+/* Edit button positioned absolutely top-right of the CONTENT area */
+.mobile-mode .action-btn-edit {
+    top: -0.25rem;
+    right: -0.5rem;
+    background: var(--bg-color); /* Mask line behind it */
+    backdrop-filter: blur(4px);
+}
+
+.mobile-mode .topic-header-main {
+    display: flex;
+    flex-direction: column; 
+    align-items: flex-start;
+    gap: 0.5rem;
+    position: relative;
+}
+
+/* Flex reordering wrapper */
+.mobile-mode .topic-header-info {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+}
+
+/* Icon - Floating/integrated look */
+.mobile-mode .topic-icon {
+    display: inline-flex;
+    width: auto;
+    height: auto;
+    background: transparent;
+    font-size: 3rem; 
+    margin: 0 0 0.5rem 0;
+    padding: 0;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+/* 1. Title (Top) */
+.mobile-mode .topic-header h2 {
+    order: 1;
+    font-size: calc(2.4rem * var(--font-scale));
+    line-height: 1.05;
+    margin: 0 0 0.5rem 0;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-color);
+}
+
+/* 2. Tags (Middle) */
+.mobile-mode .tags-container {
+    order: 2;
+    gap: 0.5rem; 
+    margin-bottom: 0.5rem;
+}
+
+.mobile-mode .tag-item {
+    font-size: 0.75rem;
+    padding: 4px 10px;
+    background-color: var(--bg-alt-color);
+    border: none;
+    border-radius: 6px; 
+    color: var(--text-color);
+    font-weight: 500;
+    opacity: 0.9;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+}
+
+/* 3. Breadcrumb (Bottom, moved out of the way) */
+.mobile-mode .breadcrumb {
+    order: 3;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+    color: var(--text-light);
+    opacity: 0.5; /* Muted */
+    margin-bottom: 0;
+    width: 100%;
+    mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to right, black 85%, transparent 100%);
+    margin-top: 0.25rem;
+}
+
+/* Ensure breadcrumb items are plain text, NOT buttons */
+.mobile-mode .breadcrumb-item {
+    background: none !important;
+    border: none !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    font-size: inherit !important;
+    color: inherit !important;
+    font-weight: inherit !important;
+    box-shadow: none !important;
+}
+
+.mobile-mode .breadcrumb-separator {
+    margin: 0 4px;
+    opacity: 0.5;
+}
+
+.mobile-mode .topic-header h2 {
+    font-size: calc(1.6rem * var(--font-scale)); /* Slightly larger */
+    line-height: 1.1; /* Tighter leading */
+    margin: 0 0 0.25rem 0; /* Tighter margin */
+    font-weight: 900; /* Extra bold */
+    letter-spacing: -0.02em;
+    color: var(--title-color, inherit);
+}
+
+.mobile-mode .tags-container {
+    display: flex;
+    flex-wrap: wrap; 
+    gap: 0.3rem; /* Tighter gap */
+    margin-bottom: 0.25rem;
+}
+
+.mobile-mode .tag-item {
+    font-size: 0.7rem;
+    padding: 2px 8px;
+    background-color: transparent;
+    border: 1px solid var(--line-color);
+    border-radius: 99px; /* Pill shape */
+    color: var(--text-light);
+    opacity: 0.8;
+}
+
+/* content header relative */
+.mobile-mode .topic-header {
+    margin-bottom: 0.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--line-color);
+    position: relative;
+    padding-right: 0; /* Full width */
+}
+
+.mobile-mode .topic-header-main {
+    display: flex;
+    flex-direction: row; /* Horizontal layout */
+    align-items: flex-start;
+    gap: 0.75rem;
+    position: relative;
+}
+
+/* Flex reordering wrapper - keep as column */
+.mobile-mode .topic-header-info {
+    display: flex;
+    flex-direction: column;
+    flex: 1; /* Take remaining width */
+    min-width: 0; /* Allow text truncation/wrapping inside flex item */
+}
+
+/* Icon - Floating/integrated look */
+.mobile-mode .topic-icon {
+    display: inline-flex;
+    width: auto;
+    height: auto;
+    background: transparent;
+    font-size: 2.5rem; /* Slightly smaller for inline */
+    margin: 0;
+    padding: 0;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+    flex-shrink: 0;
+}
+
+/* Action Buttons Modernization */
+.mobile-mode .topic-header-actions {
+    display: contents; /* Remove container influence */
+}
+
+/* Edit Button as Minimal Icon - Only visible if not iOS */
+.mobile-mode .action-btn-edit {
+    position: absolute;
+    top: 0.5rem;
+    right: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    padding: 0;
+    background: transparent;
+    border: none;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0; /* Hide text */
+    color: var(--text-color);
+    z-index: 10;
+}
+.mobile-mode .action-btn-edit .emoji {
+    font-size: 1.2rem;
+    margin: 0;
+}
+
+/* Graph View as Floating Action Button (FAB) */
+/* Graph View as Floating Action Button (FAB) - Premium Style */
+.mobile-mode .action-btn-graph {
+    position: fixed;
+    bottom: calc(2rem + env(safe-area-inset-bottom));
+    right: 1.5rem;
+    width: 3.5rem;
+    height: 3.5rem;
+    border-radius: 50%;
+    /* Vibrant Gradient */
+    background: linear-gradient(135deg, #007AFF 0%, #3b82f6 100%);
+    color: white;
+    border: none;
+    /* Colored Glow Shadow */
+    box-shadow: 0 8px 24px rgba(0, 122, 255, 0.35), 0 2px 6px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0;
+    z-index: 100;
+    padding: 0;
+    transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s;
+}
+
+.mobile-mode .action-btn-graph:active {
+    transform: scale(0.92);
+    box-shadow: 0 4px 12px rgba(0, 122, 255, 0.25);
+}
+
+.mobile-mode .action-btn-graph svg {
+    width: 1.8rem;
+    height: 1.8rem;
+    stroke-width: 2.5; /* Slightly bolder */
+    filter: none; /* Reset any filters */
+}
+
+
+/* --- Mobile Modal (Full Screen) --- */
+/* --- Mobile Modal (Full Screen) --- */
+.mobile-mode .modal {
+    display: flex;
+    align-items: flex-end; /* Align to bottom for slide-up feel */
+    padding: 0;
+    
+    /* Force Full Coverage */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    
+    background: var(--bg-color); /* Ensure opaque background */
+    z-index: 2100; /* Ensure on top of mobile header (1000) */
+}
+
+.mobile-mode .modal-content {
+    width: 100%;
+    height: 100%; /* Full screen */
+    margin: 0;
+    padding: 0; /* Reset desktop padding */
+    border: none;
+    border-radius: 0;
+    max-width: none;
+    animation: slide-up 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+}
+
+/* Adjust header for touch & safe area */
+.mobile-mode .modal-header {
+    padding: calc(1rem + env(safe-area-inset-top)) 1rem 1rem 1rem;
+    background: var(--bg-color);
+    border-bottom: 1px solid var(--line-color);
+    flex-shrink: 0; /* Prevent shrinking */
+}
+
+/* Larger styling for Title in modal */
+.mobile-mode .modal-header h2 {
+    font-size: 1.25rem;
+}
+
+/* Mobile Close Button (Touch Friendly) */
+.mobile-mode .close-btn {
+    padding: 0;
+    font-size: 1.5rem;
+    background: var(--bg-alt-color);
+    border-radius: 50%;
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid var(--line-color);
+    color: var(--text-color);
+}
+.mobile-mode .close-btn:active {
+    background-color: var(--line-color);
+    transform: scale(0.95);
+}
+
+/* Ensure canvas takes full remaining space */
+.mobile-mode .modal-content > div:not(.modal-header) {
+    flex-grow: 1;
+    min-height: 0; /* Allow flex to shrink if needed */
+    padding-bottom: 0; /* Edge to edge */
+}
+
+
+/* --- Mobile Spacing Optimizations --- */
+.mobile-mode .takeaway-section {
+    padding: 1rem;
+    margin-top: 1.5rem;
+    margin-bottom: 1.5rem;
+    border-radius: 12px;
+}
+
+.mobile-mode .at-a-glance {
+    margin-bottom: 1.5rem;
+}
+
+
+.mobile-mode .at-a-glance ul {
+    gap: 1.5rem; /* Ensure consistent spacing */
+}

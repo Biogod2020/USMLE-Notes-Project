@@ -229,6 +229,13 @@ export default function MermaidDiagram({ definition }: Props) {
     return result;
   };
 
+  const toggleZoom = () => {
+    // Only allow zoom if SVG is loaded
+    if (svg) setIsZoomed(!isZoomed);
+  };
+  
+  const [isZoomed, setIsZoomed] = useState(false);
+
   if (error) {
     return (
         <div className="mermaid-error" style={{ 
@@ -256,11 +263,74 @@ export default function MermaidDiagram({ definition }: Props) {
   }
 
   return (
-    <div 
-        ref={containerRef} 
-        className="mermaid-diagram" 
-        dangerouslySetInnerHTML={{ __html: svg }} 
-        style={{ textAlign: 'center', margin: '1rem 0' }}
-    />
+    <>
+        <div 
+            ref={containerRef} 
+            className="mermaid-diagram" 
+            onClick={toggleZoom}
+            dangerouslySetInnerHTML={{ __html: svg }} 
+            title="Click to zoom"
+            style={{ 
+                textAlign: 'center', 
+                margin: '1rem 0', 
+                cursor: 'zoom-in',
+                padding: '1rem',
+                background: 'var(--bg-alt-color)',
+                borderRadius: 'var(--radius-md)'
+            }}
+        />
+        
+        {isZoomed && (
+            <div 
+                className="mermaid-zoom-overlay" 
+                onClick={toggleZoom}
+                style={{
+                    position: 'fixed',
+                    top: 0,
+                    left: 0,
+                    width: '100vw',
+                    height: '100vh',
+                    background: 'rgba(0,0,0,0.85)',
+                    backdropFilter: 'blur(5px)',
+                    zIndex: 2000,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    overflow: 'auto',
+                    padding: '1rem'
+                }}
+            >
+                <div 
+                    dangerouslySetInnerHTML={{ __html: svg }} 
+                    style={{
+                        maxWidth: 'none', // Allow full expansion
+                        maxHeight: 'none',
+                        transform: 'scale(1.5)', // Initial slight zoom
+                        background: 'white', // Ensure transparent diagrams have bg in dark mode if needed
+                        padding: '2rem',
+                        borderRadius: '8px'
+                    }}
+                    onClick={e => e.stopPropagation()} // Prevent closing when clicking content? Actually allow closing for ease.
+                />
+                <button 
+                    style={{
+                        position: 'fixed',
+                        top: '20px',
+                        right: '20px',
+                        background: 'rgba(255,255,255,0.2)',
+                        border: 'none',
+                        color: 'white',
+                        fontSize: '2rem',
+                        cursor: 'pointer',
+                        padding: '0.5rem 1rem',
+                        borderRadius: '50%'
+                    }}
+                    onClick={toggleZoom}
+                >
+                    &times;
+                </button>
+            </div>
+        )}
+    </>
   );
 }

@@ -1,8 +1,9 @@
 // src/App.tsx
 import { Toaster } from 'sonner';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useRef } from 'react';
 import type { Topic, ToastNotification } from './types'; // 确保 Topic 和 KnowledgeBase 都从 './types' 导入
 import { NavPanel } from './components/NavPanel';
+import { MenuIcon, PanelCollapseIcon } from './components/Icons';
 import { TopicView } from './components/TopicView';
 import { ConnectionsPanel } from './components/ConnectionsPanel';
 import { GraphModal } from './components/GraphModal';
@@ -11,6 +12,9 @@ import { Popover } from './components/Popover';
 import { ToastContainer } from './components/Toast';
 import { useResizablePanels } from './hooks/useResizablePanels';
 import { useKnowledgeBase } from './hooks/useKnowledgeBase';
+import { useIsMobile } from './hooks/useIsMobile';
+import { useHaptics } from './hooks/useHaptics';
+import './mobile-theme.css';
 import { Document } from 'flexsearch';
 
 export type SearchResult = {
@@ -36,8 +40,12 @@ interface PopoverData {
 import { getEmoji } from './constants';
 
 function stripHtml(html: string) {
+  // 1. Remove HTML tags
   const doc = new DOMParser().parseFromString(html ?? '', 'text/html');
-  return doc?.body?.textContent ?? '';
+  let text = doc?.body?.textContent ?? '';
+  // 2. Resolve custom links: [[id|label]] -> label, [[id]] -> id
+  text = text.replace(/\[\[(?:[^|\]]+\|)?([^\]]+)\]\]/g, '$1');
+  return text;
 }
 
 function generateAcronym(title: string) {
@@ -64,7 +72,39 @@ export default function App() {
   const [isConnectionsOpen, setIsConnectionsOpen] = useState(false);
   const [navFilterPath, setNavFilterPath] = useState<string[] | null>(null);
   const [toasts, setToasts] = useState<ToastNotification[]>([]);
+  
+  // Mobile Header Visibility (Headroom effect)
+  const [showHeader, setShowHeader] = useState(true);
+  const lastScrollY = useRef(0);
+
   const [editorTopicId, setEditorTopicId] = useState<string | null>(null);
+  
+  // Font scale state (persisted)
+  const [fontScale, setFontScale] = useState(() => {
+    const saved = localStorage.getItem('fontScale');
+    return saved ? parseFloat(saved) : 1;
+  });
+
+  const isMobile = useIsMobile();
+  const haptics = useHaptics();
+
+  // Handle scroll for header visibility
+  useEffect(() => {
+      if (!isMobile) return;
+      const handleScroll = () => {
+          const currentScrollY = window.scrollY;
+          if (currentScrollY < 10) {
+              setShowHeader(true); // Always show at top
+          } else if (currentScrollY > lastScrollY.current + 5) {
+               setShowHeader(false); // Scrolling down (with threshold)
+          } else if (currentScrollY < lastScrollY.current - 5) {
+               setShowHeader(true); // Scrolling up (with threshold)
+          }
+          lastScrollY.current = currentScrollY;
+      };
+      window.addEventListener('scroll', handleScroll, { passive: true });
+      return () => window.removeEventListener('scroll', handleScroll);
+  }, [isMobile]);
 
   const {
     knowledgeBase,
@@ -82,6 +122,7 @@ export default function App() {
     canPersistTopics,
     getTopicSource,
     importFile,
+    importFileContent,
   } = useKnowledgeBase();
 
   // Rename error to kbError to avoid conflict with potential local error state if needed
@@ -233,6 +274,30 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (isMobile) {
+        document.body.classList.add('mobile-mode');
+    } else {
+        document.body.classList.remove('mobile-mode');
+    }
+  }, [isMobile]);
+
+  // Apply font scale
+  useEffect(() => {
+    document.documentElement.style.setProperty('--font-scale', fontScale.toString());
+    localStorage.setItem('fontScale', fontScale.toString());
+  }, [fontScale]);
+
+  const handleFontUsage = (delta: number) => {
+    setFontScale(prev => {
+        const next = Math.min(Math.max(prev + delta, 0.8), 1.5); // Limit between 0.8x and 1.5x
+        return Math.round(next * 10) / 10; // Round to 1 decimal
+    });
+  };
+
+  // Popover logic (Desktop only)
+  useEffect(() => {
+    if (isMobile) return; // Disable hover popover on mobile
+
     const handleMouseOver = (e: MouseEvent) => {
       const link = (e.target as HTMLElement).closest('a[data-topic-id]');
       if (link instanceof HTMLAnchorElement) {
@@ -264,7 +329,20 @@ export default function App() {
       document.body.removeEventListener('mouseover', handleMouseOver);
       document.body.removeEventListener('mouseout', handleMouseOut);
     };
-  }, [knowledgeBase]);
+  }, [knowledgeBase, isMobile]);
+
+  // Mobile Link Preview State
+  const [previewTopicId, setPreviewTopicId] = useState<string | null>(null);
+
+  const handleInternalLinkClick = (id: string) => {
+      if (isMobile) {
+          haptics.selection();
+          setPreviewTopicId(id);
+      } else {
+          setEditorTopicId(null);
+          setActiveTopicId(id);
+      }
+  };
 
   const toggleTheme = () => {
     const cur = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
@@ -280,6 +358,7 @@ export default function App() {
   const closeEditor = () => setEditorTopicId(null);
 
   const handleTopicSelect = (id: string) => {
+    if (isMobile) haptics.selection();
     if (!knowledgeBase[id]) {
         addToast(`Concept "${id}" is currently empty (waiting for supplement).`, 'info');
         return;
@@ -359,6 +438,32 @@ export default function App() {
 
   return (
     <>
+      {/* Mobile Link Preview Sheet */}
+      {isMobile && previewTopicId && knowledgeBase[previewTopicId] && (
+          <div className="mobile-link-sheet-overlay" onClick={() => setPreviewTopicId(null)}>
+              <div className="mobile-link-sheet" onClick={e => e.stopPropagation()}>
+                  <div className="sheet-handle"></div>
+                  <div className="sheet-header">
+                      <span className="sheet-emoji">{getEmoji(knowledgeBase[previewTopicId]!.primaryType)}</span>
+                      <div className="sheet-title-group">
+                          <span className="sheet-type">{knowledgeBase[previewTopicId]!.primaryType}</span>
+                          <h3>{knowledgeBase[previewTopicId]!.title}</h3>
+                      </div>
+                  </div>
+                  <div className="sheet-content">
+                      <p>{stripHtml(knowledgeBase[previewTopicId]!.content?.definition ?? 'No definition available.')}</p>
+                  </div>
+                  <button className="sheet-action-btn" onClick={() => {
+                      setPreviewTopicId(null);
+                      setEditorTopicId(null);
+                      setActiveTopicId(previewTopicId);
+                  }}>
+                      Read Topic
+                  </button>
+              </div>
+          </div>
+      )}
+
       <div className="container">
         <div
           className={`mobile-overlay ${isNavOpen || isConnectionsOpen ? 'visible' : ''}`}
@@ -392,38 +497,67 @@ export default function App() {
             isLoading={isLoading}
             dataHealth={dataHealth}
             onImportFile={importFile}
+            // [NEW] Pass file content handler for fallback
+            onImportFileContent={importFileContent}
             // isMobile state currently used for conditional logic inside hook or potentially passed here
+            isMobile={isMobile}
           />
         </aside>
 
+        {!isMobile && (
         <div
             className={`resizer-handle ${isCollapsed.nav || isCollapsed.connections ? 'disabled' : ''}`}
             onMouseDown={() => startDragging('nav')}
         />
+        )}
 
-        <main className={`main-panel type-${activeTopic?.primaryType || 'default'}`}>
-          <div className="mobile-header">
-              <button className="mobile-header-btn" onClick={() => setIsNavOpen(true)}>☰</button>
-              <span className="mobile-header-title">{activeTopic?.title || 'Knowledge Engine'}</span>
-              <button className="mobile-header-btn" onClick={() => setIsConnectionsOpen(true)}>↔</button>
+        <main className={`main-panel type-${activeTopic?.primaryType || 'default'}`} onClick={() => {
+             if (isMobile) setShowHeader(true); // Click content to show header
+             if (isMobile && isNavOpen) setIsNavOpen(false);
+             if (isMobile && isConnectionsOpen) setIsConnectionsOpen(false);
+        }}>
+          <div className={`mobile-header ${!showHeader ? 'hidden' : ''}`}>
+              <button className="mobile-header-btn" onClick={() => setIsNavOpen(true)} aria-label="Menu">
+                <MenuIcon />
+              </button>
+              
+              <div className="mobile-header-title-container">
+                 <span className="mobile-header-title">{activeTopic?.title || 'Knowledge Engine'}</span>
+              </div>
+
+              <div className="mobile-header-actions">
+                <button className="mobile-header-btn font-size-btn" onClick={() => handleFontUsage(-0.1)} aria-label="Decrease Font Size">A-</button>
+                <button className="mobile-header-btn font-size-btn" onClick={() => handleFontUsage(0.1)} aria-label="Increase Font Size">A+</button>
+                <button className="mobile-header-btn" onClick={() => setIsConnectionsOpen(true)} aria-label="Connections">
+                    <PanelCollapseIcon isLeft={true} />
+                </button>
+              </div>
           </div>
           <div className="main-panel-content">
             {error && <div className="error-banner">{error}</div>}
             <TopicView
               topic={activeTopic}
-              onTopicSelect={handleTopicSelect}
-              onGraphViewClick={() => setIsGraphModalOpen(true)}
-              onOpenNav={() => setIsNavOpen(true)}
+              onTopicSelect={handleInternalLinkClick}
+              onGraphViewClick={() => {
+                  if (isMobile) haptics.impactLight();
+                  setIsGraphModalOpen(true);
+              }}
+              onOpenNav={() => {
+                  if (isMobile) haptics.selection();
+                  setIsNavOpen(true);
+              }}
               onBreadcrumbClick={handleBreadcrumbClick}
               onEditTopic={openEditorFor}
             />
           </div>
         </main>
         
+        {!isMobile && (
         <div
             className={`resizer-handle ${isCollapsed.nav || isCollapsed.connections ? 'disabled' : ''}`}
             onMouseDown={() => startDragging('connections')}
         />
+        )}
 
         <aside
           className={`connections-panel ${isConnectionsOpen ? 'open' : ''} ${isCollapsed.connections ? 'collapsed' : ''}`}

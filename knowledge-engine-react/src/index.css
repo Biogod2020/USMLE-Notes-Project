@@ -231,6 +231,7 @@ html {
   margin: 0;
   padding: 0;
   height: 100%;
+  overscroll-behavior-y: none; /* Prevent rubber-banding on iOS */
   font-family: var(--font-main);
   background-color: var(--bg-color);
   color: var(--text-color);
@@ -285,6 +286,7 @@ h6 {
   flex-direction: column;
   transition: all 0.2s;
   flex-shrink: 0;
+  overflow: hidden; /* Ensure sticky search by containing scroll to list */
 }
 .main-panel {
   flex-grow: 1;
@@ -636,27 +638,155 @@ h4 .emoji {
 }
 
 /* --- READABILITY FIX: .at-a-glance --- */
+/* --- MODERN UI: .at-a-glance (Minimalist) --- */
 .at-a-glance {
-  padding: 1.25rem;
-  margin-bottom: 1.5rem;
-  border-radius: var(--radius-md);
-  background: var(--type-bg);
-  border-left: 4px solid var(--type-color);
-  color: var(--text-color); /* Use standard text color for readability */
+  padding: 0.5rem 0;
+  margin-bottom: 2rem;
+  border-radius: 0;
+  background: transparent;
+  border: none;
+  border-left: none;
+  color: var(--text-color);
 }
 .at-a-glance h4 {
-  color: var(--type-color);
-} /* Use type color for heading accent */
+  /* color: var(--text-muted);  removed to match standard h4 */
+  /* text-transform: uppercase; removed */
+  /* font-size: 0.75rem;        removed */
+  /* letter-spacing: 0.05em;    removed */
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+} 
 .at-a-glance ul {
   margin: 0;
-  padding-left: 1.25rem;
+  padding-left: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem; /* More space between items */
 }
-.at-a-glance a {
-  color: var(--type-color);
-  font-weight: 600;
-} /* Make links inside use type color */
+.at-a-glance li {
+  display: block; /* Stack vertically */
+  padding-left: 0;
+  position: relative;
+}
+/* The bullet point (dash) - optional, maybe remove for cleaner look? Let's keep distinct start */
+.at-a-glance li::before {
+  content: ""; /* Remove the bullet char */
+  display: none;
+}
+/* The Key (Bold text) becomes the subheader */
+/* The Key (Bold text) becomes the subheader */
+.at-a-glance li > strong:first-child,
+.at-a-glance li > b:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  width: 100%;
+  color: var(--type-color); /* Rich coloring linked to topic type */
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  margin-bottom: 0.25rem;
+  border-bottom: 1px solid var(--line-color);
+  padding-bottom: 0.25rem;
+}
+
+/* Ensure subsequent bold text behaves normally */
+.at-a-glance li strong:not(:first-child),
+.at-a-glance li b:not(:first-child) {
+    display: inline;
+    width: auto;
+    color: inherit;
+    font-size: inherit;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 700;
+    margin: 0;
+    border: none;
+    padding: 0;
+}
+
+/* Add a colored dot accent */
+.at-a-glance li > strong:first-child::before,
+.at-a-glance li > b:first-child::before {
+  content: "";
+  display: block;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: currentColor;
+  opacity: 0.6;
+}
+
+/* The content follows naturally */
+.at-a-glance li {
+  /* font-size: 0.95rem; removed to match standard body text */
+  line-height: 1.6;
+}
+/* .at-a-glance a {
+  color: var(--link-color);
+  font-weight: 500;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+} 
 html[data-theme="dark"] .at-a-glance a {
-  filter: brightness(1.2);
+  color: var(--link-dark);
+} */
+
+/* --- Dark Mode Fixes --- */
+html[data-theme="dark"] .tag-item {
+  background-color: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #e0e0e0; /* Brighter text for contrast */
+}
+
+html[data-theme="dark"] .breadcrumb {
+  color: #a0a0a0; /* Lighter gray for visibility */
+}
+html[data-theme="dark"] .breadcrumb-item {
+   color: inherit !important;
+}
+
+/* --- MODERN UI: .takeaway-section (Hero Card) --- */
+.takeaway-section {
+  background: var(--bg-alt-color);
+  padding: 1.5rem;
+  border-radius: 16px;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line-color);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Subtle type-colored gradient accent */
+.takeaway-section::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 6px;
+  height: 100%;
+  background: var(--type-color);
+  opacity: 0.8;
+}
+
+.takeaway-section h4 {
+  margin-top: 0;
+  margin-bottom: 1rem;
+  font-size: 1.1rem;
+  color: var(--type-color);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.takeaway-section .emoji {
+  font-size: 1.25em;
 }
 
 .classification-path {
@@ -1459,4 +1589,32 @@ html[data-theme="dark"] .toast-error {
     [data-show-mobile="true"] {
         display: block !important;
     }
+}
+
+/* Mobile Modal Fixes */
+@media (max-width: 768px) {
+  .modal {
+     align-items: flex-end; /* Or stretch? Default is block/fixed top 0 left 0 */
+  }
+  
+  .modal-content {
+    width: 100%;
+    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
+    margin: 0;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    
+    /* Safe Area Spacing */
+    padding-top: env(safe-area-inset-top, 20px);
+    padding-bottom: env(safe-area-inset-bottom, 20px);
+    padding-left: env(safe-area-inset-left, 1rem); 
+    padding-right: env(safe-area-inset-right, 1rem);
+  }
+
+  .modal-header {
+    padding-top: 0.5rem; /* Add a little extra breathing room from the top edge/notch area if needed, but safe-area handles most */
+  }
 }

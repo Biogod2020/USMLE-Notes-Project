@@ -1,5 +1,7 @@
 import { useLayoutEffect, useRef, type MouseEvent as ReactMouseEvent } from 'react';
 import type { KnowledgeBase } from '../types';
+import { useHaptics } from '../hooks/useHaptics';
+import { useIsMobile } from '../hooks/useIsMobile';
 import './graphModal.css';
 import { VisNetworkCanvas } from './VisNetworkCanvas';
 
@@ -16,9 +18,16 @@ const FOCUSABLE_SELECTORS = 'a[href], button:not([disabled]), textarea, input, s
 export function GraphModal({ isOpen, onClose, ...graphProps }: Props) {
   const modalRef = useRef<HTMLDivElement>(null);
   const lastFocusedRef = useRef<HTMLElement | null>(null);
+  const isMobile = useIsMobile();
+  const haptics = useHaptics();
 
   const handleOverlayClick = (e: ReactMouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
+  };
+
+  const handleNodeClick = (id: string) => {
+      if (isMobile) haptics.selection();
+      graphProps.onNodeClick(id);
   };
 
   useLayoutEffect(() => {
@@ -87,7 +96,7 @@ export function GraphModal({ isOpen, onClose, ...graphProps }: Props) {
           </div>
         </div>
         <div style={{flexGrow: 1, position: 'relative', minHeight: '480px'}}>
-          <VisNetworkCanvas {...graphProps} />
+          <VisNetworkCanvas {...graphProps} onNodeClick={handleNodeClick} />
         </div>
       </div>
     </div>

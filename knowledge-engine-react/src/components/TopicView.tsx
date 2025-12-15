@@ -1,10 +1,11 @@
-// src/components/TopicView.tsx
+  // src/components/TopicView.tsx
 import React from 'react';
 import type { Topic } from '../types';
 import RichHtml from './RichHtml';
 import MermaidDiagram from './MermaidDiagram';
 
 import { getEmoji } from '../constants';
+import { GraphIcon } from './Icons';
 
 
 interface Props {
@@ -16,29 +17,56 @@ interface Props {
   onEditTopic: (id: string) => void;
 }
 
+import { EmptyState } from './EmptyState';
+
 export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, onBreadcrumbClick, onEditTopic }: Props) {
   if (!topic) {
     return (
-        <div style={{ opacity: 0.8, padding: '2rem', textAlign: 'center' }}>
-          <h2>Welcome!</h2>
-          <p>
-            <span className="desktop-only">Select a topic from the left panel to begin, or import your own knowledge base JSON file.</span>
-            <span className="mobile-only">
-                Tap the <button onClick={onOpenNav} className="inline-cta">☰ menu</button> to select a topic or import a file.
-            </span>
-          </p>
-        </div>
+        <EmptyState 
+            icon="👋" 
+            title="Welcome to Knowledge Engine" 
+            description="Select a topic to start exploring, or import your notes."
+            action={{ label: "Select Topic", onClick: onOpenNav }}
+        />
     );
   }
 
   const { title, primaryType, tags, content, classificationPath } = topic;
 
+  // Sections as variables for flexible placement
+  const TakeawaySection = content.takeAway ? (
+    <section className="takeaway-section">
+      <h4>
+        <span className="emoji">🎯</span>Key Takeaway
+      </h4>
+      <RichHtml html={String(content.takeAway)} onTopicSelect={onTopicSelect} />
+    </section>
+  ) : null;
+
+  const MermaidSection = content.mermaid ? (
+    <section className="mermaid-section" style={{ marginTop: '1.5rem' }}>
+        <details>
+            <summary style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1em', listStyle: 'none' }}>
+                <h4 style={{ display: 'inline-flex', alignItems: 'center', gap: '0.5rem', margin: 0 }}>
+                    <span className="emoji">📊</span> Diagram
+                    <span style={{ fontSize: '0.8em', opacity: 0.6, fontWeight: 'normal' }}>(Click to expand)</span>
+                </h4>
+            </summary>
+            <div style={{ marginTop: '0.5rem' }}>
+                <MermaidDiagram definition={String(content.mermaid)} />
+            </div>
+        </details>
+    </section>
+  ) : null;
+
+  const isMobile = window.innerWidth <= 768; // Simple check or pass prop if available
+
   return (
-    <>
+    <div className={`topic-view-content type-${primaryType}`}>
       <header className="topic-header">
         <div className="topic-header-main">
           <div className="topic-icon">{getEmoji(primaryType)}</div>
-          <div>
+          <div className="topic-header-info">
             {classificationPath && classificationPath.length > 0 && (
               <div className="breadcrumb">
                 {classificationPath.map((item, index) => {
@@ -54,7 +82,7 @@ export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, o
                 })}
               </div>
             )}
-            <h2 className={`type-${primaryType}`}>{title}</h2>
+            <h2 className="topic-title">{title}</h2>
             {tags?.length ? (
               <div className="tags-container">
                 {tags.map(t => <span className="tag-item" key={t}>#{t}</span>)}
@@ -63,12 +91,26 @@ export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, o
           </div>
         </div>
         <div className="topic-header-actions">
-          <button type="button" onClick={() => onEditTopic(topic.id)}>
-            <span className="emoji">✏️</span>Edit Topic
+{/* Hide Edit on iOS temporarily */
+          !/iPhone|iPad|iPod/i.test(navigator.userAgent) && (
+            <button type="button" className="action-btn-edit" onClick={() => onEditTopic(topic.id)} aria-label="Edit Topic">
+              <span className="emoji">✏️</span>Edit Topic
+            </button>
+          )}
+          <button type="button" className="action-btn-graph" onClick={onGraphViewClick} aria-label="Graph View">
+            <GraphIcon />
+            Graph View
           </button>
-          <button type="button" onClick={onGraphViewClick}><span className="emoji">🕸️</span>Graph View</button>
         </div>
       </header>
+
+      {/* Mobile Priority Content */}
+      {isMobile && (
+          <div className="mobile-priority-content">
+              {TakeawaySection}
+              {MermaidSection}
+          </div>
+      )}
 
       {content.definition && (
         <>
@@ -79,11 +121,15 @@ export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, o
 
       {content.atAGlance && (
         <section className="at-a-glance">
-          <h4><span className="emoji">✨</span>At a Glance</h4>
+          <h4><span className="emoji">⚡</span>At A Glance</h4>
           <RichHtml html={String(content.atAGlance)} onTopicSelect={onTopicSelect} />
         </section>
       )}
       
+      {/* Desktop Content (if not mobile, render here) */}
+      {!isMobile && TakeawaySection}
+      {!isMobile && MermaidSection}
+
       {Object.entries(content)
         .filter(([k]) => !['definition', 'atAGlance', 'takeAway', 'mermaid'].includes(k))
         .map(([k, v]) => {
@@ -100,26 +146,6 @@ export function TopicView({ topic, onTopicSelect, onGraphViewClick, onOpenNav, o
             </section>
           );
         })}
-
-      {content.takeAway && (
-        <section style={{ background: 'var(--bg-alt-color)', padding: '1rem', borderRadius: 'var(--radius-md)', marginTop: '2rem' }}>
-          <h4><span className="emoji">🎯</span>Key Take Away</h4>
-          <RichHtml html={String(content.takeAway)} onTopicSelect={onTopicSelect} />
-        </section>
-      )}
-
-      {content.mermaid && (
-        <section style={{ marginTop: '2rem' }}>
-          <details>
-            <summary style={{ cursor: 'pointer', fontWeight: 'bold', fontSize: '1.1em' }}>
-              <span className="emoji">📊</span> Mermaid Diagram
-            </summary>
-            <div style={{ marginTop: '1rem' }}>
-              <MermaidDiagram definition={String(content.mermaid)} />
-            </div>
-          </details>
-        </section>
-      )}
-    </>
+    </div>
   );
 }

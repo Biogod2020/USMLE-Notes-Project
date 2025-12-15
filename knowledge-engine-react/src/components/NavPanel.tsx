@@ -3,6 +3,7 @@ import { useMemo, memo } from 'react';
 import type { KnowledgeBase, Topic, FileSelection, DataHealthSummary } from '../types';
 import type { SearchResult } from '../App';
 import { getIcon, ThemeIcon, PanelCollapseIcon } from './Icons';
+import { EmptyState } from './EmptyState';
 
 interface NavNodeData { children: Record<string, NavNodeData>; items: Topic[]; }
 
@@ -25,6 +26,8 @@ interface Props {
   isLoading: boolean;
   dataHealth: DataHealthSummary | null;
   onImportFile?: () => void;
+  onImportFileContent?: (fileName: string, content: string) => void;
+  isMobile?: boolean;
 }
 
 const Highlight = memo(({ text, highlight }: { text: string; highlight: string }) => {
@@ -96,12 +99,40 @@ const NavNode = memo(({ node, activeTopicId, onTopicSelect, openKeys }: {
   );
 });
 
+import { useRef, type ChangeEvent } from 'react';
+
 export function NavPanel({
   knowledgeBase, activeTopicId, onTopicSelect, searchTerm, onSearchChange,
   searchResults, onToggleTheme, isCollapsed, onToggleCollapse, navFilterPath,
   onClearNavFilter, directoryName, fileSelections, onSelectDirectory,
-  onToggleFileSelection, isLoading, dataHealth, onImportFile
+  onToggleFileSelection, isLoading, dataHealth, onImportFile, onImportFileContent, isMobile
 }: Props) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleMobileImportClick = () => {
+    // If we have content handler, use the web fallback
+    if (onImportFileContent) {
+        fileInputRef.current?.click();
+    } else {
+        onImportFile?.();
+    }
+  };
+
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && onImportFileContent) {
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            if (typeof ev.target?.result === 'string') {
+                onImportFileContent(file.name, ev.target.result);
+            }
+        };
+        reader.readAsText(file);
+    }
+    // Reset input
+    if (e.target) e.target.value = '';
+  };
+
   const { root: navTree, unclassified } = useMemo(() => buildTree(knowledgeBase), [knowledgeBase]);
   const openKeys = useMemo(() => {
     const topic = activeTopicId ? knowledgeBase[activeTopicId] : null;
@@ -157,13 +188,24 @@ export function NavPanel({
         </div>
         
         <div className="file-manager">
-            <button className="control-btn import-btn" onClick={onSelectDirectory} disabled={isLoading}>
-                {directoryName ? `📂 ${directoryName}`: '📂 Select Directory'}
+            <button 
+                className="control-btn import-btn" 
+                onClick={isMobile ? handleMobileImportClick : onSelectDirectory} 
+                disabled={isLoading}
+            >
+                {isMobile 
+                    ? (directoryName ? `📄 ${directoryName}` : '📄 Import File')
+                    : (directoryName ? `📂 ${directoryName}` : '📂 Select Directory')
+                }
             </button>
-            {/* Mobile Import Button */}
-            <button className="control-btn import-btn" onClick={onImportFile} disabled={isLoading} style={{ marginTop: '0.5rem', display: 'none' }} data-show-mobile="true">
-                📄 Import File
-            </button>
+            {/* Hidden Input for Web/Mobile Fallback */}
+            <input 
+                type="file" 
+                ref={fileInputRef} 
+                onChange={handleFileChange} 
+                accept=".json" 
+                style={{ display: 'none' }} 
+            />
             {fileSelections.length > 0 && (
                 <ul className="file-selection-list">
                     {fileSelections.map(file => {
@@ -216,7 +258,11 @@ export function NavPanel({
                             </a>
                         </li>
                     ))
-                    ) : ( <li className="no-results">No results found.</li> )}
+                    ) : ( 
+                        <div style={{ padding: '0 1rem' }}>
+                             <EmptyState icon="🔍" title="No matching topics" description={`No results found for "${searchTerm}"`} />
+                        </div>
+                    )}
                 </ul>
             </div>
           ) : (

@@ -4,7 +4,8 @@ import { toast } from 'sonner';
 
 // [REFACTORED] Import Tauri's native APIs instead of relying on web APIs
 import { open } from '@tauri-apps/plugin-dialog';
-import { readTextFile, readDir, writeTextFile } from '@tauri-apps/plugin-fs';
+import { readTextFile, readDir, writeTextFile, mkdir } from '@tauri-apps/plugin-fs';
+import { documentDir, join } from '@tauri-apps/api/path';
 
 import type { KnowledgeBase, FileSelection, DataHealthSummary, Topic } from '../types';
 import { normalizeTopic } from '../utils/normalization';
@@ -129,26 +130,38 @@ export function useKnowledgeBase() {
   // Effect to load initial state from localStorage (remains the same)
   useEffect(() => {
     if (!isTauriEnv) return;
-    try {
-      const savedFiles = localStorage.getItem(LS_FILES_KEY);
-      if (savedFiles) {
-        setFileSelections(JSON.parse(savedFiles));
-      }
-      const savedPath = localStorage.getItem(LS_DIR_PATH_KEY);
-      if (savedPath) {
-        const dirName = savedPath.split(/[/\\]/).pop() ?? savedPath;
-        setDirectoryName(dirName);
-        const context: DirectoryContext = { mode: 'tauri', path: savedPath };
-        setDirectoryContext(context);
+    
+    const loadState = async () => {
+      try {
+        const savedFiles = localStorage.getItem(LS_FILES_KEY);
         if (savedFiles) {
-          loadFilesFromSource(context, JSON.parse(savedFiles));
+          setFileSelections(JSON.parse(savedFiles));
         }
+        
+        let savedPath = localStorage.getItem(LS_DIR_PATH_KEY);
+        if (savedPath) {
+          // [IOS FIX] Expand relative token
+          if (savedPath.startsWith('$DOCUMENTS')) {
+             const docDir = await documentDir();
+             savedPath = savedPath.replace('$DOCUMENTS', docDir).replace(/\/{2,}/g, '/');
+          }
+
+          const dirName = savedPath.split(/[/\\]/).pop() ?? savedPath;
+          setDirectoryName(dirName);
+          const context: DirectoryContext = { mode: 'tauri', path: savedPath };
+          setDirectoryContext(context);
+          if (savedFiles) {
+            await loadFilesFromSource(context, JSON.parse(savedFiles));
+          }
+        }
+      } catch (e) {
+        console.error("Failed to load state from localStorage", e);
+        localStorage.removeItem(LS_FILES_KEY);
+        localStorage.removeItem(LS_DIR_PATH_KEY);
       }
-    } catch (e) {
-      console.error("Failed to load state from localStorage", e);
-      localStorage.removeItem(LS_FILES_KEY);
-      localStorage.removeItem(LS_DIR_PATH_KEY);
-    }
+    };
+    
+    loadState();
   }, []); // Note: Empty dependency array ensures this runs only once on mount
 
   // [REFACTORED] Main file processing logic, now accepts a directory context
@@ -402,24 +415,131 @@ export function useKnowledgeBase() {
         if (typeof selectedPath !== 'string') return; // Cancelled
 
         const fileName = selectedPath.split(/[/\\]/).pop() ?? 'imported.json';
-        const context: DirectoryContext = { mode: 'tauri', path: selectedPath.replace(fileName, '') }; 
         
-        // We treat this as "Selecting a directory that happens to contain just this file" 
-        // OR we just append this file to current selection? 
-        // User requested "load from local DB".
-        // Let's replace the current view with this file.
-        
-        setDirectoryName(fileName);
-        setDirectoryContext(context);
-        
-        // Use existing logic
-        await loadFilesFromSource(context, [{ name: fileName, selected: true }]);
+        // [MOBILE STRATEGY] Copy to Sandbox (Scheme A)
+        if (isMobile()) {
+            try {
+                // 1. Resolve Target Dir: Documents/library
+                const docDir = await documentDir();
+                const libDir = await join(docDir, 'library');
+                
+                // 2. Ensure exists
+                await mkdir(libDir, { recursive: true });
+                
+                // 3. Read Source Content
+                const content = await readTextFile(selectedPath);
+                
+                // 4. Write to Sandbox
+                const targetPath = await join(libDir, fileName);
+                await writeTextFile(targetPath, content);
+                
+                // 5. Update Context to point to Sandbox Library
+                setDirectoryName('My Library');
+                const context: DirectoryContext = { mode: 'tauri', path: libDir };
+                setDirectoryContext(context);
+                
+                // [IOS FIX] Store relative path token because absolute paths change on iOS app updates/restarts
+                localStorage.setItem(LS_DIR_PATH_KEY, '$DOCUMENTS/library');
+
+                // 6. Load
+                await loadFilesFromSource(context, [{ name: fileName, selected: true }]);
+                
+                toast.success("File imported to Library");
+                
+            } catch (err) {
+                console.error("Mobile Import Failed", err);
+                toast.error("Failed to import file to sandbox.");
+            }
+        } else {
+            // [DESKTOP STRATEGY] Reference in place (Original)
+            const context: DirectoryContext = { mode: 'tauri', path: selectedPath.replace(fileName, '') }; 
+            
+            // We treat this as "Selecting a directory that happens to contain just this file" 
+            // OR we just append this file to current selection? 
+            // User requested "load from local DB".
+            // Let's replace the current view with this file.
+            
+            setDirectoryName(fileName);
+            setDirectoryContext(context);
+            
+            // Use existing logic
+            await loadFilesFromSource(context, [{ name: fileName, selected: true }]);
+        }
 
     } catch (e) {
         console.error("Import failed", e);
         toast.error("Failed to import file");
     }
   }, [loadFilesFromSource]);
+
+  // [NEW] Import processed file content (web fallback / mobile)
+  const importFileContent = useCallback(async (fileName: string, content: string) => {
+      try {
+          setIsLoading(true);
+          // Create a mock context for this transient file
+          // Since we can't really "save" back to this file easily on web without FileSystemAccess API,
+          // we treat it as read-only or session-only for now unless we implement file saving.
+          // But for "Knowledge Engine" viewing, this is fine.
+          
+          setDirectoryName(fileName);
+          // Dummy context just to satisfy types - wouldn't work for saving back to same path easily
+          setDirectoryContext({ mode: 'tauri', path: '/imported' }); 
+          
+          // Parse manually since loadFilesFromSource expects to read from FS
+          const fileTopics: Record<string, Topic> = {};
+          let invalidTopics = 0;
+          let jsonData;
+          
+          try {
+              jsonData = JSON.parse(content);
+          } catch(e) {
+              throw new Error("Invalid JSON content");
+          }
+
+          const entries = Object.entries(jsonData as Record<string, unknown>);
+          for (const [idKey, rawTopic] of entries) {
+            if (!rawTopic || typeof idKey !== 'string' || idKey.startsWith('zzz_')) continue;
+            const normalized = normalizeTopic(idKey, rawTopic);
+            if (normalized.id.startsWith('zzz_')) continue;
+            
+            const validation = TopicSchema.safeParse(normalized);
+            if (validation.success) {
+                fileTopics[validation.data.id] = validation.data;
+            } else {
+                invalidTopics++;
+            }
+          }
+
+          setKnowledgeBase(fileTopics);
+          setFileSelections([{ name: fileName, selected: true }]);
+          
+          const health: DataHealthSummary = {
+              totalTopics: Object.keys(fileTopics).length,
+              selectedFiles: 1,
+              invalidFiles: 0,
+              invalidTopics,
+              fileErrors: {}
+          };
+          setDataHealth(health);
+          
+          // Clear caches as we are resetting state
+          fileCacheRef.current = { [fileName]: jsonData };
+          overrideFileCacheRef.current = {};
+          setTopicSources(
+             Object.keys(fileTopics).reduce((acc, id) => ({ ...acc, [id]: fileName }), {})
+          );
+          setOverridesByFile({});
+          setOverrides({});
+
+          toast.success(`Imported ${Object.keys(fileTopics).length} topics from ${fileName}`);
+
+      } catch (e) {
+          console.error("Content import failed", e);
+          toast.error("Failed to parse imported file: " + (e instanceof Error ? e.message : String(e)));
+      } finally {
+          setIsLoading(false);
+      }
+  }, []);
 
   const toggleFileSelection = useCallback(async (fileName: string) => {
     if (!directoryContext) {
@@ -530,6 +650,7 @@ export function useKnowledgeBase() {
     canPersistTopics,
     getTopicSource,
     importFile, // Expose new function
+    importFileContent, // [NEW] Expose web fallback
     isMobile: isMobile(), // Expose mobile status
   };
 }

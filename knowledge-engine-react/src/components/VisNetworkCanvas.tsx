@@ -135,7 +135,7 @@ export function VisNetworkCanvas({ knowledgeBase, centerNodeId, onNodeClick }: V
           maxVelocity: 50,
           minVelocity: 0.1,
         },
-        interaction: { hover: true },
+        interaction: { hover: true, zoomView: true, dragView: true },
         groups: resolveGroupColors(theme),
         autoResize: true,
       };
